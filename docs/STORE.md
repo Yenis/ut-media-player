@@ -5,38 +5,44 @@ text and screenshots are added when there is a player to describe. What is
 recorded from the start is the confinement: which permissions the app asks
 for, why, and what `click-review` says about each.
 
-## Policy groups
+## Confinement
 
-As of version 0.0.1, checked with `click-review` in the Clickable 24.04 build
-image on 2 October 2026.
+GemPlayer is **unconfined** (decision D12 in [PLAN.md](PLAN.md)). Checked with
+`click-review` in the Clickable 24.04 build image on 2 October 2026:
 
-| Policy group | Why the app needs it | `click-review` |
-|---|---|---|
-| `audio` | Playing sound through the system media service | Accepted |
-| `video` | Playing video through the system media service | Accepted |
-| `content_exchange` | Receiving files that other apps hand over ("Open with") | Accepted |
-| `keep-display-on` | Keeping the screen on while a video plays | Accepted |
-| `networking` | Opening network streams by address | Accepted |
-| `music_files_read` | Listing and playing everything in `~/Music` and the SD card's `Music` folder without importing each file | **Reserved: needs manual review** |
-| `video_files_read` | The same for `~/Videos` and the SD card's `Videos` folder | **Reserved: needs manual review** |
-
-**These groups are not enough.** The spike showed that they let the app list
-`~/Music` and `~/Videos` and get thumbnails, but not play anything from them
-and not read the media library: media-hub and mediascanner each allow that
-only to a short list of package names, whatever the policy groups say. See
-"Why playback and the library fail" in [TESTING.md](TESTING.md).
-
-What the package asks for therefore depends on decision D12 in
-[PLAN.md](PLAN.md). If the app goes unconfined, this table is replaced by one
-line, the `unconfined` template, and the reviewer's question becomes why; the
-answer is the paragraph above.
-
-## Not requested
-
-| Policy group | Why not |
+| Setting | `click-review` |
 |---|---|
-| `music_files`, `video_files` (write access) | The app never changes media files. Deleting and renaming from inside the app would need them, and compiled code as well; that is undecided |
-| `content_exchange_source` | Sharing a file to another app. Added if and when sharing is built |
+| `"template": "unconfined"`, no policy groups | **Needs manual review**: `'unconfined' not allowed` |
+
+### Why, for the reviewer
+
+A media player needs two things from the system: to play the user's files in
+`~/Music` and `~/Videos`, and to read the media library. Neither is available
+to a confined third-party app, whatever policy groups it declares:
+
+- media-hub opens files under `Music/`, `Videos/` and `/media` only for the
+  packages `music.ubports` and `gallery.ubports`
+  (`src/service/apparmor/lomiri.cpp`).
+- mediascanner answers a confined app only if it is `music.ubports`, and only
+  for audio (`src/ms-dbus/service-skeleton.cc`).
+
+Both were confirmed on a Pixel 3a with 24.04-1.x: a build with `audio`,
+`video`, `music_files_read` and `video_files_read` could list the folders and
+get thumbnails, but every file was refused with "Client is not allowed to
+access", and the library came back empty. The record is in
+[TESTING.md](TESTING.md), runs 1 and 2.
+
+What the app does with its access: it reads media files, reads the media
+library, and writes only its own settings and database. It has no network use
+beyond opening the stream addresses the user enters.
+
+### The confined alternative
+
+If an unconfined package is not acceptable, the fallback is a confined build
+whose library is filled through Content Hub: the user hands files over from
+the file manager, and the app plays the hard links Content Hub creates in the
+app's own folder. It would declare `audio`, `video`, `content_exchange`,
+`keep-display-on` and `networking`, all of which `click-review` accepts.
 
 ## Listing
 

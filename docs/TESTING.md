@@ -67,7 +67,7 @@ the **Library** tab plays a queue of songs from the phone's own library.
 
 Version 0.0.1 with the policy groups `audio`, `video`, `content_exchange`,
 `keep-display-on`, `networking`, `music_files_read`, `video_files_read`.
-Automatic part only; the manual part waits for the confinement decision (D12
+Automatic part only, run three times (the third with Wi-Fi on, for S13); the manual part waits for the confinement decision (D12
 in [PLAN.md](PLAN.md)), because the confined app cannot play the test set.
 
 | # | Question | Result |
@@ -79,7 +79,7 @@ in [PLAN.md](PLAN.md)), because the confined app cannot play the test set.
 | S7 | Playback speed | Asked for 2.0, the property read back 1 and the measured speed was 1.00. To be repeated in a clean run |
 | S8 | Fullscreen | **Pass.** The window grows from 1080x2145 to 1080x2220 and covers the top panel. Keeping the display on is not yet checked by eye |
 | S10 | Reading a `.srt` beside the video | **Pass.** 664 characters read from `~/Videos/gemplayer-test/sidecar.srt` |
-| S13 | Network streams | **Inconclusive.** The phone had no network connection during the run |
+| S13 | Network streams | **HLS: pass**, confined too: started in 3.8 s, seekable. Plain MP4: see run 2 |
 | S15 | QML modules | **Pass**, 14 of 15 present. Missing: `org.nemomobile.mpris 1.0` |
 | - | Settings and database | **Pass.** Launch counter and SQLite rows both went 1 → 2 across launches |
 | - | Audio role | Music and video roles can both be set and read back |
@@ -99,13 +99,41 @@ system services decide for themselves who may use them, by package name
 An unconfined app passes both checks. Both pieces of code carry a note that
 the list of names is a stand-in until a permission store exists.
 
+### Run 2: unconfined, 2 October 2026
+
+The same build with the `unconfined` template (D12). Automatic part.
+
+| # | Question | Result |
+|---|---|---|
+| S1 | Plays a local file? | **Pass**, from `~/Videos` and `~/Music`. 1080p H.264 starts in 1.2 s at normal speed. Smoothness still to be judged by eye |
+| S2 | Reading folders directly | **Pass.** The home folder lists as well. No SD card in the phone, so `/media` is untested |
+| S3 | Media library | **Pass.** 187 songs, 27 albums, 34 artists, 11 genres. `query("", VideoMedia)` lists all 10 videos, each with width, height, duration and a thumbnail address. A text query narrows it (1 result for "sidecar") |
+| S4 | Thumbnails and album art | **Video thumbnail: pass.** Album art: the first album in the library has no artist or album tag and its art fails to load; to be repeated with a tagged album |
+| S6b | Seeking | **Works, with a caveat.** A seek lands on the keyframe before the requested time, not on the time itself. The test file has a keyframe every 8.3 s: asking for 10.0 s gave 8.3 s, 30.0 s gave 25.0 s, 40.0 s gave 33.3 s, 5.0 s gave 0. So a seek can land up to one keyframe interval early. Playback resumes 0.4 to 1.5 s after the call. Seeking while paused works the same way. Same figures in two runs |
+| S6b | Position updates | 10 per second with `notifyInterval: 100` |
+| S7 | Playback speed | **Confirmed absent.** Asked for 2.0, the property read back 1 and the measured speed was 1.00 |
+| S8 | Fullscreen | **Pass**, as in run 1 |
+| S10 | Reading a `.srt` | **Pass**, as in run 1 |
+| S13 | Network streams | **Pass.** HLS and a plain MP4 over `https` both start in 1.6 s and are seekable. **A missing file (HTTP 404) raises no error**: the player just never starts, so the app needs its own time limit for streams. The MP4 that failed in run 1 was such a 404, a wrong address in the test |
+| S14 | Formats | **All pass.** Video: H.264, HEVC, VP9 and AV1, in MP4, MKV and WebM, up to 1080p; a portrait file too. Audio: MP3, FLAC, Opus, Vorbis, AAC. Video starts in 0.5 to 1.2 s, audio in 0.25 to 0.35 s |
+| S15 | QML modules | As in run 1: only `org.nemomobile.mpris` is missing |
+| S16 | Tracks, subtitles, chapters | **Nothing is exposed.** The file with two audio tracks, two subtitle tracks and three chapters plays, but `metaData` is empty: no track list, no chapters, no codec, no resolution. Which audio track is heard and whether embedded subtitles are drawn is a manual check |
+| S16 | Capturing a frame | **Pass.** `grabToImage` on the video surface returned the real picture, 1080x607, and saved it as a PNG |
+| - | Queue | **Pass.** A `Playlist` of three files plays, `next()` moves on and keeps playing. Loop mode reads back; random mode did not read back |
+| - | Volume | After setting 0.3 the property read back 0.01. Whether the sound level changed is a manual check |
+| S5, S6, S9, S11, S12 | | Manual part, not done yet |
+
 ### Other observations
 
 - With no media loaded, `MediaPlayer.position` reads a large negative number
   (-140462611), not 0. The player must not show or store it.
-- `hasAudio` read `false` for a file that has an AAC track, and
-  `metaData.resolution` was empty. Neither can be relied on.
+- `hasAudio` reads `false` for every video file, although each has an audio
+  track; `hasVideo` is right. `metaData` is always empty. Width, height and
+  duration come from the media library instead.
 - Volume: after setting 0.3 the property read back 0.01. To be looked at.
 - Position updates arrive about 10 times a second with `notifyInterval: 100`.
 - Clearing `MediaPlayer.source` raises an error ("Failed to open uri"); the
   player should stop instead of clearing.
+- The library reports 1920x1088 and 640x368 for files that are 1920x1080 and
+  640x360: coded size, rounded up to a multiple of 16. Aspect ratio must not be
+  computed from these without care.

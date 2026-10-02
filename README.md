@@ -39,6 +39,10 @@ each. The core:
 GemPlayer has no accounts and no tracking. Nothing leaves the device except
 the addresses of network streams you choose to open.
 
+The app runs unconfined, outside Ubuntu Touch's sandbox, because the system
+does not let a sandboxed third-party player open your music and videos. It
+reads media files and writes only its own settings.
+
 ## Building
 
 You need [Clickable](https://clickable-ut.dev) 8.9 or newer and a phone with
@@ -54,10 +58,10 @@ clickable logs       # follow the app's log output
 The click is QML-only: `qmlscene` runs `qml/Main.qml`, there is no compiled
 code, and one package serves every architecture.
 
-`click-review` reports two findings on this build, both expected: the policy
-groups `music_files_read` and `video_files_read` are reserved and need a manual
-review in the OpenStore. [docs/STORE.md](docs/STORE.md) explains why the app
-asks for them.
+`click-review` reports one finding on this build, which is expected: the app
+is unconfined, and that needs a manual review in the OpenStore.
+[docs/STORE.md](docs/STORE.md) explains why: on Ubuntu Touch today, a confined
+third-party app is not allowed to play files from `~/Music` or `~/Videos`.
 
 The `vlc-android/` folder, if you have one, is a reference copy of VLC's
 source. It is ignored by git and never enters the package.

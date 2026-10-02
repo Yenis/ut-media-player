@@ -32,8 +32,8 @@ clickable install
 clickable launch
 ```
 
-`clickable build` ends with two `click-review` findings about reserved policy
-groups. They are expected; see [STORE.md](STORE.md).
+`clickable build` ends with one `click-review` finding, `'unconfined' not
+allowed`. It is expected; see [STORE.md](STORE.md).
 
 ## Remove it
 

@@ -658,7 +658,9 @@ FocusScope {
     // S13: network streams.
     function stepStreams() {
         var list = [
-            ["https mp4", "https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"],
+            ["https mp4", "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"],
+            // A missing file: what does the backend report for a 404?
+            ["https 404", "https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"],
             ["HLS", "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"]
         ];
         var i = 0;

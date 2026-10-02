@@ -103,14 +103,14 @@ Source: `src/gui/video/VideoTouchDelegate.kt`. Settings and defaults:
 | Feature | Behaviour in VLC | Verdict |
 |---|---|---|
 | Single tap | Shows or hides the controls, after the double-tap window has passed | Build |
-| Double tap, sides | Left quarter of the width seeks back, right quarter forward, 10 s by default. Further taps add up and the overlay shows the total | Build; seek speed in S6b |
+| Double tap, sides | Left quarter of the width seeks back, right quarter forward, 10 s by default. Further taps add up and the overlay shows the total | Build. A jump lands on the keyframe before its target **[device]**: forward it can fall short, backward it can go further than 10 s |
 | Double tap, centre | Play or pause | Build |
-| Horizontal swipe | Seeks on release; see [Values worth matching](#values-worth-matching) | Build; seek speed in S6b |
+| Horizontal swipe | Seeks on release; see [Values worth matching](#values-worth-matching) | Build. A seek lands on the keyframe before the target and takes 0.4 to 1.5 s **[device]**, so the overlay shows the target and the position is corrected once the seek lands |
 | Vertical swipe, right | Volume. VLC changes the system media volume | Build with app volume; system volume is Spike S11 |
 | Vertical swipe, left | Screen brightness | Build as a dimming overlay; real brightness is Discuss |
 | Pinch | Out switches to "Fit screen", in returns to the previous mode | Build |
 | Tap and hold | Plays at 2x while held ("fast play"), off by default | Discuss (needs playback speed) |
-| Three-finger swipe | Screenshot, off by default | Discuss (see Screenshot) |
+| Three-finger swipe | Screenshot, off by default | Build |
 | Each gesture can be switched off | Seven toggles in the settings | Build |
 | Drag on a 360° video | Moves the viewpoint; pinch changes field of view | Discuss |
 
@@ -175,7 +175,7 @@ audio player with a different set of entries.
 | Audio delay, subtitle delay | 50 ms steps; audio delay can be saved per file or for Bluetooth | `src/gui/video/VideoDelayDelegate.kt` | Subtitle delay: Build (our own subtitle drawing). Audio delay: Discuss |
 | Audio boost | Volume up to 200% | `VideoTouchDelegate.kt` | Discuss |
 | Video queue | Play a folder as a queue; "Video playlist mode" plays all videos in order | `preferences_ui.xml` `playlist_mode_video` | Build |
-| Screenshot | Button or gesture; saves a frame | `src/gui/video/VideoPlayerScreenshotDelegate.kt` | Discuss (whether QML can grab a decoded frame is unknown) |
+| Screenshot | Button or gesture; saves a frame | `src/gui/video/VideoPlayerScreenshotDelegate.kt` | Build. `grabToImage` returns the real picture **[device]** |
 | Keyboard | Space, arrows, media keys and letter shortcuts | `VideoPlayerActivity.kt` `onKeyDown` | Build |
 | Hardware acceleration, deblocking, frame skip, preferred resolution, fast seek | Decoder settings | `res/xml/preferences.xml`, `preferences_adv.xml` | Discuss (the backend decides these itself) |
 | Secondary display, cast to a renderer | Chromecast and presentation displays | `src/RendererDelegate.kt` | Discuss |
@@ -284,7 +284,7 @@ Source: `src/gui/network/MRLPanelFragment.kt`.
 
 | Feature | Behaviour in VLC | Verdict |
 |---|---|---|
-| Open a stream by address | Text field; plays on enter | Spike S13 |
+| Open a stream by address | Text field; plays on enter | Build. HLS and MP4 over `https` play **[device]**; a dead address gives no error, so the app sets its own time limit |
 | Stream history | Past addresses; play, rename, delete, copy, add to playlist | Build |
 | Open from other apps | Links and files handed over by the system | Spike S12 |
 
@@ -332,7 +332,7 @@ None is decided; each is raised when the work reaches it.
 | What would unlock it | Features |
 |---|---|
 | A playback engine that exposes more than QtMultimedia 5 does (libVLC, or GStreamer driven from compiled code) | Playback speed and fast play, equalizer, audio delay, audio boost, audio and embedded-subtitle track selection, chapters, replay gain, passthrough, decoder settings, 360° video, live statistics |
-| A platform capability | Pop-up player and picture-in-picture, casting, real screen brightness, screenshot of a video frame |
+| A platform capability | Pop-up player and picture-in-picture, casting, real screen brightness |
 | Network code beyond HTTP | Network shares, remote access |
 | An online service | Subtitle download, film metadata |
 | Our own scanner | Choosing library folders |

@@ -1,12 +1,13 @@
 # GemPlayer - a VLC-style media player for Ubuntu Touch - plan
 
-Status: Phase 0 is under way, and **blocked on decision D12**. The survey of
-the VLC clone is done, see [VLC-FEATURES.md](VLC-FEATURES.md). The project
-skeleton builds and installs as version 0.0.1, which is the spike's diagnostics
-page and not a player yet. The first spike run found that a confined app
-cannot play files from `~/Videos` or `~/Music`, nor read the media library;
-see [TESTING.md](TESTING.md). Target device is the Pixel 3a on Ubuntu Touch
-24.04-1.x (tag `24.04-1.4`), the same one GemTicker was verified on.
+Status: Phase 0 is under way. The survey of the VLC clone is done, see
+[VLC-FEATURES.md](VLC-FEATURES.md). The project skeleton builds and installs as
+version 0.0.1, which is the spike's diagnostics page and not a player yet. The
+automatic part of the spike has run: unconfined (D12), every test file plays
+and the media library is readable; see [TESTING.md](TESTING.md). Next step: the
+manual part of the spike (background audio, play as audio, system controls,
+orientation). Target device is the Pixel 3a on Ubuntu Touch 24.04-1.x (tag
+`24.04-1.4`), the same one GemTicker was verified on.
 
 Goal: every feature of VLC for Android, where feasible, on top of the media
 stack Ubuntu Touch already ships. This is a new QML app modelled on VLC's UI,
@@ -65,28 +66,40 @@ Facts are marked:
 | D9 | Distribution | **OpenStore, eventually.** First a self-installed click that is battle-tested on the Pixel 3a for a few weeks; the store submission follows and is not urgent. Store requirements shape choices from the start, see [Phase 6](#phase-6---openstore) |
 | D10 | Background playback | **Audio plays while other apps are in use and while the screen is locked**, as the stock Music app does. **Video stops when the app leaves the foreground**, except through "Play as audio". This matches VLC's own default **[vlc]** |
 | D11 | "Play as audio" | **Essential.** A playing video can be switched to audio-only and back; see [Play as audio](#play-as-audio) |
+| D12 | Confinement | **Unconfined** (decided 2 October 2026), for development and the battle test. A confined app cannot play files from `~/Videos` or `~/Music` nor read the media library: media-hub and mediascanner allow that by package name only **[source, device]**. File access is kept behind one module so that a confined build with a Content Hub import library stays possible; a fix is proposed upstream. Which form goes to the OpenStore is decided in Phase 6. See [Confinement](#confinement) |
 
 ### Still open
 
 | # | Decision | Recommendation |
 |---|---|---|
-| D12 | Confinement | **Unconfined now, and propose a fix upstream.** Found by the spike: media-hub plays files from `Music/` and `Videos/` only for the stock Music and Gallery apps, and mediascanner answers only the stock Music app, both by package name **[source, device]**. A confined GemPlayer can play what other apps hand it through Content Hub, files in its own folders, and network streams, and nothing else. See [Confinement](#confinement) |
 | D7 | Packaging | Pure-QML click like GemTicker if Phase 0 allows. Falls back to a compiled click only if a needed module has to be bundled (MPRIS is the likely one); for the store that means one build per architecture. Several "Discuss" features would also need compiled code |
 
 ### Confinement
 
-The options for D12:
+Ubuntu Touch has no permission the app could ask for at run time here. What
+exists, and why each does or does not help:
+
+| Mechanism | What it is | Helps? |
+|---|---|---|
+| Policy groups | Declared in the package, fixed at install. We declare `video_files_read` and `music_files_read` | No. media-hub and mediascanner do not look at them |
+| Trust prompts | The "Allow this app to use the camera?" dialogs | No. They exist for camera, microphone and location. Both services carry a note that they should use this for media one day; neither does |
+| Content Hub | The user picks files in another app and hands them to ours | Yes, confined. See option A |
+| Unconfined template | The package opts out of the sandbox | Yes. See option B |
+
+The check sits inside the two services, so nothing in our package can satisfy
+it. The options for D12:
 
 | Option | What works | Cost |
 |---|---|---|
-| A. Stay confined | Playing files that other apps hand over, files copied into the app's own folder, network streams. No library of `~/Videos` or `~/Music`, no folder browsing that can play | The app becomes an "open with" player. Most of Phases 2-4 falls away, or needs every file imported as a copy |
+| A. Stay confined, library by import | The user picks videos and music in the file manager and hands them over. Content Hub hard-links them into the app's folder, so files on the phone's own storage take no extra space **[source]**; files on an SD card are copied. From there they play, in the background too. Network streams work | The library holds only what was imported; new files do not appear by themselves. No artist, album or duration from the system library. Removing an import needs compiled code, since QML cannot delete a file |
 | B. Go unconfined | Everything the plan assumes, as far as the remaining spike rows confirm it: both services accept an unconfined app | The package runs with the user's full rights instead of in a sandbox. In the OpenStore that means a manual review and a visible warning on the listing **[verify]**. Self-installing is unaffected |
-| C. Change the platform | A confined app with the reserved groups could play and query, if media-hub and mediascanner honoured them | A patch to two UBports components, their review, and an OTA release before any user has it. Not in our hands |
+| C. Change the platform | A confined app with the reserved groups could play and query, if media-hub and mediascanner asked AppArmor whether the app may read the file instead of comparing package names | A patch to two UBports components, their review, and an OTA release before any user has it. Not in our hands, but we can propose it |
 | D. Play without media-hub | Qt's own GStreamer backend is on the device and would read files in-process | The app is suspended in the background, so no audio with the screen off. That breaks D10 and D11 |
 
-Recommended: B to get the app built and battle-tested, C proposed upstream in
-parallel, and a return to confinement if C lands. D is ruled out by D10 and
-D11.
+Chosen: B, confirmed on the device, with file access kept behind one module so
+that A remains possible, and C proposed upstream. Which of A or B goes to the
+OpenStore is decided in Phase 6, when it is known whether C landed. D is ruled
+out by D10 and D11.
 
 ---
 
@@ -94,11 +107,15 @@ D11.
 
 | Need | API | Status |
 |---|---|---|
-| Audio and video playback | `QtMultimedia 5.6` `MediaPlayer`, `VideoOutput` | **[source]** both stock apps use it |
-| Play queue | `QtMultimedia` `Playlist`, with sequential, loop, repeat-one and random modes | **[source]** music app |
+| Audio and video playback | `QtMultimedia` `MediaPlayer`, `VideoOutput` | **[device]** H.264, HEVC, VP9, AV1; MP3, FLAC, Opus, Vorbis, AAC |
+| Seeking | `seek()` lands on the keyframe before the requested time, which can be several seconds early, and playback resumes 0.4 to 1.5 s later | **[device]** |
+| Network streams | HLS and plain MP4 over `https` play and seek. A missing file raises no error; the player never starts | **[device]** |
+| What the player tells us about a file | Duration, position, `hasVideo`. Not: tracks, chapters, codecs, resolution (`metaData` is empty), and `hasAudio` is wrong for videos | **[device]** |
+| Capturing a video frame | `grabToImage` on the `VideoOutput` returns the real picture | **[device]** |
+| Play queue | `QtMultimedia` `Playlist`, with sequential, loop, repeat-one and random modes | **[device]** items, `next()` and loop mode work; random mode did not read back |
 | Queue saved across launches | `Playlist.save()`/`load()` do not work; the music app stores the queue itself | **[source]** |
-| Music library | `MediaScanner 0.1`: `SongsModel`, `AlbumsModel`, `ArtistsModel`, `GenresModel`, `SongsSearchModel` | **[source]** |
-| Video library | No video model. `MediaStore.query(text, VideoMedia)` exists, and `MediaFile` carries title, duration, width, height and art | **[source]**; whether an empty query lists everything is **[verify]** |
+| Music library | `MediaScanner 0.1`: `SongsModel`, `AlbumsModel`, `ArtistsModel`, `GenresModel`, `SongsSearchModel` | **[device]**, unconfined only |
+| Video library | No video model. `MediaStore.query(text, VideoMedia)` lists every video for an empty text; each `MediaFile` carries title, duration, width, height and a thumbnail address | **[device]**, unconfined only |
 | Confinement for video | Policy groups `video`, `audio`, `content_exchange` | **[source]** stock video app |
 | Confinement for music | `audio`, `music_files_read`, `content_exchange`, `content_exchange_source`, `networking`, `keep-display-on`; read paths for `~/.cache/media-art/`, `~/.cache/mediascanner-2.0/` and `/media/*/*/` | **[source]** music app |
 | Reading media folders directly | `video_files_read` and `music_files_read` cover `~/Videos`, `~/Music` and the `Videos` and `Music` folders of an SD card, nothing else. Both are reserved: `click-review` flags them for manual review. They allow listing, thumbnails and reading a `.srt`, but **not playback** | **[device]** |
@@ -110,7 +127,7 @@ D11.
 | Own database | `QtQuick.LocalStorage 2.0` (SQLite) | **[source]** music app; used here for resume points, history, playlists, bookmarks, favourites, groups |
 | Audio role | The backend accepts Qt's music and video roles but maps both to the same media-hub "multimedia" role, so the role does not tell audio from video. media-hub itself decides by whether the stream has a picture | **[source]** `qtubuntu-media`, media-hub |
 | Lock-screen and indicator controls | media-hub exposes the current multimedia player over MPRIS by itself. The Music app additionally bundles `org.nemomobile.mpris`, a compiled module that is **not** on the system image **[device]** | **[source]**; whether media-hub's own controls are enough is **[verify]**, S11 |
-| **Playback speed** | **Not available.** The backend's `setPlaybackRate()` ignores its argument and always reports 1.0 | **[source]** `qtubuntu-media` |
+| **Playback speed** | **Not available.** The backend's `setPlaybackRate()` ignores its argument and always reports 1.0 | **[source]** `qtubuntu-media`, **[device]** |
 
 ---
 
@@ -199,6 +216,7 @@ All of it is in [VLC-FEATURES.md](VLC-FEATURES.md).
       `CHANGELOG.md`, `docs/INSTALL.md`, `docs/STORE.md`, `docs/TESTING.md`.
 - [x] Builds as `gemplayer.yenis_0.0.1_all.click` and installs on the Pixel 3a.
 - [ ] A real icon. `assets/icon.png` is a placeholder.
+- [ ] Draft the upstream proposal for media-hub and mediascanner (D12, option C).
 
 ### Spike
 

@@ -1,12 +1,5 @@
 {
-    "policy_groups": [
-        "audio",
-        "video",
-        "content_exchange",
-        "keep-display-on",
-        "networking",
-        "music_files_read",
-        "video_files_read"
-    ],
+    "template": "unconfined",
+    "policy_groups": [],
     "policy_version": "@APPARMOR_POLICY@"
 }
