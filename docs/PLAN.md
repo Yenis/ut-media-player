@@ -1,8 +1,8 @@
 # GemPlayer - a VLC-style media player for Ubuntu Touch - plan
 
-Status: **Phase 0 is done; Phase 1, the video player, is under way.** Version
-0.0.2 plays videos with VLC's gestures, picture sizes, lock, resume and play as
-audio; [Phase 1](#phase-1---video-player) lists what is still missing. The
+Status: **Phase 0 is done; Phase 1, the video player, is built** and waits for
+a last round of checks by hand and for decisions on the Discuss items it
+reached; see [Phase 1](#phase-1---video-player). Version 0.0.3. The
 survey of the VLC clone is in [VLC-FEATURES.md](VLC-FEATURES.md) and the
 spike's answers are in [TESTING.md](TESTING.md). In short: unconfined (D12),
 every common format plays, the media library is readable, audio and video keep
@@ -133,6 +133,9 @@ out by D10 and D11.
 | Embedded subtitles and audio tracks | The first audio track plays; embedded subtitles are never drawn; neither can be chosen | **[device]**, **[source]** media-hub |
 | Rotation | The system rotates the window, subject to the user's rotation lock | **[device]** |
 | Audio in the background | media-hub plays the queue and advances it while the app is suspended | **[device]** |
+| Volume | `MediaPlayer.volume` is accepted and ignored (an empty function in `qtubuntu-media`). The system volume can be set through the sound indicator's `volume` action, with `QMenuModel`'s `QDBusActionGroup` | **[source]**, **[device]** |
+| Screen brightness | The power indicator's `brightness` action sets the real backlight, the same way | **[device]** |
+| Running in the background | An app is frozen a few seconds after it leaves the foreground, so its timers stop. Apps listed in `com.canonical.qtmir lifecycle-exempt-appids` are not; the list holds `music.ubports` | **[device]** |
 | **Playback speed** | **Not available.** The backend's `setPlaybackRate()` ignores its argument and always reports 1.0 | **[source]** `qtubuntu-media`, **[device]** |
 
 ---
@@ -288,16 +291,19 @@ built.
 
 The screen that plays one video, opened from a file path or Content Hub.
 Behaviour follows [VLC-FEATURES.md](VLC-FEATURES.md), "Video player" and
-"Values worth matching". Under way; version 0.0.2 has the first part.
+"Values worth matching". Built in versions 0.0.2 and 0.0.3.
 
 How it is built:
 
 | Part | File | What it does |
 |---|---|---|
 | Playback core | `qml/Gem/Playback.qml` | The app's one `MediaPlayer`, with the backend's quirks hidden behind it: open, play, pause, seek, resume, position saving |
-| Resume points | `qml/Gem/ResumeStore.qml` | SQLite table of position, length and "seen" per file |
+| What is remembered | `qml/Gem/PlayerStore.qml` | SQLite: position, length and "seen" per file, and bookmarks |
 | Player screen | `qml/Gem/VideoPlayerPage.qml` | Picture, picture size, own rotation, overlays, lock |
 | Gestures | `qml/Gem/GestureLayer.qml`, `qml/js/Gestures.js` | Recognises taps, swipes and pinch with VLC's zones and thresholds |
+| Volume and brightness | `qml/platform/SystemVolume.qml`, `SystemBrightness.qml` | The system's own levels, through the sound and power indicators |
+| Subtitles | `qml/Gem/SubtitleTrack.qml`, `qml/js/Srt.js` | Finds and reads the `.srt` beside a video; the page draws the current line |
+| Menu features | `qml/Gem/TimePicker.qml`, `SleepTimer.qml`, `PlayerStore.qml` | Keypad for jump and sleep, the timer, bookmarks |
 | Controls | `qml/Gem/PlayerControls.qml`, `SeekBar.qml`, `OptionSheet.qml`, `Glyph.qml` | Title bar, timeline, buttons, menu, icons |
 | Audio mode | `qml/Gem/AudioModePage.qml` | What shows while a video plays as audio |
 | Way in | `qml/Gem/HomePage.qml`, `qml/platform/MediaLibrary.qml`, `qml/platform/ContentImport.qml` | A plain list of videos until Phase 2; files from other apps |
@@ -309,28 +315,53 @@ hidden.
 
 - [x] Player surface, auto-hiding controls, title, seek bar with time labels.
 - [x] Gesture layer: single tap, double-tap seek and pause, swipe seek, volume,
-      dimming, pinch to fit. Written; **to be tried by hand**.
+      brightness, pinch to fit. Tried by hand.
+- [x] Volume gesture sets the system volume, brightness gesture the real
+      backlight; the phone's own brightness returns when the player is left.
 - [ ] A setting for each gesture, and for the skip lengths (with Settings, Phase 4).
-- [ ] Optional rewind and forward buttons.
+- [ ] Optional rewind and forward buttons (with Settings).
 - [x] Lock with slide to unlock.
 - [x] Orientation: the player turns its own content to follow the phone, and
-      the button locks it. **Direction to be confirmed by hand.**
+      the button locks it.
 - [x] The twelve picture sizes: tap steps through six, long press lists all.
-- [x] Player menu, with Lock and Play as audio so far.
+- [x] Player menu in VLC's order.
 - [x] Resume where the file was left (always; the "ask" and "never" choices come
       with Settings). Seen marker when a file is played to the end.
-- [ ] Jump to time, A-B repeat, sleep timer, bookmarks.
-- [ ] External subtitles with styling and delay.
-- [ ] Video information, as far as the library goes.
+- [x] Jump to time, on a keypad of its own.
+- [x] A-B repeat, with marks on the timeline.
+- [x] Sleep timer, with VLC's two options. Limited by the platform, see below.
+- [x] Bookmarks: add, jump, remove, marks on the timeline. Renaming waits for
+      a text field that works in a turned player.
+- [x] External `.srt` subtitles beside the video, with a delay control.
+      Styling, other encodings and picking a file by hand come with Settings
+      and the file browser.
+- [x] Video information, as far as the library goes.
 - [x] Play as audio and back to video (D11), with a minimal audio page; Phase 3
       replaces it with the full one.
 - [x] Pause when the app is suspended in video mode (D10).
-- [ ] Screenshot.
-- [ ] Keyboard shortcuts.
-- [ ] Network stream time limit and error states.
-- [ ] Discuss, when reached: playback speed and fast play, audio delay and
-      boost, audio and embedded-subtitle tracks, chapters, real
-      brightness, pop-up player, subtitle download.
+- [x] Screenshot of the picture, saved to Pictures.
+- [x] Keyboard shortcuts.
+- [x] "Loading" while a file starts, and a message when a file or stream does
+      not start within 20 s.
+- [ ] Still by hand: the new sheets and the keypad under a finger, a real
+      film with real subtitles, a keyboard.
+
+What the platform limits, found while building:
+
+| Feature | Limit | Way out |
+|---|---|---|
+| Sleep timer, A-B repeat | They run in the app, and Ubuntu Touch freezes an app a few seconds after it leaves the foreground or the screen goes off. For a video on screen they work. For audio behind the lock screen the timer fires late, when the app is next opened | The system exempts apps listed in the setting `lifecycle-exempt-appids`, which holds the stock Music app. An unconfined app can add itself. To discuss |
+| Seeking, A-B repeat, bookmarks, resume | A seek lands on the keyframe before its target, so all four start a little early | None on this backend |
+
+Discuss items this phase reached, for a decision (D2):
+
+| Item | What it would take | Suggestion |
+|---|---|---|
+| Playback speed and fast play, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters | A second playback engine, in compiled code | After 0.1.0, as one decision |
+| Sleep timer and A-B repeat while the app is in the background | The app adding itself to the system's list of apps that are not frozen | An opt-in switch in Settings, Phase 4 |
+| Pop-up player | The platform has no floating windows | Drop |
+| Subtitle download | An account with an online subtitle service, and a file hash | After 0.1.0 |
+| Renaming a bookmark | A text field in a turned player; the system keyboard appears on the window's edge, not the content's | With playlists in Phase 4, which need naming too |
 
 ## Phase 2 - App shell and video library
 

@@ -13,6 +13,10 @@ Item {
     property int duration: 0        // ms
     property bool enabled: true
 
+    // Marks on the timeline: [{ position (ms), color }], for bookmarks and the
+    // two ends of an A-B repeat.
+    property var markers: []
+
     readonly property bool dragging: area.pressed
     readonly property int shownPosition: dragging ? dragPosition : position
     property int dragPosition: 0
@@ -39,6 +43,18 @@ Item {
             height: parent.height
             radius: parent.radius
             color: Theme.accent
+        }
+    }
+
+    Repeater {
+        model: bar.duration > 0 ? bar.markers : []
+        delegate: Rectangle {
+            width: Math.max(2, Theme.u(0.3))
+            height: Theme.u(1.4)
+            radius: width / 2
+            color: modelData.color
+            anchors.verticalCenter: track.verticalCenter
+            x: track.x + track.width * Math.min(1, modelData.position / bar.duration) - width / 2
         }
     }
 

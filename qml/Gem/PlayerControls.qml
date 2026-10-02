@@ -16,6 +16,10 @@ Item {
 
     property var playback: null
     property bool orientationLocked: false
+    property bool subtitlesAvailable: false
+    property bool subtitlesOn: true
+    property var markers: []            // for the timeline
+    property var chips: []              // [{ key, label }]: what is switched on, VLC's "quick actions"
 
     readonly property bool dragging: seekBar.dragging
 
@@ -24,6 +28,8 @@ Item {
     signal aspectTapped()
     signal aspectHeld()
     signal orientationTapped()
+    signal subtitlesTapped()
+    signal chipTapped(string key)
     signal interacted()
 
     // ---- top ----
@@ -54,6 +60,36 @@ Item {
         maximumLineCount: 1
     }
 
+    Row {
+        anchors { left: parent.left; leftMargin: Theme.u(2); top: backButton.bottom; topMargin: Theme.u(0.5) }
+        spacing: Theme.u(1)
+
+        Repeater {
+            model: hud.chips
+            delegate: Rectangle {
+                width: chipLabel.implicitWidth + Theme.u(2.4)
+                height: Theme.u(3.6)
+                radius: height / 2
+                color: Qt.rgba(0, 0, 0, 0.55)
+                border.width: 1
+                border.color: Theme.accent
+
+                Text {
+                    id: chipLabel
+                    anchors.centerIn: parent
+                    text: modelData.label
+                    color: Theme.accent
+                    font.pixelSize: Theme.fontXS
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -Theme.u(0.8)
+                    onClicked: { hud.chipTapped(modelData.key); hud.interacted(); }
+                }
+            }
+        }
+    }
+
     // ---- bottom ----
     Rectangle {
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
@@ -71,10 +107,19 @@ Item {
         height: Theme.u(7)
 
         IconButton {
+            id: rotateButton
             anchors { left: parent.left; verticalCenter: parent.verticalCenter }
             glyph: "rotate"
             color: hud.orientationLocked ? Theme.accent : Theme.text
             onClicked: { hud.orientationTapped(); hud.interacted(); }
+        }
+
+        IconButton {
+            visible: hud.subtitlesAvailable
+            anchors { left: rotateButton.right; verticalCenter: parent.verticalCenter }
+            glyph: "subtitles"
+            color: hud.subtitlesOn ? Theme.text : Theme.textDim
+            onClicked: { hud.subtitlesTapped(); hud.interacted(); }
         }
 
         IconButton {
@@ -132,6 +177,7 @@ Item {
             position: hud.playback ? hud.playback.position : 0
             duration: hud.playback ? hud.playback.duration : 0
             enabled: hud.playback ? hud.playback.seekable : false
+            markers: hud.markers
             onDraggingChanged: hud.interacted()
             onSeekRequested: { hud.playback.seekTo(position); hud.interacted(); }
         }

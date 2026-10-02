@@ -106,8 +106,8 @@ Source: `src/gui/video/VideoTouchDelegate.kt`. Settings and defaults:
 | Double tap, sides | Left quarter of the width seeks back, right quarter forward, 10 s by default. Further taps add up and the overlay shows the total | Build. A jump lands on the keyframe before its target **[device]**: forward it can fall short, backward it can go further than 10 s |
 | Double tap, centre | Play or pause | Build |
 | Horizontal swipe | Seeks on release; see [Values worth matching](#values-worth-matching) | Build. A seek lands on the keyframe before the target and takes 0.4 to 1.5 s **[device]**, so the overlay shows the target and the position is corrected once the seek lands |
-| Vertical swipe, right | Volume. VLC changes the system media volume | Build with app volume; system volume is Spike S11 |
-| Vertical swipe, left | Screen brightness | Build as a dimming overlay; real brightness is Discuss |
+| Vertical swipe, right | Volume. VLC changes the system media volume | Build: the system volume, through the sound indicator **[device]**. The player's own volume is ignored by the backend |
+| Vertical swipe, left | Screen brightness | Build: the real backlight, through the power indicator **[device]**; restored when the player is left. Darkens the picture instead where that is not available |
 | Pinch | Out switches to "Fit screen", in returns to the previous mode | Build |
 | Tap and hold | Plays at 2x while held ("fast play"), off by default | Discuss (needs playback speed) |
 | Three-finger swipe | Screenshot, off by default | Build |
@@ -143,7 +143,7 @@ audio player with a different set of entries.
 | Entry | Behaviour in VLC | Verdict |
 |---|---|---|
 | Lock | As above | Build |
-| Sleep timer | Time picker, with "Wait for current media item to finish first" and "Reset on any interaction". A default duration can be set | Build |
+| Sleep timer | Time picker, with "Wait for current media item to finish first" and "Reset on any interaction". A default duration can be set | Build. Works while the app is in front; behind the lock screen the app is frozen and the timer fires late. Fixing that is Discuss |
 | Playback speed | 0.25x to 8x in 0.01 steps, for this media or all media | Discuss |
 | Jump to time | Hours, minutes, seconds | Build |
 | Equalizer | Presets and custom bands, saved per preset | Discuss |
@@ -154,7 +154,7 @@ audio player with a different set of entries.
 | Shuffle | Offered when the queue has more than two items | Build |
 | Video information | Codec, resolution, bitrate graphs | Build for what the metadata gives; live statistics are Discuss |
 | Go to chapter | Shown when the file has chapters | Discuss |
-| Bookmarks | Add at the current time, rename, delete, jump to previous or next; markers on the seek bar | Build |
+| Bookmarks | Add at the current time, rename, delete, jump to previous or next; markers on the seek bar | Build. Renaming waits for Phase 4 |
 | A-B repeat | Mark A, mark B, loop; markers on the seek bar; reset | Build |
 | Save playlist | Saves the current queue as a playlist | Build |
 | Digital audio passthrough | For external receivers | Discuss |
@@ -332,7 +332,7 @@ None is decided; each is raised when the work reaches it.
 | What would unlock it | Features |
 |---|---|
 | A playback engine that exposes more than QtMultimedia 5 does (libVLC, or GStreamer driven from compiled code) | Playback speed and fast play, equalizer, audio delay, audio boost, audio and embedded-subtitle track selection, chapters, replay gain, passthrough, decoder settings, 360° video, live statistics |
-| A platform capability | Pop-up player and picture-in-picture, casting, real screen brightness |
+| A platform capability | Pop-up player and picture-in-picture, casting |
 | Network code beyond HTTP | Network shares, remote access |
 | An online service | Subtitle download, film metadata |
 | Our own scanner | Choosing library folders |

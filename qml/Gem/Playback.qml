@@ -24,7 +24,7 @@ import Gem 1.0
 Item {
     id: playback
 
-    property var store: null            // ResumeStore
+    property var store: null            // PlayerStore
 
     // What is loaded.
     property string url: ""
@@ -35,8 +35,14 @@ Item {
     // "Play as audio": the same playback, without its picture.
     property bool audioMode: false
 
-    property real volume: 1.0
     property string error: ""
+
+    // A-B repeat: -1 is unset. With both set, playback loops between them.
+    property int abStart: -1
+    property int abEnd: -1
+
+    // From opening a file until it actually plays.
+    readonly property bool starting: _awaitingStart && error === ""
 
     readonly property alias player: mediaPlayer
     readonly property bool loaded: url !== ""
@@ -72,12 +78,32 @@ Item {
         playerDuration = 0;
         audioMode = false;
         error = "";
+        abStart = -1;
+        abEnd = -1;
         _seekTarget = -1;
         _pendingStart = store ? store.resumePoint(url) : 0;
         _awaitingStart = true;
         if (mediaPlayer.source.toString() !== url)
             mediaPlayer.source = url;
         mediaPlayer.play();
+        startLimit.restart();
+    }
+
+    // First call marks the start, second the end; a third clears both.
+    function markAB() {
+        if (abStart < 0) {
+            abStart = position;
+        } else if (abEnd < 0) {
+            if (position > abStart + 1000)
+                abEnd = position;
+        } else {
+            clearAB();
+        }
+    }
+
+    function clearAB() {
+        abStart = -1;
+        abEnd = -1;
     }
 
     function play() {
@@ -120,12 +146,11 @@ Item {
     MediaPlayer {
         id: mediaPlayer
         notifyInterval: 100
-        volume: playback.volume
 
         onDurationChanged: playback.playerDuration = Math.max(0, duration)
 
         onError: {
-            playback.error = errorString;
+            playback.error = errorString || "This file could not be played.";
             console.warn("playback error", error, errorString);
         }
 
@@ -146,6 +171,11 @@ Item {
             // is the seek landing.
             if (playback._seekTarget >= 0 && (step < -50 || step > 400))
                 playback._seekTarget = -1;
+
+            // Only while the app runs: frozen in the background, nothing here
+            // is called and the file plays on past B.
+            if (playback.abEnd > 0 && playback._seekTarget < 0 && now >= playback.abEnd)
+                playback.seekTo(playback.abStart);
         }
 
         onStatusChanged: {
@@ -163,6 +193,20 @@ Item {
         id: seekSettle
         interval: 3000
         onTriggered: playback._seekTarget = -1
+    }
+
+    // The backend raises no error for an address that does not answer, or for
+    // some files it cannot play: it just never starts.
+    Timer {
+        id: startLimit
+        interval: 20000
+        onTriggered: {
+            if (!playback._awaitingStart || playback.error !== "")
+                return;
+            playback.error = playback.url.indexOf("file://") === 0
+                ? "This file could not be played."
+                : "The stream did not start. Check the address and the connection.";
+        }
     }
 
     Timer {

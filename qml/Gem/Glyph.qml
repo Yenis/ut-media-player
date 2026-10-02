@@ -128,6 +128,44 @@ Canvas {
                 ctx.fillStyle = glyph.color;
             }
             break;
+        case "erase":
+            line([0.32, 0.22, 0.9, 0.22, 0.9, 0.78, 0.32, 0.78, 0.08, 0.5]);
+            ctx.closePath();
+            ctx.stroke();
+            stroke([0.5, 0.38, 0.72, 0.62]);
+            stroke([0.72, 0.38, 0.5, 0.62]);
+            break;
+        case "add":
+            stroke([0.5, 0.18, 0.5, 0.82]);
+            stroke([0.18, 0.5, 0.82, 0.5]);
+            break;
+        case "bookmark":
+            line([0.26, 0.14, 0.74, 0.14, 0.74, 0.86, 0.5, 0.66, 0.26, 0.86]);
+            ctx.closePath();
+            ctx.stroke();
+            break;
+        case "info":
+            arc(0.5, 0.5, 0.38, 0, 2);
+            dot(0.5, 0.3, 0.06);
+            stroke([0.5, 0.46, 0.5, 0.72]);
+            break;
+        case "subtitles":
+            ctx.strokeRect(w * 0.1, w * 0.22, w * 0.8, w * 0.56);
+            stroke([0.24, 0.5, 0.42, 0.5]);
+            stroke([0.56, 0.5, 0.76, 0.5]);
+            stroke([0.24, 0.64, 0.6, 0.64]);
+            break;
+        case "repeat":
+            stroke([0.2, 0.44, 0.2, 0.3, 0.8, 0.3, 0.8, 0.46]);
+            stroke([0.7, 0.38, 0.8, 0.48, 0.9, 0.38]);
+            stroke([0.8, 0.56, 0.8, 0.7, 0.2, 0.7, 0.2, 0.54]);
+            stroke([0.1, 0.62, 0.2, 0.52, 0.3, 0.62]);
+            break;
+        case "camera":
+            ctx.strokeRect(w * 0.1, w * 0.3, w * 0.8, w * 0.52);
+            arc(0.5, 0.56, 0.14, 0, 2);
+            stroke([0.36, 0.3, 0.42, 0.18, 0.58, 0.18, 0.64, 0.3]);
+            break;
         case "refresh":
             arc(0.5, 0.5, 0.38, 0.45, 1.95);
             fill([0.32, 0.84, 0.62, 0.78, 0.5, 1.0]);

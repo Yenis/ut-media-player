@@ -5,7 +5,11 @@ import Gem 1.0
  * A list of choices that slides up from the bottom, over a dimmed page: the
  * player menu and the list of aspect modes. Tapping outside closes it.
  *
- * options: [{ key, label, glyph (optional), selected (optional) }]
+ * options: [{ key, label, glyph, selected, value, stay }]
+ *   key       what `chosen` reports; a row without one cannot be tapped
+ *   value     shown on the right, dimmed
+ *   stay      the sheet stays open when this row is chosen
+ * Everything but `label` is optional.
  */
 Item {
     id: sheet
@@ -15,6 +19,7 @@ Item {
     property string title: ""
 
     signal chosen(string key)
+    signal held(string key)
 
     visible: open || slide.running
 
@@ -94,20 +99,33 @@ Item {
 
                         Text {
                             anchors { left: icon.visible ? icon.right : parent.left; leftMargin: Theme.u(2.5)
-                                      right: parent.right; rightMargin: Theme.u(2.5); verticalCenter: parent.verticalCenter }
+                                      right: valueLabel.left; rightMargin: Theme.u(1.5); verticalCenter: parent.verticalCenter }
                             text: modelData.label
                             color: modelData.selected ? Theme.accent : Theme.text
                             font.pixelSize: Theme.fontM
                             elide: Text.ElideRight
                         }
 
+                        Text {
+                            id: valueLabel
+                            anchors { right: parent.right; rightMargin: Theme.u(2.5); verticalCenter: parent.verticalCenter }
+                            width: Math.min(implicitWidth, parent.width * 0.6)
+                            text: modelData.value || ""
+                            color: Theme.textDim
+                            font.pixelSize: Theme.fontS
+                            elide: Text.ElideLeft
+                        }
+
                         MouseArea {
                             id: rowMouse
                             anchors.fill: parent
+                            enabled: !!modelData.key
                             onClicked: {
-                                sheet.close();
+                                if (!modelData.stay)
+                                    sheet.close();
                                 sheet.chosen(modelData.key);
                             }
+                            onPressAndHold: sheet.held(modelData.key)
                         }
                     }
                 }

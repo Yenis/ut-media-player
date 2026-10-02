@@ -1,10 +1,41 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the player (version 0.0.2); the rest is the Phase 0 spike from
+is the player (versions 0.0.2 and 0.0.3); the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, behind the button at
 the top right of the list.
+
+## Player, version 0.0.3
+
+### Checked over adb, 2 October 2026
+
+| Check | Result |
+|---|---|
+| Volume swipe (driven through the same function) | Pass: the system volume went 0.54 → 0.44 → 0.54 |
+| Brightness swipe | Pass: the backlight went 1.0 → 0.6; back to 1.0 on leaving the player, 0.6 again on return |
+| Subtitles: `sidecar.srt` found and shown, in time, above the controls | Pass |
+| Menu with all entries; keypad for "Jump to time"; sleep picker upright and on its side | Pass (layout) |
+| Sleep timer: set to 5 s, playback paused when it ran out | Pass |
+| A-B repeat: playback returned to the start mark after passing the end mark | Pass; the loop begins at the keyframe before A |
+| Bookmarks: two added, listed, marked on the timeline | Pass |
+| Video information | Pass |
+| Screenshot: `GemPlayer sidecar 0-16.png` in Pictures | Pass |
+| Labels for sleep timer, A-B repeat and subtitle delay | Pass |
+
+### To be checked by hand
+
+| Check | Look for |
+|---|---|
+| Swipe on the right half | The sound gets louder and quieter, and the phone's volume indicator agrees afterwards |
+| Swipe on the left half | The screen itself gets darker and brighter; leaving the player gives the old brightness back |
+| Menu → Jump to time, type `1`, `:30`, OK | Playback jumps to about 1:30 |
+| Menu → Sleep timer, type `1`, OK | The label counts down; playback pauses after a minute |
+| Menu → Bookmarks → Add bookmark; later tap it; hold it | Jumps there; holding removes it |
+| Menu → A-B repeat twice, some seconds apart | It loops; the label under the title turns it off |
+| `sidecar` in the list | Subtitles show; the subtitles button hides them and shifts them |
+| Menu → Screenshot | A picture appears in the Gallery |
+| A real film of your own | Anything that looks or feels wrong |
 
 ## Player, version 0.0.2
 
@@ -27,9 +58,10 @@ and the system's media interface as the witness.
 | Opening the same file again after it ended | Pass |
 | Resume: left at 0:30, reopened, continues from there | Pass (from the keyframe before) |
 
-### To be checked by hand
+### Checked by hand
 
-Gestures and the orientation sensor cannot be driven remotely.
+Gestures and the orientation sensor cannot be driven remotely. All of these
+passed on 2 October 2026, except the volume swipe as noted.
 
 | Check | Look for |
 |---|---|
@@ -37,7 +69,7 @@ Gestures and the orientation sensor cannot be driven remotely.
 | Double tap, left and right quarter | Skips 10 s; repeated taps add up and the total shows on that side |
 | Double tap, middle | Pauses and plays |
 | Swipe sideways | A message like `+0:42 (12:10)` follows the finger; the jump happens on release |
-| Swipe up and down, right half | Volume bar; is the sound actually louder and quieter? |
+| Swipe up and down, right half | Volume bar. **Failed in 0.0.2**: the level showed but the sound did not change; fixed in 0.0.3 |
 | Swipe up and down, left half | The picture dims and brightens |
 | Pinch out, pinch in | "Fit screen", then back |
 | Turn the phone on its side, both ways | The player turns with it, the right way up both times |

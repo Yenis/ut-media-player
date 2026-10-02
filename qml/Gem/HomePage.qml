@@ -10,7 +10,7 @@ Item {
     id: page
 
     property var library: null          // platform/MediaLibrary.qml, or null off the device
-    property var store: null            // ResumeStore
+    property var store: null            // PlayerStore
     property var videos: []
 
     signal mediaChosen(var media)

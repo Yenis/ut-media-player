@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.0.3 - unreleased
+
+- **Fixed:** the volume swipe showed a level but changed nothing. It now sets
+  the phone's media volume, as the volume keys do.
+- The brightness swipe sets the real backlight. The phone's own brightness
+  comes back when the player is left.
+- Player menu: sleep timer, jump to time, video information, bookmarks,
+  A-B repeat, screenshot.
+- External subtitles: a `.srt` file beside the video is shown automatically,
+  with a button to hide it and a delay control.
+- Small labels under the title show what is switched on: sleep timer, A-B
+  repeat, subtitle delay.
+- Marks on the timeline for bookmarks and the two ends of an A-B repeat.
+- Keyboard: space, arrows, A or Z for picture size, G and H for subtitle
+  delay, S to close.
+- "Loading" while a file starts; a message if it never does.
+
 ## 0.0.2 - unreleased
 
 The first build that is a player.

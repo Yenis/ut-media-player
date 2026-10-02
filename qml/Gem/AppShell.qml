@@ -8,7 +8,7 @@ import "../js/Format.js" as Format
  * Created by Main.qml only after the app identity is set.
  *
  * Phase 1: a list of videos, the video player, and a minimal "playing as
- * audio" page.
+ * audio" page. The sleep timer lives here because it outlasts any one page.
  */
 FocusScope {
     id: shell
@@ -21,19 +21,28 @@ FocusScope {
 
     readonly property alias playback: core
     readonly property alias videoPage: videoView
+    readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
 
-    ResumeStore { id: resume }
+    PlayerStore { id: playerStore }
 
     Playback {
         id: core
-        store: resume
+        store: playerStore
         // Nothing follows yet; a queue comes with Phase 2.
         onEnded: if (shell.page === "video" || shell.page === "audio") shell.page = "home"
     }
 
+    SleepTimer {
+        id: sleeper
+        onExpired: core.pause()
+    }
+
     // These only exist on Ubuntu Touch; anywhere else the Loader fails quietly.
     Loader { id: libraryLoader; source: "../platform/MediaLibrary.qml" }
+    Loader { id: volumeLoader; source: "../platform/SystemVolume.qml" }
+    Loader { id: brightnessLoader; source: "../platform/SystemBrightness.qml" }
+    Loader { id: foldersLoader; source: "../platform/Folders.qml" }
     Loader {
         source: "../platform/ContentImport.qml"
         onLoaded: item.incoming.connect(shell.openUrl)
@@ -116,11 +125,16 @@ FocusScope {
         }
     }
 
+    Keys.onPressed: {
+        if (page === "video" && videoView.handleKey(event))
+            event.accepted = true;
+    }
+
     HomePage {
         anchors.fill: parent
         visible: shell.page === "home"
         library: shell.library
-        store: resume
+        store: playerStore
         onMediaChosen: shell.openMedia(media)
         onDiagnosticsRequested: shell.page = "diagnostics"
     }
@@ -133,6 +147,11 @@ FocusScope {
         anchors.fill: parent
         visible: shell.page === "video"
         playback: core
+        store: playerStore
+        sleep: sleeper
+        systemVolume: volumeLoader.status === Loader.Ready ? volumeLoader.item : null
+        systemBrightness: brightnessLoader.status === Loader.Ready ? brightnessLoader.item : null
+        picturesFolder: foldersLoader.status === Loader.Ready ? foldersLoader.item.pictures : ""
         onCloseRequested: shell.closePlayer()
         onAudioRequested: shell.toAudio()
     }

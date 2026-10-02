@@ -77,18 +77,22 @@ Item {
         else if (name === "back") shell.back();
         else if (name === "home") shell.page = "home";
         else if (name === "diagnostics") shell.page = "diagnostics";
-        else if (name === "volume") p.volume = parseFloat(argument);
         else if (v && name === "controls") { if (argument === "1") v.showControls(); else v.controlsShown = false; }
         else if (v && name === "angle") { v.orientationLocked = true; v.contentAngle = parseInt(argument); }
         else if (v && name === "aspect") v.setAspect(parseInt(argument));
         else if (v && name === "lock") v.locked = argument === "1";
-        else if (v && name === "menu") v.openMenu();
-        else if (v && name === "aspectlist") v.openAspectList();
+        else if (v && name === "sheet") v.openSheet(argument);
         else if (v && name === "info") v.showInfo(argument, 5000);
-        else if (v && name === "level") v.showLevel(argument, 0.62);
+        else if (v && name === "level") v.showLevel(argument, 0.62, 5000);
+        else if (v && name === "volume") v.changeVolume(parseFloat(argument));
+        else if (v && name === "bookmark") v.addBookmark();
+        else if (v && name === "ab") v.markAB();
+        else if (v && name === "screenshot") v.takeScreenshot();
+        else if (v && name === "subdelay") v.changeSubtitleDelay(parseInt(argument));
+        else if (name === "sleep") shell.sleepTimer.start(parseInt(argument), false, false);
         else if (v && name === "tapseek") v.tapSeek(argument);
         else if (v && name === "follow") { v.orientationLocked = false; v.followSensor(); }
-        else if (v && name === "brightness") v.brightness = parseFloat(argument);
+        else if (v && name === "brightness") v.changeBrightness(parseFloat(argument));
         else if (name === "shot") shot(argument || "shot");
         else if (name === "state") state();
     }
@@ -100,7 +104,8 @@ Item {
             page: shell.page, url: p.url, playing: p.playing, position: p.position,
             raw: p.player.position, duration: p.duration, audioMode: p.audioMode,
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
-            error: p.error, volume: p.volume,
+            error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd],
+            sleep: shell.sleepTimer.remaining,
             angle: v ? v.contentAngle : null, window: shell.width + "x" + shell.height,
             sensor: v ? v.Screen.orientation : null, app: Qt.application.state, wall: Date.now()
         }));
