@@ -1,0 +1,12 @@
+# Reference clone of VLC for Android: read only, never built, never committed
+vlc-android/
+
+# Clickable build output
+build/
+.clickable/
+*.click
+
+# Editor and tool leftovers
+*.user
+CMakeLists.txt.user*
+__pycache__/
