@@ -126,7 +126,10 @@ out by D10 and D11.
 | Calls and low battery | media-hub pauses multimedia sessions for a phone call and resumes them afterwards | **[source]** media-hub |
 | Own database | `QtQuick.LocalStorage 2.0` (SQLite) | **[source]** music app; used here for resume points, history, playlists, bookmarks, favourites, groups |
 | Audio role | The backend accepts Qt's music and video roles but maps both to the same media-hub "multimedia" role, so the role does not tell audio from video. media-hub itself decides by whether the stream has a picture | **[source]** `qtubuntu-media`, media-hub |
-| Lock-screen and indicator controls | media-hub publishes the playing item over MPRIS by itself, with title, album, position and working pause, play and next **[device]**. The `org.nemomobile.mpris` module the Music app bundles is not on the system image and is not needed for this | How the indicator and lock screen look is **[verify]** by eye |
+| System media controls | media-hub publishes the playing item over MPRIS by itself, with title, album, position and working pause, play and next. The sound indicator shows a player section for it, labelled "Media Player" with the stock app's icon. The lock screen has no media controls | **[device]**. Our own name and icon there would need an MPRIS service of our own: compiled code, as the Music app bundles |
+| Files from other apps | Content Hub delivers a file as a hard link in `~/.cache/gemplayer.yenis/HubIncoming/`, taking no extra space | **[device]** |
+| Embedded subtitles and audio tracks | The first audio track plays; embedded subtitles are never drawn; neither can be chosen | **[device]**, **[source]** media-hub |
+| Rotation | The system rotates the window, subject to the user's rotation lock | **[device]** |
 | Audio in the background | media-hub plays the queue and advances it while the app is suspended | **[device]** |
 | **Playback speed** | **Not available.** The backend's `setPlaybackRate()` ignores its argument and always reports 1.0 | **[source]** `qtubuntu-media`, **[device]** |
 

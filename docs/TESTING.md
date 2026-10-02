@@ -144,6 +144,20 @@ was read while GemPlayer was suspended.
 | - | Two players at once | **Pass.** A video and an audio queue from the same app play at the same time |
 | S11 | System controls without an MPRIS module | **Pass at the interface.** media-hub publishes the playing item over MPRIS with status, position, title, album and length, and `Pause`, `Play` and `Next` sent to it took effect. What the sound indicator and lock screen show is still to be seen by eye |
 
+### Run 4: manual part, 2 October 2026
+
+Done by hand on the phone; timings read from the journal afterwards.
+
+| # | Question | Result |
+|---|---|---|
+| S1 | Is 1080p H.264 smooth? | **Pass.** Smooth, and the volume keys change the loudness |
+| S16 | A file with two audio tracks and embedded subtitles | The first audio track plays; there is no way to pick the other. **No subtitles are drawn**: media-hub switches the text stream off **[source]**. It does see both audio streams (its log says "1 video streams and 2 audio streams") but does not pass that on |
+| S9 | Rotation | The system rotates the app. With the phone's rotation lock on, it offers its rotate button first, then the window becomes 2220x1005. Whether the app can force landscape by itself was not tried; the player will rotate its own content instead |
+| S6 | Video with the screen off | **Kept playing for 53 s**, cable unplugged: position and clock advanced by the same 52.8 s. But the keep-alive was on during this run, and 53 s may be too short for the phone to suspend. **To be repeated**, longer, with the keep-alive off and then on |
+| S5 | Music with the screen off | **Pass.** A library queue played on for 39 s behind the lock screen |
+| S11 | Lock screen and sound indicator | The lock screen shows nothing; it has no media controls of its own. The sound indicator has a player section with play, previous and next, wired to media-hub, but it is labelled "Media Player" with the stock app's icon: media-hub reports itself as `lomiri-mediaplayer-app` and the indicator only lists that name. Showing "GemPlayer" there would take an MPRIS service of our own, which is compiled code |
+| S12 | Open with, from the file manager | **Pass.** The file arrives as `~/.cache/gemplayer.yenis/HubIncoming/2/av1-720p.mp4`, and it is a hard link to the original (same inode, link count 2), so it takes no extra space. The spike only logs it; playing it is the player's job |
+
 ### Other observations
 
 - With no media loaded, `MediaPlayer.position` reads a large negative number

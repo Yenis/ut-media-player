@@ -126,14 +126,14 @@ Source: `res/layout/player_hud.xml`, `player_hud_right.xml`,
 | Play, previous, next | Previous and next act on the queue | Build |
 | Rewind and forward buttons | Optional. 10 s on tap, 20 s on long press, both adjustable | Build |
 | Lock | Hides the controls and ignores touches until unlocked by a swipe | Build |
-| Orientation button | Locks to the current orientation; a setting chooses automatic, portrait, landscape, reverse landscape or last locked | Spike S9 |
+| Orientation button | Locks to the current orientation; a setting chooses automatic, portrait, landscape, reverse landscape or last locked | Build, by rotating the player's own content. The system's rotation follows the user's rotation lock **[device]**, which a video player has to override |
 | Aspect button | Tap cycles the main modes, long press lists all twelve | Build |
 | Tracks button | Audio track, subtitle track, video track, pick a subtitle file, download subtitles | External subtitles: Spike S10. The rest: Discuss |
 | Queue button | Shows the play queue over the video | Build |
 | Quick-action chips | Appear when sleep timer, speed, a delay or orientation lock is active; tap to change | Build for sleep and orientation |
 | Brightness, volume and info overlays | Vertical bar with a percentage; short text for seek and aspect changes | Build |
-| Keep screen on while playing | Implied on Android | Spike S8 |
-| Fullscreen, hiding system bars | Yes | Spike S8 |
+| Keep screen on while playing | Implied on Android | Build. media-hub holds the display on for a video by itself **[device]** |
+| Fullscreen, hiding system bars | Yes | Build **[device]** |
 
 ### Player menu
 
@@ -147,8 +147,8 @@ audio player with a different set of entries.
 | Playback speed | 0.25x to 8x in 0.01 steps, for this media or all media | Discuss |
 | Jump to time | Hours, minutes, seconds | Build |
 | Equalizer | Presets and custom bands, saved per preset | Discuss |
-| Play as audio | Video only. Leaves the video screen; playback continues in the audio player | Spike S6 |
-| Play as video | Audio player only, shown when the file has a video track | Spike S6 |
+| Play as audio | Video only. Leaves the video screen; playback continues in the audio player | Build. The same player carries on with its picture hidden **[device]**. With the screen off: still Spike S6 |
+| Play as video | Audio player only, shown when the file has a video track | Build **[device]** |
 | Pop-up player | Video in a floating window | Discuss |
 | Repeat | None, one, all; "all" is skipped when the queue has one item | Build |
 | Shuffle | Offered when the queue has more than two items | Build |
@@ -184,8 +184,8 @@ audio player with a different set of entries.
 
 | Feature | Behaviour in VLC | Source | Verdict |
 |---|---|---|---|
-| External subtitle file | Loaded automatically when it sits beside the video; can be picked by hand | `preferences_subtitles.xml` `subtitles_autoload`, `src/gui/browser/FilePickerFragment.kt` | Spike S10 |
-| Embedded subtitle tracks | Listed and selectable | `src/gui/dialogs/VideoTracksDialog.kt` | Discuss |
+| External subtitle file | Loaded automatically when it sits beside the video; can be picked by hand | `preferences_subtitles.xml` `subtitles_autoload`, `src/gui/browser/FilePickerFragment.kt` | Build **[device]** |
+| Embedded subtitle tracks | Listed and selectable | `src/gui/dialogs/VideoTracksDialog.kt` | Discuss. media-hub never draws them and does not list them **[device]** |
 | Styling | Size (seven steps), bold, colour, opacity, background, shadow, outline, and six presets | `res/xml/preferences_subtitles.xml` | Build, for subtitles we draw |
 | Text encoding, preferred language | Settings | same | Encoding: Build. Preferred language applies to embedded tracks: Discuss |
 | Download subtitles | Searches an online service by file | `src/gui/dialogs/SubtitleDownloaderDialogFragment.kt` | Discuss (needs a service account and a file hash) |
@@ -210,8 +210,8 @@ Source: `src/gui/audio/AudioPlayer.kt`, `res/layout/audio_player.xml`,
 | Sleep timer, jump to time, A-B repeat, bookmarks, save playlist | Shared with the video player | Build |
 | Playback speed, equalizer, chapters | Shared with the video player | Discuss |
 | Resume last queue | Queue and position restored on launch; a card offers to resume | Build |
-| Background playback | Continues with the screen off and under other apps | Spike S5 |
-| System controls | Notification, lock screen with cover, headset and Bluetooth buttons | Spike S11 |
+| Background playback | Continues with the screen off and under other apps | Build **[device]**. media-hub runs the queue while the app is suspended |
+| System controls | Notification, lock screen with cover, headset and Bluetooth buttons | Build for what the system gives: play, previous and next in the sound indicator, under the name "Media Player" **[device]**. Our own name, icon and cover there: Discuss (compiled MPRIS service) |
 | Headset | Pause when unplugged, optional resume when plugged in | Spike S11 |
 | Pause for calls, lower volume for notifications | Audio focus | Spike S5 (media-hub may do this for us) |
 | Replay gain | Track or album mode, pre-amp, peak protection | Discuss |
@@ -228,7 +228,7 @@ Source: `src/gui/video/VideoGridFragment.kt`,
 
 | Feature | Behaviour in VLC | Verdict |
 |---|---|---|
-| Grid or list | Thumbnail, title, duration, resolution, progress bar, seen marker | Spike S3, S4 |
+| Grid or list | Thumbnail, title, duration, resolution, progress bar, seen marker | Build **[device]** |
 | Grouping | None, by folder, or by name (videos with a common name prefix) | Build |
 | Manual groups | Add to group, rename, ungroup, regroup automatically | Build |
 | Sorting | Name, file name, length, date, last modified, date added; ascending or descending | Build |
@@ -286,7 +286,7 @@ Source: `src/gui/network/MRLPanelFragment.kt`.
 |---|---|---|
 | Open a stream by address | Text field; plays on enter | Build. HLS and MP4 over `https` play **[device]**; a dead address gives no error, so the app sets its own time limit |
 | Stream history | Past addresses; play, rename, delete, copy, add to playlist | Build |
-| Open from other apps | Links and files handed over by the system | Spike S12 |
+| Open from other apps | Links and files handed over by the system | Build **[device]** |
 
 ---
 
