@@ -1,10 +1,11 @@
 # GemPlayer - a VLC-style media player for Ubuntu Touch - plan
 
-Status: the survey of the VLC clone is done, see
-[VLC-FEATURES.md](VLC-FEATURES.md), and the licence is set (GPL-3.0 or later,
-D5). Nothing is built yet. Next step: the project
-skeleton and the spike on the Pixel 3a, both in Phase 0. Target device is the
-Pixel 3a on Ubuntu Touch 24.04-1.x, the same one GemTicker was verified on.
+Status: Phase 0 is under way. The survey of the VLC clone is done, see
+[VLC-FEATURES.md](VLC-FEATURES.md). The project skeleton builds and installs as
+version 0.0.1, which is the spike's diagnostics page and not a player yet.
+Next step: run the spike on the Pixel 3a and record the answers in
+[TESTING.md](TESTING.md). Target device is the Pixel 3a on Ubuntu Touch
+24.04-1.x (tag `24.04-1.4`), the same one GemTicker was verified on.
 
 Goal: every feature of VLC for Android, where feasible, on top of the media
 stack Ubuntu Touch already ships. This is a new QML app modelled on VLC's UI,
@@ -58,6 +59,8 @@ Facts are marked:
 | D3 | Rule for adopting an API | Only what is **confirmed on the device** in Phase 0 goes into the build phases |
 | D4 | Name and identity | **GemPlayer**, under the GemsTech brand. Organization and application name are both `gemplayer.yenis`. No app of that name is on the OpenStore (checked by Yenis, 2 October 2026). Own icon; never the VLC name or cone, which are VideoLAN trademarks |
 | D5 | Licence and reuse | **GPL-3.0 or later, as GemTicker** (decided 2 October 2026); the text is in `LICENSE`. VLC for Android is "GPLv2 or later" **[vlc]** (`README.md`, `COPYING`, file headers), which GPLv3 can absorb, so behaviour, layouts, strings and icons may be adapted from the clone as long as the README credits VLC for Android and adapted files keep their copyright notices. The VLC name and cone stay off limits (D4). This also gives the OpenStore listing the licence and public source link it needs |
+| D6 | UI toolkit | **Plain QtQuick with our own components and theme**, reusing GemTicker's (`Theme`, `IconButton`, `Toggle`, `SettingRow`, `PageHeader`, `SectionLabel`, `SegmentedChoice`, `TextButton`). Lomiri only for grid units, Content Hub and thumbnails |
+| D8 | Order | **Video player first**: it is the larger gap, since the stock video app is a bare player with no library. Audio second |
 | D9 | Distribution | **OpenStore, eventually.** First a self-installed click that is battle-tested on the Pixel 3a for a few weeks; the store submission follows and is not urgent. Store requirements shape choices from the start, see [Phase 6](#phase-6---openstore) |
 | D10 | Background playback | **Audio plays while other apps are in use and while the screen is locked**, as the stock Music app does. **Video stops when the app leaves the foreground**, except through "Play as audio". This matches VLC's own default **[vlc]** |
 | D11 | "Play as audio" | **Essential.** A playing video can be switched to audio-only and back; see [Play as audio](#play-as-audio) |
@@ -66,9 +69,7 @@ Facts are marked:
 
 | # | Decision | Recommendation |
 |---|---|---|
-| D6 | UI toolkit | Plain QtQuick with our own components and theme, reusing GemTicker's (`Theme`, `IconButton`, `Toggle`, `SettingRow`, `PageHeader`, `Preferences`). Lomiri only for grid units, Content Hub and thumbnails |
 | D7 | Packaging | Pure-QML click like GemTicker if Phase 0 allows. Falls back to a compiled click only if a needed module has to be bundled (MPRIS is the likely one); for the store that means one build per architecture. Several "Discuss" features would also need compiled code |
-| D8 | Order | Video player first: it is the larger gap, since the stock video app is a bare player with no library. Audio second |
 
 ---
 
@@ -83,9 +84,13 @@ Facts are marked:
 | Video library | No video model. `MediaStore.query(text, VideoMedia)` exists, and `MediaFile` carries title, duration, width, height and art | **[source]**; whether an empty query lists everything is **[verify]** |
 | Confinement for video | Policy groups `video`, `audio`, `content_exchange` | **[source]** stock video app |
 | Confinement for music | `audio`, `music_files_read`, `content_exchange`, `content_exchange_source`, `networking`, `keep-display-on`; read paths for `~/.cache/media-art/`, `~/.cache/mediascanner-2.0/` and `/media/*/*/` | **[source]** music app |
+| Reading media folders directly | `video_files_read` and `music_files_read` cover `~/Videos`, `~/Music` and the `Videos` and `Music` folders of an SD card, nothing else. Both are reserved: `click-review` flags them for manual review | **[device]** policy files on the phone; review run on 0.0.1 |
+| Deleting and renaming files | QML has no API for either, whatever the confinement allows. Needs compiled code plus the write groups `video_files`, `music_files` | **[source]**; a Discuss item |
+| Keeping the display on | `QtSystemInfo 5.0` `ScreenSaver`, policy group `keep-display-on` | **[source]** music app. media-hub also holds the display on by itself while a video source plays |
+| Calls and low battery | media-hub pauses multimedia sessions for a phone call and resumes them afterwards | **[source]** media-hub |
 | Own database | `QtQuick.LocalStorage 2.0` (SQLite) | **[source]** music app; used here for resume points, history, playlists, bookmarks, favourites, groups |
-| Audio role | The backend implements Qt's audio role control, so a player can declare itself music or video | **[source]** `qtubuntu-media`; that the role decides what survives the lock screen is **[verify]** |
-| Lock-screen and indicator controls | Music app bundles `org.nemomobile.mpris`, a compiled module | **[source]**; whether media-hub provides basic controls without it is **[verify]** |
+| Audio role | The backend accepts Qt's music and video roles but maps both to the same media-hub "multimedia" role, so the role does not tell audio from video. media-hub itself decides by whether the stream has a picture | **[source]** `qtubuntu-media`, media-hub |
+| Lock-screen and indicator controls | media-hub exposes the current multimedia player over MPRIS by itself. The Music app additionally bundles `org.nemomobile.mpris`, a compiled module that is **not** on the system image **[device]** | **[source]**; whether media-hub's own controls are enough is **[verify]**, S11 |
 | **Playback speed** | **Not available.** The backend's `setPlaybackRate()` ignores its argument and always reports 1.0 | **[source]** `qtubuntu-media` |
 
 ---
@@ -136,12 +141,15 @@ Behaviour here:
 | Video player leaves the foreground without the switch | Playback pauses (D10). A setting can change this to "play as audio in background", as in VLC |
 | Resume point | Shared: position saved in either mode resumes in either mode |
 
-How it is expected to work **[verify, S5-S6]**: the same file is played by a
-player declared with the music role and no video surface attached, starting at
-the video's position. If the role cannot change during playback, the switch is
-stop, re-open, seek, play, and the length of that gap is what the spike
-measures. Whether a file "has video" is remembered from when it was opened as
-a video, or read from the media scanner.
+How it is expected to work **[verify, S5-S6]**: playback runs in media-hub, a
+system service, not in the app, so sound can outlive the app being suspended.
+The open question is what media-hub does with a file that has a picture when
+the screen goes off, since it treats "has video" as a property of the stream
+and not of the role **[source]**. The spike tries two routes: the same player
+with its picture hidden, and a second player that never had a video surface,
+started at the video's position; for the second it measures the gap in sound.
+Whether a file "has video" is remembered from when it was opened as a video,
+or read from the media scanner.
 
 ---
 
@@ -162,20 +170,25 @@ All of it is in [VLC-FEATURES.md](VLC-FEATURES.md).
 
 ### Project skeleton
 
-- [ ] Copied from `~/ut-crypto-dashboard/`: `clickable.yaml`, manifest,
+- [x] Copied from `~/ut-crypto-dashboard/`: `clickable.yaml`, manifest,
       AppArmor file, `Theme`, shared components, units.
-- [ ] App identity `gemplayer.yenis` (D4) set in QML from the first line.
-- [ ] The click build does not pick up `vlc-android/`.
-- [x] `LICENSE` (D5).
-- [ ] The other documents listed under
-      [Documents kept from the first commit](#documents-kept-from-the-first-commit);
-      the README carries the credit to VLC for Android.
+- [x] App identity `gemplayer.yenis` (D4) set in `qml/Main.qml` before anything
+      stores data.
+- [x] The click build does not pick up `vlc-android/`: `CMakeLists.txt`
+      installs only `qml/`, the icon and the four package files.
+- [x] `LICENSE` (D5), `README.md` with the credit to VLC for Android,
+      `CHANGELOG.md`, `docs/INSTALL.md`, `docs/STORE.md`, `docs/TESTING.md`.
+- [x] Builds as `gemplayer.yenis_0.0.1_all.click` and installs on the Pixel 3a.
+- [ ] A real icon. `assets/icon.png` is a placeholder.
 
 ### Spike
 
-One throwaway click with a diagnostics page, as in GemTicker's Phase 1. Each
-row ends as pass, fail or "works with a caveat", and
-[VLC-FEATURES.md](VLC-FEATURES.md) is updated before anything else is built.
+One throwaway diagnostics page, `qml/spike/`, shipped as version 0.0.1. It
+runs most checks by itself on launch and writes each finding to the app log;
+the rest need hands on the phone. How to run it, and the answers, are in
+[TESTING.md](TESTING.md). Each row ends as pass, fail or "works with a caveat",
+and [VLC-FEATURES.md](VLC-FEATURES.md) is updated before anything else is
+built.
 
 | # | Question |
 |---|---|

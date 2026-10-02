@@ -1,0 +1,16 @@
+{
+    "name": "gemplayer.yenis",
+    "title": "GemPlayer",
+    "version": "0.0.1",
+    "description": "A VLC-style media player. Phase 0 spike build: a diagnostics page, not the player.",
+    "framework": "@CLICK_FRAMEWORK@",
+    "architecture": "@CLICK_ARCH@",
+    "maintainer": "Yenis <yenis92@live.com>",
+    "hooks": {
+        "gemplayer": {
+            "apparmor": "gemplayer.apparmor",
+            "desktop": "gemplayer.desktop",
+            "content-hub": "gemplayer.content-hub.json"
+        }
+    }
+}

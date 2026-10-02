@@ -1,0 +1,12 @@
+{
+    "policy_groups": [
+        "audio",
+        "video",
+        "content_exchange",
+        "keep-display-on",
+        "networking",
+        "music_files_read",
+        "video_files_read"
+    ],
+    "policy_version": "@APPARMOR_POLICY@"
+}

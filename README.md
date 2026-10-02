@@ -1,0 +1,91 @@
+# GemPlayer
+
+A media player for Ubuntu Touch, modelled on VLC for Android: its gestures, its
+player menu, its library and its queue, built in QML on the media stack Ubuntu
+Touch already ships.
+
+**Status: early development.** Version 0.0.1 is a diagnostics build used to
+find out what the platform can do. It is not a player yet. The plan and its
+progress are in [docs/PLAN.md](docs/PLAN.md).
+
+GemPlayer is not VLC and is not affiliated with VideoLAN. It does not contain
+libVLC. See [Credits](#credits).
+
+## Contents
+
+- [What it will do](#what-it-will-do)
+- [Privacy](#privacy)
+- [Building](#building)
+- [Documents](#documents)
+- [Credits](#credits)
+- [License](#license)
+
+## What it will do
+
+The goal is every feature of VLC for Android that Ubuntu Touch can support.
+[docs/VLC-FEATURES.md](docs/VLC-FEATURES.md) lists them all, with the state of
+each. The core:
+
+- Video player with VLC's gestures: swipe to seek, double-tap to skip, swipe
+  for volume and brightness, pinch to fit.
+- **Play as audio**: carry on listening to a video with the screen off.
+- Resume where you left off, bookmarks, A-B repeat, sleep timer.
+- External subtitles.
+- Video and audio library, playlists, favourites, history.
+- Play queue with shuffle and repeat.
+
+## Privacy
+
+GemPlayer has no accounts and no tracking. Nothing leaves the device except
+the addresses of network streams you choose to open.
+
+## Building
+
+You need [Clickable](https://clickable-ut.dev) 8.9 or newer and a phone with
+Developer Mode on.
+
+```bash
+clickable build      # produce the .click and run click-review on it
+clickable install    # copy it to the connected phone and install it
+clickable launch
+clickable logs       # follow the app's log output
+```
+
+The click is QML-only: `qmlscene` runs `qml/Main.qml`, there is no compiled
+code, and one package serves every architecture.
+
+`click-review` reports two findings on this build, both expected: the policy
+groups `music_files_read` and `video_files_read` are reserved and need a manual
+review in the OpenStore. [docs/STORE.md](docs/STORE.md) explains why the app
+asks for them.
+
+The `vlc-android/` folder, if you have one, is a reference copy of VLC's
+source. It is ignored by git and never enters the package.
+
+## Documents
+
+| File | What it is |
+|---|---|
+| [docs/PLAN.md](docs/PLAN.md) | Decisions, phases, and what is done |
+| [docs/VLC-FEATURES.md](docs/VLC-FEATURES.md) | What VLC for Android does, and the state of each feature here |
+| [docs/TESTING.md](docs/TESTING.md) | Device checks and their results |
+| [docs/INSTALL.md](docs/INSTALL.md) | Installing a build on your phone |
+| [docs/STORE.md](docs/STORE.md) | Notes for the OpenStore submission |
+| [CHANGELOG.md](CHANGELOG.md) | What changed in each version |
+
+## Credits
+
+GemPlayer follows the behaviour and layout of
+[VLC for Android](https://code.videolan.org/videolan/vlc-android) by VideoLAN
+and the VLC authors, which is licensed under the GNU General Public License,
+version 2 or later. Text or artwork adapted from it is marked as such in the
+file that carries it. "VLC" and the cone logo are trademarks of VideoLAN and
+are not used by this app.
+
+The theme and several interface components come from
+[GemTicker](https://github.com/Yenis/gemticker).
+
+## License
+
+GemPlayer is free software, licensed under the
+**[GNU General Public License v3.0 or later](LICENSE)**.

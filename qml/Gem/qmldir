@@ -1,0 +1,11 @@
+module Gem
+
+singleton Theme 1.0 Theme.qml
+
+IconButton 1.0 IconButton.qml
+PageHeader 1.0 PageHeader.qml
+SectionLabel 1.0 SectionLabel.qml
+SegmentedChoice 1.0 SegmentedChoice.qml
+SettingRow 1.0 SettingRow.qml
+TextButton 1.0 TextButton.qml
+Toggle 1.0 Toggle.qml

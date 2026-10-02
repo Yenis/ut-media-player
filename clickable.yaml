@@ -1,0 +1,12 @@
+clickable_minimum_required: '8.9.0'
+
+# QML-only click (docs/PLAN.md, D7): qmlscene runs qml/Main.qml directly, so
+# there is no compiled binary and one package serves every architecture
+# ("all") on Ubuntu Touch 20.04 and 24.04.
+builder: pure-qml-cmake
+framework: ubuntu-sdk-20.04-qml
+
+# Nothing is compiled, so the image only copies files and runs click-review.
+# Reuse the 24.04 image instead of pulling a separate multi-GB 20.04 one; its
+# click-review accepts the ubuntu-sdk-20.04-qml framework.
+docker_image: clickable/amd64-ut24.04-2.x-amd64

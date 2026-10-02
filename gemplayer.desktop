@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=GemPlayer
+GenericName=Media player
+Comment=A VLC-style media player
+Exec=qmlscene -I qml qml/Main.qml
+Icon=assets/icon.png
+Terminal=false
+Type=Application
+Categories=AudioVideo;Player;
+X-Ubuntu-Touch=true
