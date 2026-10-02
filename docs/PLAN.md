@@ -1,7 +1,8 @@
 # GemPlayer - a VLC-style media player for Ubuntu Touch - plan
 
 Status: the survey of the VLC clone is done, see
-[VLC-FEATURES.md](VLC-FEATURES.md). Nothing is built yet. Next step: the project
+[VLC-FEATURES.md](VLC-FEATURES.md), and the licence is set (GPL-3.0 or later,
+D5). Nothing is built yet. Next step: the project
 skeleton and the spike on the Pixel 3a, both in Phase 0. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x, the same one GemTicker was verified on.
 
@@ -56,6 +57,7 @@ Facts are marked:
 | D2 | Scope | **Every VLC for Android feature, where feasible** (changed 2 October 2026; it was "UI features only, drop what the backend cannot do"). A feature that is very hard on Ubuntu Touch is not dropped in advance: when the work reaches it, we discuss whether it is worth trying. [VLC-FEATURES.md](VLC-FEATURES.md) marks these as "Discuss" |
 | D3 | Rule for adopting an API | Only what is **confirmed on the device** in Phase 0 goes into the build phases |
 | D4 | Name and identity | **GemPlayer**, under the GemsTech brand. Organization and application name are both `gemplayer.yenis`. No app of that name is on the OpenStore (checked by Yenis, 2 October 2026). Own icon; never the VLC name or cone, which are VideoLAN trademarks |
+| D5 | Licence and reuse | **GPL-3.0 or later, as GemTicker** (decided 2 October 2026); the text is in `LICENSE`. VLC for Android is "GPLv2 or later" **[vlc]** (`README.md`, `COPYING`, file headers), which GPLv3 can absorb, so behaviour, layouts, strings and icons may be adapted from the clone as long as the README credits VLC for Android and adapted files keep their copyright notices. The VLC name and cone stay off limits (D4). This also gives the OpenStore listing the licence and public source link it needs |
 | D9 | Distribution | **OpenStore, eventually.** First a self-installed click that is battle-tested on the Pixel 3a for a few weeks; the store submission follows and is not urgent. Store requirements shape choices from the start, see [Phase 6](#phase-6---openstore) |
 | D10 | Background playback | **Audio plays while other apps are in use and while the screen is locked**, as the stock Music app does. **Video stops when the app leaves the foreground**, except through "Play as audio". This matches VLC's own default **[vlc]** |
 | D11 | "Play as audio" | **Essential.** A playing video can be switched to audio-only and back; see [Play as audio](#play-as-audio) |
@@ -64,7 +66,6 @@ Facts are marked:
 
 | # | Decision | Recommendation |
 |---|---|---|
-| D5 | Licence and reuse | **GPL-3.0, as GemTicker.** VLC for Android is "GPLv2 or later" **[vlc]** (`README.md`, `COPYING`, file headers), which GPLv3 can absorb, so behaviour, layouts and strings may be adapted from the clone as long as the README credits VLC for Android. Under any other licence nothing could be adapted, only observed. The VLC name and cone stay off limits either way (D4). The OpenStore listing needs a licence and a public source link, which this satisfies |
 | D6 | UI toolkit | Plain QtQuick with our own components and theme, reusing GemTicker's (`Theme`, `IconButton`, `Toggle`, `SettingRow`, `PageHeader`, `Preferences`). Lomiri only for grid units, Content Hub and thumbnails |
 | D7 | Packaging | Pure-QML click like GemTicker if Phase 0 allows. Falls back to a compiled click only if a needed module has to be bundled (MPRIS is the likely one); for the store that means one build per architecture. Several "Discuss" features would also need compiled code |
 | D8 | Order | Video player first: it is the larger gap, since the stock video app is a bare player with no library. Audio second |
@@ -165,9 +166,10 @@ All of it is in [VLC-FEATURES.md](VLC-FEATURES.md).
       AppArmor file, `Theme`, shared components, units.
 - [ ] App identity `gemplayer.yenis` (D4) set in QML from the first line.
 - [ ] The click build does not pick up `vlc-android/`.
-- [ ] The documents listed under
-      [Documents kept from the first commit](#documents-kept-from-the-first-commit),
-      once D5 is settled.
+- [x] `LICENSE` (D5).
+- [ ] The other documents listed under
+      [Documents kept from the first commit](#documents-kept-from-the-first-commit);
+      the README carries the credit to VLC for Android.
 
 ### Spike
 
@@ -299,7 +301,7 @@ that nothing built later has to be undone.
 |---|---|
 | `README.md` | What it is, features, privacy, build, credits to VLC for Android |
 | `CHANGELOG.md` | One entry per release; the store's changelog field is copied from it |
-| `LICENSE` | GPL-3.0 |
+| `LICENSE` | GPL-3.0 or later (D5); added |
 | `docs/PLAN.md` | This plan |
 | `docs/VLC-FEATURES.md` | The feature survey and the verdict for each feature |
 | `docs/INSTALL.md` | Self-install route, used during the battle test |

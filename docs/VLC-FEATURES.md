@@ -366,7 +366,9 @@ Read from `src/gui/video/VideoTouchDelegate.kt` unless another file is named.
 
 ## Strings and layouts worth adapting
 
-Allowed under GPL-3.0 with credit (D5 in [PLAN.md](PLAN.md)).
+GemPlayer is GPL-3.0 or later (D5 in [PLAN.md](PLAN.md)), so these may be
+adapted, with credit to VLC for Android in the README and the copyright notice
+kept on any adapted file.
 
 | What | Where | Why |
 |---|---|---|
