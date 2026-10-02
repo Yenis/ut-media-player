@@ -1,13 +1,16 @@
 # GemPlayer - a VLC-style media player for Ubuntu Touch - plan
 
-Status: Phase 0 is under way. The survey of the VLC clone is done, see
-[VLC-FEATURES.md](VLC-FEATURES.md). The project skeleton builds and installs as
-version 0.0.1, which is the spike's diagnostics page and not a player yet. The
-automatic part of the spike has run: unconfined (D12), every test file plays
-and the media library is readable; see [TESTING.md](TESTING.md). Next step: the
-manual part of the spike (background audio, play as audio, system controls,
-orientation). Target device is the Pixel 3a on Ubuntu Touch 24.04-1.x (tag
-`24.04-1.4`), the same one GemTicker was verified on.
+Status: **Phase 0 is done; Phase 1, the video player, is under way.** Version
+0.0.2 plays videos with VLC's gestures, picture sizes, lock, resume and play as
+audio; [Phase 1](#phase-1---video-player) lists what is still missing. The
+survey of the VLC clone is in [VLC-FEATURES.md](VLC-FEATURES.md) and the
+spike's answers are in [TESTING.md](TESTING.md). In short: unconfined (D12),
+every common format plays, the media library is readable, audio and video keep
+playing in the background and with the screen off, and "Play as audio" is the
+same player with its picture hidden. Playback speed, track selection and
+embedded subtitles are not available from the system backend. Target device is
+the Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one
+GemTicker was verified on.
 
 Goal: every feature of VLC for Android, where feasible, on top of the media
 stack Ubuntu Touch already ships. This is a new QML app modelled on VLC's UI,
@@ -62,6 +65,7 @@ Facts are marked:
 | D4 | Name and identity | **GemPlayer**, under the GemsTech brand. Organization and application name are both `gemplayer.yenis`. No app of that name is on the OpenStore (checked by Yenis, 2 October 2026). Own icon; never the VLC name or cone, which are VideoLAN trademarks |
 | D5 | Licence and reuse | **GPL-3.0 or later, as GemTicker** (decided 2 October 2026); the text is in `LICENSE`. VLC for Android is "GPLv2 or later" **[vlc]** (`README.md`, `COPYING`, file headers), which GPLv3 can absorb, so behaviour, layouts, strings and icons may be adapted from the clone as long as the README credits VLC for Android and adapted files keep their copyright notices. The VLC name and cone stay off limits (D4). This also gives the OpenStore listing the licence and public source link it needs |
 | D6 | UI toolkit | **Plain QtQuick with our own components and theme**, reusing GemTicker's (`Theme`, `IconButton`, `Toggle`, `SettingRow`, `PageHeader`, `SectionLabel`, `SegmentedChoice`, `TextButton`). Lomiri only for grid units, Content Hub and thumbnails |
+| D7 | Packaging | **Pure-QML click**, one package for every architecture. The spike found every module the plan needs on the device (S15), and system media controls work without a bundled MPRIS module. Compiled code comes back on the table only with a Discuss item that needs it (our own name in the sound indicator, real brightness, deleting files) |
 | D8 | Order | **Video player first**: it is the larger gap, since the stock video app is a bare player with no library. Audio second |
 | D9 | Distribution | **OpenStore, eventually.** First a self-installed click that is battle-tested on the Pixel 3a for a few weeks; the store submission follows and is not urgent. Store requirements shape choices from the start, see [Phase 6](#phase-6---openstore) |
 | D10 | Background playback | **Audio plays while other apps are in use and while the screen is locked**, as the stock Music app does. **Video stops when the app leaves the foreground**, except through "Play as audio". This matches VLC's own default **[vlc]** |
@@ -70,9 +74,7 @@ Facts are marked:
 
 ### Still open
 
-| # | Decision | Recommendation |
-|---|---|---|
-| D7 | Packaging | Pure-QML click like GemTicker if Phase 0 allows. Falls back to a compiled click only if a needed module has to be bundled (MPRIS is the likely one); for the store that means one build per architecture. Several "Discuss" features would also need compiled code |
+None. Discuss items become decisions as the work reaches them.
 
 ### Confinement
 
@@ -191,13 +193,13 @@ when the app is suspended, with or without a picture on screen. So:
 - Pausing a video when the app is left (D10) is something the app does itself,
   on leaving the foreground, unless it is in audio mode.
 - A second player for the audio side does not work and is not needed.
-- **Open [verify, S6]:** with the screen off. media-hub keeps the display on
-  for a file that has a picture, but asks the system to stay awake only for
-  audio files. If the phone suspends once the screen is off, the candidate
-  fix is a second player looping a silent audio file, which makes media-hub
-  hold the stay-awake lock; it runs alongside the video **[device]**. The
-  cleaner alternative is one D-Bus call to the power service, which needs
-  compiled code (D7).
+- With the screen off, a video played on for 3.6 minutes without help and for
+  10 minutes with a silent keep-alive player beside it; the 30-minute pocket
+  test is part of the battle test. If it ever fails, the fix in reserve is
+  that keep-alive: a second player looping a silent audio file, which makes
+  media-hub hold the stay-awake lock.
+- The app uses exactly one `MediaPlayer` for all playback. A second one
+  misbehaves: it fails to start, or starts by itself.
 
 Whether a file "has video" comes from the media library, since the player's
 own `hasVideo` is only known once the file is loaded.
@@ -233,7 +235,27 @@ All of it is in [VLC-FEATURES.md](VLC-FEATURES.md).
 - [ ] A real icon. `assets/icon.png` is a placeholder.
 - [ ] Draft the upstream proposal for media-hub and mediascanner (D12, option C).
 
-### Spike
+### Spike (done)
+
+| # | Outcome |
+|---|---|
+| S1 | Pass, unconfined: 1080p H.264 is smooth |
+| S2 | Direct reading works; playing from `~/Videos` and `~/Music` needs the app unconfined (D12) |
+| S3 | Pass, unconfined: music models and the video query |
+| S4 | Video thumbnails pass; album art still to be seen with a tagged album |
+| S5 | Audio continues in the background and with the screen off. A video does too, so pausing it is the app's job |
+| S6 | Pass: the same player with its picture hidden. Screen off: played on for minutes; pocket test in the battle test |
+| S6b | Seeks land on the keyframe before the target and take 0.4 to 1.5 s; position updates 10 times a second |
+| S7 | Confirmed: no playback speed |
+| S8 | Fullscreen covers the panel; media-hub keeps the display on for a video |
+| S9 | The system rotates the window, subject to the user's rotation lock; the player rotates its own content |
+| S10 | Pass |
+| S11 | Controls in the sound indicator work through media-hub, under the name "Media Player" |
+| S12 | Pass: files arrive through Content Hub as hard links |
+| S13 | Pass: HLS and MP4 over `https`; a dead address raises no error |
+| S14 | Pass: H.264, HEVC, VP9, AV1; MP3, FLAC, Opus, Vorbis, AAC |
+| S15 | Pass: pure QML is enough (D7) |
+| S16 | The backend exposes no tracks, chapters or codecs, draws no embedded subtitles; a video frame can be captured |
 
 One throwaway diagnostics page, `qml/spike/`, shipped as version 0.0.1. It
 runs most checks by itself on launch and writes each finding to the app log;
@@ -266,25 +288,48 @@ built.
 
 The screen that plays one video, opened from a file path or Content Hub.
 Behaviour follows [VLC-FEATURES.md](VLC-FEATURES.md), "Video player" and
-"Values worth matching".
+"Values worth matching". Under way; version 0.0.2 has the first part.
 
-- [ ] Player surface, auto-hiding controls, title, seek bar with time labels.
-- [ ] Gesture layer: single tap, double-tap seek and pause, swipe seek, volume,
-      dimming, pinch to fit; a toggle for each.
+How it is built:
+
+| Part | File | What it does |
+|---|---|---|
+| Playback core | `qml/Gem/Playback.qml` | The app's one `MediaPlayer`, with the backend's quirks hidden behind it: open, play, pause, seek, resume, position saving |
+| Resume points | `qml/Gem/ResumeStore.qml` | SQLite table of position, length and "seen" per file |
+| Player screen | `qml/Gem/VideoPlayerPage.qml` | Picture, picture size, own rotation, overlays, lock |
+| Gestures | `qml/Gem/GestureLayer.qml`, `qml/js/Gestures.js` | Recognises taps, swipes and pinch with VLC's zones and thresholds |
+| Controls | `qml/Gem/PlayerControls.qml`, `SeekBar.qml`, `OptionSheet.qml`, `Glyph.qml` | Title bar, timeline, buttons, menu, icons |
+| Audio mode | `qml/Gem/AudioModePage.qml` | What shows while a video plays as audio |
+| Way in | `qml/Gem/HomePage.qml`, `qml/platform/MediaLibrary.qml`, `qml/platform/ContentImport.qml` | A plain list of videos until Phase 2; files from other apps |
+| Development aid | `qml/dev/Remote.qml` | Drives and photographs the app over adb. Off unless a marker file exists; removed in Phase 5 |
+
+Two rules the spike imposed: the video surface exists before a file is opened
+(the backend will not start a video otherwise), and it is never destroyed, only
+hidden.
+
+- [x] Player surface, auto-hiding controls, title, seek bar with time labels.
+- [x] Gesture layer: single tap, double-tap seek and pause, swipe seek, volume,
+      dimming, pinch to fit. Written; **to be tried by hand**.
+- [ ] A setting for each gesture, and for the skip lengths (with Settings, Phase 4).
 - [ ] Optional rewind and forward buttons.
-- [ ] Lock with swipe to unlock, orientation lock, the twelve aspect modes.
-- [ ] Player menu in VLC's order.
-- [ ] Resume: always, never or ask; seen marker when a file is played to the
-      end.
+- [x] Lock with slide to unlock.
+- [x] Orientation: the player turns its own content to follow the phone, and
+      the button locks it. **Direction to be confirmed by hand.**
+- [x] The twelve picture sizes: tap steps through six, long press lists all.
+- [x] Player menu, with Lock and Play as audio so far.
+- [x] Resume where the file was left (always; the "ask" and "never" choices come
+      with Settings). Seen marker when a file is played to the end.
 - [ ] Jump to time, A-B repeat, sleep timer, bookmarks.
 - [ ] External subtitles with styling and delay.
-- [ ] Video information, as far as the metadata goes.
-- [ ] Play as audio and back to video (D11). In Phase 1 the audio side is a
-      minimal now-playing screen; Phase 3 replaces it with the full one.
-- [ ] Pause when the app leaves the foreground in video mode (D10).
+- [ ] Video information, as far as the library goes.
+- [x] Play as audio and back to video (D11), with a minimal audio page; Phase 3
+      replaces it with the full one.
+- [x] Pause when the app is suspended in video mode (D10).
+- [ ] Screenshot.
 - [ ] Keyboard shortcuts.
+- [ ] Network stream time limit and error states.
 - [ ] Discuss, when reached: playback speed and fast play, audio delay and
-      boost, audio and embedded-subtitle tracks, chapters, screenshot, real
+      boost, audio and embedded-subtitle tracks, chapters, real
       brightness, pop-up player, subtitle download.
 
 ## Phase 2 - App shell and video library
@@ -336,6 +381,8 @@ Behaviour follows [VLC-FEATURES.md](VLC-FEATURES.md), "Video player" and
 ## Phase 5 - Release 0.1.0, self-installed
 
 - [ ] README, `docs/INSTALL.md`, `CHANGELOG.md`, in the style of GemTicker's.
+- [ ] Remove the development aids: `qml/dev/` (remote control) and `qml/spike/`
+      (diagnostics page), and the entry that opens it.
 - [ ] `clickable review` clean, or every exception written down in
       `docs/STORE.md`.
 - [ ] Verified on the Pixel 3a from a clean install.

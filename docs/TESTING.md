@@ -1,8 +1,52 @@
 # Testing GemPlayer on a device
 
-Version 0.0.1 is the Phase 0 spike from [PLAN.md](PLAN.md): a diagnostics page
-that finds out what Ubuntu Touch offers a QML-only media player. This page says
-how to run it and records the answers.
+This page records what has been checked on a device, and how. The first part
+is the player (version 0.0.2); the rest is the Phase 0 spike from
+[PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
+a QML-only media player. The spike is still in the app, behind the button at
+the top right of the list.
+
+## Player, version 0.0.2
+
+### Checked over adb, 2 October 2026
+
+Driven through `qml/dev/Remote.qml`, with screenshots the app takes of itself
+and the system's media interface as the witness.
+
+| Check | Result |
+|---|---|
+| The list shows every video with thumbnail, length and size | Pass |
+| A video opens and plays, fullscreen | Pass |
+| Layout in portrait and turned to landscape | Pass |
+| Menu, list of picture sizes, "Fit screen", 4:3 | Pass |
+| Seek from the timeline | Pass; lands on the keyframe before, as the backend does |
+| Play as audio: page changes, playback uninterrupted, continues behind another app | Pass |
+| Play as video: picture is back, playback uninterrupted | Pass |
+| A video pauses when another app comes to the front | Pass |
+| End of file: back to the list, file marked "seen" | Pass |
+| Opening the same file again after it ended | Pass |
+| Resume: left at 0:30, reopened, continues from there | Pass (from the keyframe before) |
+
+### To be checked by hand
+
+Gestures and the orientation sensor cannot be driven remotely.
+
+| Check | Look for |
+|---|---|
+| Tap | Controls appear and go; they leave by themselves after 4 s while playing |
+| Double tap, left and right quarter | Skips 10 s; repeated taps add up and the total shows on that side |
+| Double tap, middle | Pauses and plays |
+| Swipe sideways | A message like `+0:42 (12:10)` follows the finger; the jump happens on release |
+| Swipe up and down, right half | Volume bar; is the sound actually louder and quieter? |
+| Swipe up and down, left half | The picture dims and brightens |
+| Pinch out, pinch in | "Fit screen", then back |
+| Turn the phone on its side, both ways | The player turns with it, the right way up both times |
+| Rotate button | Holds the orientation; again releases it |
+| Menu → Lock | Controls gone; a tap shows "Slide to unlock"; sliding unlocks |
+| Power button during a video | It is paused when the phone is unlocked again |
+| Menu → Play as audio, then power button | It keeps playing |
+
+## Spike, version 0.0.1
 
 ## Test device
 
@@ -158,6 +202,23 @@ Done by hand on the phone; timings read from the journal afterwards.
 | S11 | Lock screen and sound indicator | The lock screen shows nothing; it has no media controls of its own. The sound indicator has a player section with play, previous and next, wired to media-hub, but it is labelled "Media Player" with the stock app's icon: media-hub reports itself as `lomiri-mediaplayer-app` and the indicator only lists that name. Showing "GemPlayer" there would take an MPRIS service of our own, which is compiled code |
 | S12 | Open with, from the file manager | **Pass.** The file arrives as `~/.cache/gemplayer.yenis/HubIncoming/2/av1-720p.mp4`, and it is a hard link to the original (same inode, link count 2), so it takes no extra space. The spike only logs it; playing it is the player's job |
 
+### Run 5: screen off, 2 October 2026
+
+`long-35min.mp4` playing as a normal video, cable unplugged, power button
+pressed. The app logs position and clock when it is suspended and when it
+wakes; if playback had stopped or the phone had slept, the two would differ.
+
+| Run | Keep-alive | Screen off for | Position advanced by | Verdict |
+|---|---|---|---|---|
+| 1 | Off | 3 min 38.8 s | 3 min 38.8 s | **Played throughout.** For the first 62 s a stray audio queue was also playing (see below), which holds the stay-awake lock; the remaining 2 min 45 s had no lock from media-hub and the video still played |
+| 2 | On | 10 min 20.6 s | 10 min 20.6 s | **Played throughout** |
+
+So on this phone a video plays on with the screen off without help, at least
+for several minutes. S6 is a pass, and the silent keep-alive stays in reserve.
+The 30-minute pocket test is left for the battle test, with the real player.
+It also means a video does not stop by itself when the screen goes off: that
+is the app's job too (D10).
+
 ### Other observations
 
 - With no media loaded, `MediaPlayer.position` reads a large negative number
@@ -172,6 +233,9 @@ Done by hand on the phone; timings read from the journal afterwards.
 - After `stop()`, calling `play()` on the same source does not play: the state
   goes to playing, then paused, and stays there. The source has to be set
   again. The player should pause and seek to 0 instead of stopping.
+- A second `MediaPlayer` that had been stopped started playing again by itself
+  at the moment another one was started (run 5). Together with the failed
+  second-player test in run 3: the app uses exactly one `MediaPlayer`.
 - media-hub's MPRIS metadata carries what `MediaPlayer.metaData` does not:
   audio codec, container format, album. QML cannot read D-Bus, so using it
   would take compiled code.

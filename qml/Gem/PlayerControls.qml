@@ -1,0 +1,139 @@
+import QtQuick 2.12
+import Gem 1.0
+import "../js/Format.js" as Format
+
+/*
+ * The controls over a playing video: title bar on top, timeline and buttons
+ * at the bottom. Only the buttons take touches; everything else falls through
+ * to the gesture layer underneath.
+ *
+ * The layout follows VLC for Android's player_hud.xml: time, seek bar and
+ * length in one row; under it the orientation button on the left, play in the
+ * middle, resize and "more" on the right.
+ */
+Item {
+    id: hud
+
+    property var playback: null
+    property bool orientationLocked: false
+
+    readonly property bool dragging: seekBar.dragging
+
+    signal back()
+    signal menuRequested()
+    signal aspectTapped()
+    signal aspectHeld()
+    signal orientationTapped()
+    signal interacted()
+
+    // ---- top ----
+    Rectangle {
+        anchors { left: parent.left; right: parent.right; top: parent.top }
+        height: Theme.u(10)
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.75) }
+            GradientStop { position: 1.0; color: "transparent" }
+        }
+    }
+
+    IconButton {
+        id: backButton
+        anchors { left: parent.left; leftMargin: Theme.u(0.5); top: parent.top; topMargin: Theme.u(0.8) }
+        glyph: "back"
+        color: Theme.text
+        onClicked: hud.back()
+    }
+
+    Text {
+        anchors { left: backButton.right; leftMargin: Theme.u(0.5); right: parent.right; rightMargin: Theme.u(2)
+                  verticalCenter: backButton.verticalCenter }
+        text: hud.playback ? hud.playback.title : ""
+        color: Theme.text
+        font.pixelSize: Theme.fontM
+        elide: Text.ElideRight
+        maximumLineCount: 1
+    }
+
+    // ---- bottom ----
+    Rectangle {
+        anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+        height: Theme.u(16)
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "transparent" }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.8) }
+        }
+    }
+
+    Item {
+        id: buttons
+        anchors { left: parent.left; right: parent.right; bottom: parent.bottom
+                  leftMargin: Theme.u(1); rightMargin: Theme.u(1); bottomMargin: Theme.u(1) }
+        height: Theme.u(7)
+
+        IconButton {
+            anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+            glyph: "rotate"
+            color: hud.orientationLocked ? Theme.accent : Theme.text
+            onClicked: { hud.orientationTapped(); hud.interacted(); }
+        }
+
+        IconButton {
+            anchors.centerIn: parent
+            implicitWidth: Theme.u(8)
+            implicitHeight: Theme.u(7)
+            glyphSize: Theme.u(3.6)
+            glyph: hud.playback && hud.playback.playing ? "pause" : "play"
+            color: Theme.text
+            onClicked: { hud.playback.toggle(); hud.interacted(); }
+        }
+
+        IconButton {
+            id: moreButton
+            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+            glyph: "more"
+            color: Theme.text
+            onClicked: { hud.menuRequested(); hud.interacted(); }
+        }
+
+        IconButton {
+            anchors { right: moreButton.left; verticalCenter: parent.verticalCenter }
+            glyph: "aspect"
+            color: Theme.text
+            onClicked: { hud.aspectTapped(); hud.interacted(); }
+            onPressAndHold: { hud.aspectHeld(); hud.interacted(); }
+        }
+    }
+
+    Item {
+        anchors { left: parent.left; right: parent.right; bottom: buttons.top
+                  leftMargin: Theme.u(2); rightMargin: Theme.u(2) }
+        height: Theme.u(4)
+
+        Text {
+            id: timeLabel
+            anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+            text: Format.clock(seekBar.shownPosition)
+            color: Theme.text
+            font.pixelSize: Theme.fontS
+        }
+
+        Text {
+            id: lengthLabel
+            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+            text: hud.playback ? Format.clock(hud.playback.duration) : ""
+            color: Theme.text
+            font.pixelSize: Theme.fontS
+        }
+
+        SeekBar {
+            id: seekBar
+            anchors { left: timeLabel.right; right: lengthLabel.left; verticalCenter: parent.verticalCenter
+                      leftMargin: Theme.u(1); rightMargin: Theme.u(1) }
+            position: hud.playback ? hud.playback.position : 0
+            duration: hud.playback ? hud.playback.duration : 0
+            enabled: hud.playback ? hud.playback.seekable : false
+            onDraggingChanged: hud.interacted()
+            onSeekRequested: { hud.playback.seekTo(position); hud.interacted(); }
+        }
+    }
+}

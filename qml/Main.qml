@@ -8,9 +8,6 @@ import Gem 1.0
  * This file only bootstraps. It fixes the app identity and the grid unit, then
  * loads the shell. Everything that stores data is created after the identity
  * is set, so its files land in the folders AppArmor allows.
- *
- * Phase 0: the shell is the spike's diagnostics page (qml/spike/). The player
- * replaces it in Phase 1.
  */
 Window {
     id: root
@@ -63,7 +60,7 @@ Window {
         anchors.fill: parent
         active: false
         focus: true
-        source: "spike/SpikeShell.qml"
+        sourceComponent: Component { AppShell {} }
         onLoaded: item.appWindow = root
     }
 }

@@ -4,9 +4,10 @@ A media player for Ubuntu Touch, modelled on VLC for Android: its gestures, its
 player menu, its library and its queue, built in QML on the media stack Ubuntu
 Touch already ships.
 
-**Status: early development.** Version 0.0.1 is a diagnostics build used to
-find out what the platform can do. It is not a player yet. The plan and its
-progress are in [docs/PLAN.md](docs/PLAN.md).
+**Status: early development.** Version 0.0.2 plays the videos on the phone
+with VLC's gestures, resume and "play as audio". The library, the audio player,
+subtitles and settings are still to come. The plan and its progress are in
+[docs/PLAN.md](docs/PLAN.md).
 
 GemPlayer is not VLC and is not affiliated with VideoLAN. It does not contain
 libVLC. See [Credits](#credits).

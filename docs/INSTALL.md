@@ -1,7 +1,7 @@
 # Installing GemPlayer on Ubuntu Touch
 
 GemPlayer is not in the OpenStore. Until it is, you install a build yourself.
-Version 0.0.1 is a diagnostics build, so this page is short; it grows into a
+This page is short while the app is in early development; it grows into a
 full guide with the first real release.
 
 ## What you need
@@ -15,8 +15,8 @@ full guide with the first real release.
 ## Install a package
 
 ```bash
-adb push gemplayer.yenis_0.0.1_all.click /home/phablet/
-adb shell "pkcon install-local --allow-untrusted /home/phablet/gemplayer.yenis_0.0.1_all.click"
+adb push gemplayer.yenis_0.0.2_all.click /home/phablet/
+adb shell "pkcon install-local --allow-untrusted /home/phablet/gemplayer.yenis_0.0.2_all.click"
 ```
 
 The file name ends in `_all.click`: it contains no compiled code and fits
