@@ -27,6 +27,7 @@ FocusScope {
     // The player the manual controls act on: the one with a picture, or the
     // one without (see "Play as audio").
     property bool audioMode: false
+    property bool hidePicture: false
     readonly property var active: audioMode ? audioPlayer : player
 
     property int positionUpdates: 0
@@ -123,6 +124,18 @@ FocusScope {
         onPlaybackStateChanged: spike.log("AUDIO", "state " + spike.stateName(playbackState))
     }
 
+    // A silent loop. media-hub keeps the phone awake for an audio source but
+    // only keeps the display on for a video source, so this may be what lets a
+    // video carry on as audio once the screen is off.
+    MediaPlayer {
+        id: keepAlive
+        source: "file://" + spike.audioDir + "/silence.ogg"
+        loops: MediaPlayer.Infinite
+        volume: 0
+        onPlaybackStateChanged: spike.log("KEEPALIVE", "state " + spike.stateName(playbackState))
+        onError: spike.log("KEEPALIVE", "error " + error + " " + errorString)
+    }
+
     // A queue, as the stock Music app builds it.
     MediaPlayer {
         id: queuePlayer
@@ -148,6 +161,7 @@ FocusScope {
                                + " video=" + spike.stateName(player.playbackState) + "@" + player.position
                                + " audio=" + spike.stateName(audioPlayer.playbackState) + "@" + audioPlayer.position
                                + " queue=" + spike.stateName(queuePlayer.playbackState) + "#" + queue.currentIndex + "@" + queuePlayer.position
+                               + " keepalive=" + spike.stateName(keepAlive.playbackState)
                                + " app=" + spike.appStateName(Qt.application.state))
     }
 
@@ -180,24 +194,35 @@ FocusScope {
 
     // S6: hand the playing file to the player that has no picture, at the same
     // position, and time how long the sound is gone. And the way back.
+    // The old player is paused, not stopped: after stop() this backend does not
+    // play the same source again.
     function switchMode(toAudio) {
         var from = toAudio ? player : audioPlayer;
         var to = toAudio ? audioPlayer : player;
         if (from.source.toString() === "")
             return;
-        var at = from.position;
+        var at = Math.max(0, from.position);
         var t0 = Date.now();
-        from.stop();
-        to.source = from.source;
+        from.pause();
+        if (to.source.toString() !== from.source.toString())
+            to.source = from.source;
         to.play();
-        to.seek(at);
         audioMode = toAudio;
         log("S6", (toAudio ? "to audio" : "to video") + " at " + at + " ms");
-        waitFor(function() { return to.playbackState === MediaPlayer.PlayingState && to.position > at + 150; },
-                15000, function(ok) {
-            result("S6", (toAudio ? "video->audio" : "audio->video") + " gap "
-                   + (ok ? (Date.now() - t0) + " ms" : "did not resume")
-                   + ", hasVideo=" + to.hasVideo + ", position " + to.position);
+        // A seek before the media has started is ignored.
+        waitFor(function() { return to.playbackState === MediaPlayer.PlayingState && to.duration > 0 && to.position >= 0; },
+                15000, function(started, startMs) {
+            to.seek(at);
+            waitFor(function() { return to.position > at - 12000; }, 10000, function(landed) {
+                var landedAt = to.position;
+                waitFor(function() { return to.position > landedAt + 100; }, 10000, function(moving) {
+                    result("S6", (toAudio ? "video->audio" : "audio->video")
+                           + ": started " + (started ? "after " + startMs + " ms" : "NEVER")
+                           + ", sound back " + (moving ? "after " + (Date.now() - t0) + " ms" : "NEVER")
+                           + ", asked for " + at + " ms, landed at " + landedAt
+                           + ", hasVideo=" + to.hasVideo);
+                });
+            });
         });
     }
 
@@ -212,6 +237,91 @@ FocusScope {
         queue.currentIndex = 0;
         queuePlayer.play();
         log("QUEUE", "playing " + queue.itemCount + " library songs");
+    }
+
+    // ---- remote control ---------------------------------------------------------
+
+    // Lets the checks be driven over adb while the phone lies on the desk:
+    //   echo "7 open /home/phablet/Videos/x.mp4" > ~/.cache/gemplayer.yenis/spike-cmd.txt
+    // A line is "<number> <command> [argument]"; a new number runs it once.
+    property int lastCommand: -1
+    readonly property string commandFile: (files.status === Loader.Ready ? files.item.cache : home + "/.cache")
+                                          + "/gemplayer.yenis/spike-cmd.txt"
+
+    Timer {
+        interval: 500
+        repeat: true
+        running: true
+        onTriggered: spike.pollCommand()
+    }
+
+    function pollCommand() {
+        var request = new XMLHttpRequest();
+        request.onreadystatechange = function() {
+            if (request.readyState !== XMLHttpRequest.DONE)
+                return;
+            var parts = (request.responseText || "").trim().split(" ");
+            var number = parseInt(parts[0]);
+            if (isNaN(number))
+                return;
+            // Whatever is in the file at launch is old; only later changes count.
+            var first = lastCommand === -1;
+            if (number === lastCommand)
+                return;
+            lastCommand = number;
+            if (!first && parts.length > 1)
+                runCommand(parts[1], parts.slice(2).join(" "));
+        };
+        try {
+            request.open("GET", "file://" + commandFile);
+            request.send();
+        } catch (e) {
+            // No command file yet.
+        }
+    }
+
+    function runCommand(name, argument) {
+        log("CMD", name + (argument ? " " + argument : ""));
+        if (name === "open") open(argument);
+        else if (name === "play") active.play();
+        else if (name === "pause") active.pause();
+        else if (name === "stop") { player.stop(); audioPlayer.stop(); queuePlayer.stop(); }
+        else if (name === "seek") active.seek(parseInt(argument));
+        else if (name === "audio") switchMode(true);
+        else if (name === "video") switchMode(false);
+        else if (name === "queue") playLibraryQueue();
+        else if (name === "testqueue") playTestQueue();
+        else if (name === "next") queue.next();
+        else if (name === "tab") tab = parseInt(argument);
+        else if (name === "keepalive") { if (argument === "1") keepAlive.play(); else keepAlive.pause(); }
+        // Two candidates for "play as audio" on the same player: hide the
+        // picture, or take the video surface away altogether.
+        else if (name === "hide") hidePicture = argument === "1";
+        else if (name === "detach") videoOut.source = argument === "1" ? null : player;
+        else if (name === "auto") startAuto();
+        else if (name === "volume") {
+            active.volume = parseFloat(argument);
+            log("CMD", "volume now reads " + active.volume);
+        } else if (name === "keepon" && screenProbe.status === Loader.Ready) {
+            screenProbe.item.keepOn = argument === "1";
+        } else if (name === "state") {
+            log("STATE", "video=" + stateName(player.playbackState) + "@" + player.position
+                + " audio=" + stateName(audioPlayer.playbackState) + "@" + audioPlayer.position
+                + " queue=" + stateName(queuePlayer.playbackState) + "#" + queue.currentIndex + "@" + queuePlayer.position
+                + " app=" + appStateName(Qt.application.state) + " wall=" + Date.now());
+        }
+    }
+
+    // Three 30 s files: short enough to watch the queue move on by itself.
+    function playTestQueue() {
+        queuePlayer.stop();
+        queue.clear();
+        queue.addItem("file://" + audioDir + "/test-1.mp3");
+        queue.addItem("file://" + audioDir + "/test-2.flac");
+        queue.addItem("file://" + audioDir + "/test-3.opus");
+        queue.currentIndex = 0;
+        queuePlayer.play();
+        log("QUEUE", "playing the 3 test files");
     }
 
     // ---- automatic run ---------------------------------------------------------
@@ -747,7 +857,7 @@ FocusScope {
             id: videoOut
             anchors.fill: parent
             source: player
-            visible: !spike.audioMode
+            visible: !spike.audioMode && !spike.hidePicture
         }
         Text {
             anchors.centerIn: parent
@@ -862,6 +972,11 @@ FocusScope {
                             screenProbe.item.keepOn = !screenProbe.item.keepOn;
                             spike.log("S8", "keep display on = " + screenProbe.item.keepOn);
                         }
+                    }
+                    TextButton {
+                        text: keepAlive.playbackState === MediaPlayer.PlayingState ? "Keep-alive: on" : "Keep-alive: off"
+                        tone: Theme.sapphire
+                        onClicked: keepAlive.playbackState === MediaPlayer.PlayingState ? keepAlive.pause() : keepAlive.play()
                     }
                     TextButton {
                         text: "Fullscreen"

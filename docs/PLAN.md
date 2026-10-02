@@ -126,7 +126,8 @@ out by D10 and D11.
 | Calls and low battery | media-hub pauses multimedia sessions for a phone call and resumes them afterwards | **[source]** media-hub |
 | Own database | `QtQuick.LocalStorage 2.0` (SQLite) | **[source]** music app; used here for resume points, history, playlists, bookmarks, favourites, groups |
 | Audio role | The backend accepts Qt's music and video roles but maps both to the same media-hub "multimedia" role, so the role does not tell audio from video. media-hub itself decides by whether the stream has a picture | **[source]** `qtubuntu-media`, media-hub |
-| Lock-screen and indicator controls | media-hub exposes the current multimedia player over MPRIS by itself. The Music app additionally bundles `org.nemomobile.mpris`, a compiled module that is **not** on the system image **[device]** | **[source]**; whether media-hub's own controls are enough is **[verify]**, S11 |
+| Lock-screen and indicator controls | media-hub publishes the playing item over MPRIS by itself, with title, album, position and working pause, play and next **[device]**. The `org.nemomobile.mpris` module the Music app bundles is not on the system image and is not needed for this | How the indicator and lock screen look is **[verify]** by eye |
+| Audio in the background | media-hub plays the queue and advances it while the app is suspended | **[device]** |
 | **Playback speed** | **Not available.** The backend's `setPlaybackRate()` ignores its argument and always reports 1.0 | **[source]** `qtubuntu-media`, **[device]** |
 
 ---
@@ -177,15 +178,26 @@ Behaviour here:
 | Video player leaves the foreground without the switch | Playback pauses (D10). A setting can change this to "play as audio in background", as in VLC |
 | Resume point | Shared: position saved in either mode resumes in either mode |
 
-How it is expected to work **[verify, S5-S6]**: playback runs in media-hub, a
-system service, not in the app, so sound can outlive the app being suspended.
-The open question is what media-hub does with a file that has a picture when
-the screen goes off, since it treats "has video" as a property of the stream
-and not of the role **[source]**. The spike tries two routes: the same player
-with its picture hidden, and a second player that never had a video surface,
-started at the video's position; for the second it measures the gap in sound.
-Whether a file "has video" is remembered from when it was opened as a video,
-or read from the media scanner.
+How it works **[device]**, except for the last point: playback runs in
+media-hub, a system service, not in the app. A video therefore keeps playing
+when the app is suspended, with or without a picture on screen. So:
+
+- "Play as audio" is the same player with its video surface hidden or
+  detached. Nothing is re-opened and there is no gap in the sound. "Play as
+  video" shows the surface again.
+- Pausing a video when the app is left (D10) is something the app does itself,
+  on leaving the foreground, unless it is in audio mode.
+- A second player for the audio side does not work and is not needed.
+- **Open [verify, S6]:** with the screen off. media-hub keeps the display on
+  for a file that has a picture, but asks the system to stay awake only for
+  audio files. If the phone suspends once the screen is off, the candidate
+  fix is a second player looping a silent audio file, which makes media-hub
+  hold the stay-awake lock; it runs alongside the video **[device]**. The
+  cleaner alternative is one D-Bus call to the power service, which needs
+  compiled code (D7).
+
+Whether a file "has video" comes from the media library, since the player's
+own `hasVideo` is only known once the file is loaded.
 
 ---
 

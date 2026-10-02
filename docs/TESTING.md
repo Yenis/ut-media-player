@@ -52,14 +52,17 @@ the **Library** tab plays a queue of songs from the phone's own library.
 
 | # | Do this | Look for |
 |---|---|---|
-| S1 | Player → `h264-1080p30.mp4` | Is the motion smooth, with no stutter or tearing? |
-| S5 | Library → "Play a queue of 4 library songs". Press the power button and wait a minute. Unlock, then open another app | Does music continue with the screen off and under another app? Does it move on to the next song by itself? |
-| S5 | Player → `long-35min.mp4`. Press the power button. Unlock, then open another app | Does the beep stop when the screen goes off, or when the app is left? |
-| S6 | Player → `long-35min.mp4`, then "Play as audio". Press the power button and put the phone in a pocket for 30 minutes | Is it still beeping at the end? Then "Play as video": does the picture come back at the right time? |
-| S8 | Player → `long-35min.mp4`, do not touch the phone past the screen timeout. Then "Fullscreen" | Does the screen stay on? Does fullscreen hide the top panel? |
+| S1 | Player → `h264-1080p30.mp4` | Is the motion smooth, with no stutter or tearing? Do the volume keys change the loudness? |
+| S16 | Player → `multi-track.mkv` | Is the tone low (English track) or high (German track)? Do subtitles appear on the picture? |
 | S9 | Turn the phone sideways. System → the orientation buttons | Does the page rotate? Do the buttons lock or change it? |
-| S11 | While the song queue plays: the sound indicator in the top panel, the lock screen, headset buttons, unplugging a headset, the volume keys | Which of them show and control playback? |
+| S8 | Player → `long-35min.mp4`, do not touch the phone past the screen timeout | Does the screen stay on? |
+| S6 | **Unplug the USB cable** (a phone on a cable does not suspend). Player → `long-35min.mp4`, press the power button, listen for two minutes | Does the beep, every 10 s, carry on? |
+| S6 | If it stopped: unlock, tap "Keep-alive" so it reads "on", play again, press the power button, listen for two minutes | Does it carry on now? If so, repeat for 30 minutes in a pocket |
+| S5, S11 | Library → "Play a queue of 4 library songs", press the power button | Does music continue? Does the lock screen show the song with working controls? And the sound indicator in the top panel? Headset buttons, if one is at hand |
 | S12 | File manager → a video → open with GemPlayer | Does GemPlayer open, and does the log show a `RESULT S12` line? |
+
+The spike logs its state every two seconds, so the timings can be read from
+the journal after the cable is plugged in again.
 
 ## Results
 
@@ -121,7 +124,25 @@ The same build with the `unconfined` template (D12). Automatic part.
 | S16 | Capturing a frame | **Pass.** `grabToImage` on the video surface returned the real picture, 1080x607, and saved it as a PNG |
 | - | Queue | **Pass.** A `Playlist` of three files plays, `next()` moves on and keeps playing. Loop mode reads back; random mode did not read back |
 | - | Volume | After setting 0.3 the property read back 0.01. Whether the sound level changed is a manual check |
-| S5, S6, S9, S11, S12 | | Manual part, not done yet |
+| S5, S6, S9, S11, S12 | | See run 3 and the manual part |
+
+### Run 3: driven over adb, 2 October 2026
+
+The spike takes commands from a file, so these checks were run from the
+computer: the app was sent behind the Calculator through the URL dispatcher,
+and the system's own media interface (MPRIS, `org.mpris.MediaPlayer2.MediaHub`)
+was read while GemPlayer was suspended.
+
+| # | Question | Result |
+|---|---|---|
+| S5 | Audio under another app | **Pass.** A queue of three 30 s files kept playing with GemPlayer suspended, and moved to the second and third file by itself. media-hub runs the queue, not the app |
+| S5 | Video under another app | **It keeps playing.** media-hub does not pause a video when its app is suspended: the position advanced 7 → 15 → 26 s behind the Calculator. Pausing when the app is left (D10) is therefore the app's job |
+| S6 | Play as audio: same player, picture hidden | **Pass.** Playback is unaffected by hiding the `VideoOutput`, and continues under another app |
+| S6 | Play as audio: same player, video surface detached | **Pass.** Setting `VideoOutput.source` to null and back does not interrupt playback. Whether the picture returns cleanly is still to be seen by eye |
+| S6 | Play as audio: a second player without a surface | **Fail, and not needed.** A second `MediaPlayer` given the same file never started while the first was paused |
+| S6 | With the screen off | **Open, needs the power button.** media-hub holds the display on for a file with a picture, but asks the system to stay awake only for audio files, so the phone may suspend once the screen is off. A candidate fix is in the spike: a second player looping a silent audio file ("Keep-alive"). It was shown to run alongside the video and to make media-hub request the stay-awake lock |
+| - | Two players at once | **Pass.** A video and an audio queue from the same app play at the same time |
+| S11 | System controls without an MPRIS module | **Pass at the interface.** media-hub publishes the playing item over MPRIS with status, position, title, album and length, and `Pause`, `Play` and `Next` sent to it took effect. What the sound indicator and lock screen show is still to be seen by eye |
 
 ### Other observations
 
@@ -134,6 +155,14 @@ The same build with the `unconfined` template (D12). Automatic part.
 - Position updates arrive about 10 times a second with `notifyInterval: 100`.
 - Clearing `MediaPlayer.source` raises an error ("Failed to open uri"); the
   player should stop instead of clearing.
+- After `stop()`, calling `play()` on the same source does not play: the state
+  goes to playing, then paused, and stays there. The source has to be set
+  again. The player should pause and seek to 0 instead of stopping.
+- media-hub's MPRIS metadata carries what `MediaPlayer.metaData` does not:
+  audio codec, container format, album. QML cannot read D-Bus, so using it
+  would take compiled code.
+- The system bus offers `com.canonical.Unity.Screen.setUserBrightness`, a real
+  brightness control. Again D-Bus, so compiled code.
 - The library reports 1920x1088 and 640x368 for files that are 1920x1080 and
   640x360: coded size, rounded up to a multiple of 16. Aspect ratio must not be
   computed from these without care.
