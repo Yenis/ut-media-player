@@ -63,4 +63,49 @@ the **Library** tab plays a queue of songs from the phone's own library.
 
 ## Results
 
-Not run yet.
+### Run 1: confined, 2 October 2026
+
+Version 0.0.1 with the policy groups `audio`, `video`, `content_exchange`,
+`keep-display-on`, `networking`, `music_files_read`, `video_files_read`.
+Automatic part only; the manual part waits for the confinement decision (D12
+in [PLAN.md](PLAN.md)), because the confined app cannot play the test set.
+
+| # | Question | Result |
+|---|---|---|
+| S1 | Plays a local file under confinement? | **Only from the app's own folders.** A file in `~/.cache/gemplayer.yenis/` plays: started in 1.6 s, normal speed, seekable. Every file in `~/Videos` and `~/Music` is refused, see below |
+| S2 | Reading media folders directly | **Listing works, playing does not.** `~/Videos` and `~/Music` list with all their files. Home, Documents, Downloads and `/media` list nothing. `click-review` flags `music_files_read` and `video_files_read` as reserved |
+| S3 | Media library | **Fail.** All four music models are empty and the video query returns nothing, although the phone has 183 songs |
+| S4 | Thumbnails and album art | **Video thumbnail: pass** (256x145 for a file in `~/Videos`). Album art not tested: no album could be read |
+| S7 | Playback speed | Asked for 2.0, the property read back 1 and the measured speed was 1.00. To be repeated in a clean run |
+| S8 | Fullscreen | **Pass.** The window grows from 1080x2145 to 1080x2220 and covers the top panel. Keeping the display on is not yet checked by eye |
+| S10 | Reading a `.srt` beside the video | **Pass.** 664 characters read from `~/Videos/gemplayer-test/sidecar.srt` |
+| S13 | Network streams | **Inconclusive.** The phone had no network connection during the run |
+| S15 | QML modules | **Pass**, 14 of 15 present. Missing: `org.nemomobile.mpris 1.0` |
+| - | Settings and database | **Pass.** Launch counter and SQLite rows both went 1 → 2 across launches |
+| - | Audio role | Music and video roles can both be set and read back |
+| S5, S6, S6b, S9, S11, S12, S14, S16 | | Not answered yet: they need files that play |
+
+### Why playback and the library fail
+
+Neither failure is an AppArmor denial, and no policy group changes it. Two
+system services decide for themselves who may use them, by package name
+**[source]**, confirmed by the error text on the device:
+
+| Service | Rule in its source | Effect on GemPlayer |
+|---|---|---|
+| media-hub, `src/service/apparmor/lomiri.cpp` | A confined app may open: files under its own `~/.local/share/<package>/` and `~/.cache/<package>/`, files in its own install folder, and network streams. Files under `Music/`, `Videos/` and `/media` only if the package is `music.ubports` or `gallery.ubports` | `Client is not allowed to access: file:///home/phablet/Videos/...` for every file of the test set |
+| mediascanner, `src/ms-dbus/service-skeleton.cc` | A confined app may query the library only if it is `music.ubports`, and then only audio. Nobody confined may query video | Empty models, empty video query |
+
+An unconfined app passes both checks. Both pieces of code carry a note that
+the list of names is a stand-in until a permission store exists.
+
+### Other observations
+
+- With no media loaded, `MediaPlayer.position` reads a large negative number
+  (-140462611), not 0. The player must not show or store it.
+- `hasAudio` read `false` for a file that has an AAC track, and
+  `metaData.resolution` was empty. Neither can be relied on.
+- Volume: after setting 0.3 the property read back 0.01. To be looked at.
+- Position updates arrive about 10 times a second with `notifyInterval: 100`.
+- Clearing `MediaPlayer.source` raises an error ("Failed to open uri"); the
+  player should stop instead of clearing.

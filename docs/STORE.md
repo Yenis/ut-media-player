@@ -20,14 +20,16 @@ image on 2 October 2026.
 | `music_files_read` | Listing and playing everything in `~/Music` and the SD card's `Music` folder without importing each file | **Reserved: needs manual review** |
 | `video_files_read` | The same for `~/Videos` and the SD card's `Videos` folder | **Reserved: needs manual review** |
 
-The two reserved groups are what makes a library possible: a media player that
-could only play files handed to it one by one through Content Hub would have no
-library, no folders and no "continue watching". They grant read access only,
-and only to the Music and Videos folders. The stock Music app uses
-`music_files_read` for the same reason.
+**These groups are not enough.** The spike showed that they let the app list
+`~/Music` and `~/Videos` and get thumbnails, but not play anything from them
+and not read the media library: media-hub and mediascanner each allow that
+only to a short list of package names, whatever the policy groups say. See
+"Why playback and the library fail" in [TESTING.md](TESTING.md).
 
-If a reviewer refuses them, the fallback is Content Hub import: the app keeps
-its own copies of imported files and builds its library from those.
+What the package asks for therefore depends on decision D12 in
+[PLAN.md](PLAN.md). If the app goes unconfined, this table is replaced by one
+line, the `unconfined` template, and the reviewer's question becomes why; the
+answer is the paragraph above.
 
 ## Not requested
 

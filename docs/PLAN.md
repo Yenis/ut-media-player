@@ -1,10 +1,11 @@
 # GemPlayer - a VLC-style media player for Ubuntu Touch - plan
 
-Status: Phase 0 is under way. The survey of the VLC clone is done, see
-[VLC-FEATURES.md](VLC-FEATURES.md). The project skeleton builds and installs as
-version 0.0.1, which is the spike's diagnostics page and not a player yet.
-Next step: run the spike on the Pixel 3a and record the answers in
-[TESTING.md](TESTING.md). Target device is the Pixel 3a on Ubuntu Touch
+Status: Phase 0 is under way, and **blocked on decision D12**. The survey of
+the VLC clone is done, see [VLC-FEATURES.md](VLC-FEATURES.md). The project
+skeleton builds and installs as version 0.0.1, which is the spike's diagnostics
+page and not a player yet. The first spike run found that a confined app
+cannot play files from `~/Videos` or `~/Music`, nor read the media library;
+see [TESTING.md](TESTING.md). Target device is the Pixel 3a on Ubuntu Touch
 24.04-1.x (tag `24.04-1.4`), the same one GemTicker was verified on.
 
 Goal: every feature of VLC for Android, where feasible, on top of the media
@@ -69,7 +70,23 @@ Facts are marked:
 
 | # | Decision | Recommendation |
 |---|---|---|
+| D12 | Confinement | **Unconfined now, and propose a fix upstream.** Found by the spike: media-hub plays files from `Music/` and `Videos/` only for the stock Music and Gallery apps, and mediascanner answers only the stock Music app, both by package name **[source, device]**. A confined GemPlayer can play what other apps hand it through Content Hub, files in its own folders, and network streams, and nothing else. See [Confinement](#confinement) |
 | D7 | Packaging | Pure-QML click like GemTicker if Phase 0 allows. Falls back to a compiled click only if a needed module has to be bundled (MPRIS is the likely one); for the store that means one build per architecture. Several "Discuss" features would also need compiled code |
+
+### Confinement
+
+The options for D12:
+
+| Option | What works | Cost |
+|---|---|---|
+| A. Stay confined | Playing files that other apps hand over, files copied into the app's own folder, network streams. No library of `~/Videos` or `~/Music`, no folder browsing that can play | The app becomes an "open with" player. Most of Phases 2-4 falls away, or needs every file imported as a copy |
+| B. Go unconfined | Everything the plan assumes, as far as the remaining spike rows confirm it: both services accept an unconfined app | The package runs with the user's full rights instead of in a sandbox. In the OpenStore that means a manual review and a visible warning on the listing **[verify]**. Self-installing is unaffected |
+| C. Change the platform | A confined app with the reserved groups could play and query, if media-hub and mediascanner honoured them | A patch to two UBports components, their review, and an OTA release before any user has it. Not in our hands |
+| D. Play without media-hub | Qt's own GStreamer backend is on the device and would read files in-process | The app is suspended in the background, so no audio with the screen off. That breaks D10 and D11 |
+
+Recommended: B to get the app built and battle-tested, C proposed upstream in
+parallel, and a return to confinement if C lands. D is ruled out by D10 and
+D11.
 
 ---
 
@@ -84,7 +101,9 @@ Facts are marked:
 | Video library | No video model. `MediaStore.query(text, VideoMedia)` exists, and `MediaFile` carries title, duration, width, height and art | **[source]**; whether an empty query lists everything is **[verify]** |
 | Confinement for video | Policy groups `video`, `audio`, `content_exchange` | **[source]** stock video app |
 | Confinement for music | `audio`, `music_files_read`, `content_exchange`, `content_exchange_source`, `networking`, `keep-display-on`; read paths for `~/.cache/media-art/`, `~/.cache/mediascanner-2.0/` and `/media/*/*/` | **[source]** music app |
-| Reading media folders directly | `video_files_read` and `music_files_read` cover `~/Videos`, `~/Music` and the `Videos` and `Music` folders of an SD card, nothing else. Both are reserved: `click-review` flags them for manual review | **[device]** policy files on the phone; review run on 0.0.1 |
+| Reading media folders directly | `video_files_read` and `music_files_read` cover `~/Videos`, `~/Music` and the `Videos` and `Music` folders of an SD card, nothing else. Both are reserved: `click-review` flags them for manual review. They allow listing, thumbnails and reading a `.srt`, but **not playback** | **[device]** |
+| Who may play a file | media-hub decides by package name, not by policy group: only `music.ubports` and `gallery.ubports` may open files under `Music/`, `Videos/` and `/media`. Any confined app may open files in its own data and cache folders, and network streams. Unconfined apps may open anything | **[source]** media-hub, **[device]** |
+| Who may read the library | mediascanner answers a confined app only if it is `music.ubports`, and only for audio. Unconfined apps get everything | **[source]** mediascanner, **[device]** |
 | Deleting and renaming files | QML has no API for either, whatever the confinement allows. Needs compiled code plus the write groups `video_files`, `music_files` | **[source]**; a Discuss item |
 | Keeping the display on | `QtSystemInfo 5.0` `ScreenSaver`, policy group `keep-display-on` | **[source]** music app. media-hub also holds the display on by itself while a video source plays |
 | Calls and low battery | media-hub pauses multimedia sessions for a phone call and resumes them afterwards | **[source]** media-hub |

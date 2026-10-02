@@ -256,6 +256,7 @@ FocusScope {
     function steps() {
         return [
             ["modules", stepModules], ["storage", stepStorage], ["files", stepFiles],
+            ["own folder", stepOwnFolder],
             ["srt", stepSrt], ["library", stepLibrary], ["thumbnails", stepThumbnails],
             ["formats", stepFormats], ["seek", stepSeek], ["rate", stepRate],
             ["metadata", stepMetadata], ["roles", stepRoles], ["queue", stepQueue],
@@ -268,6 +269,9 @@ FocusScope {
             return;
         running = true;
         stepIndex = 0;
+        // The run must not be cut short by the screen timeout.
+        if (screenProbe.status === Loader.Ready)
+            screenProbe.item.keepOn = true;
         log("AUTO", "start, version " + AppInfo.VERSION + ", grid unit " + Theme.gu
             + ", window " + width + "x" + height + ", screen " + Screen.width + "x" + Screen.height
             + " dpr " + Screen.devicePixelRatio);
@@ -280,6 +284,8 @@ FocusScope {
             running = false;
             stepName = "";
             player.stop();
+            if (screenProbe.status === Loader.Ready)
+                screenProbe.item.keepOn = false;
             log("AUTO", "done");
             return;
         }
@@ -353,6 +359,17 @@ FocusScope {
             });
         }
         one();
+    }
+
+    // S2: a file inside the app's own cache folder, which is where Content Hub
+    // puts what other apps hand over.
+    function stepOwnFolder() {
+        var path = (files.status === Loader.Ready ? files.item.cache : home + "/.cache")
+                   + "/gemplayer.yenis/spike/sidecar.mp4";
+        playOne("file://" + path, 2, function(r) {
+            result("S2", "own cache folder, " + path + ": " + r.text);
+            next();
+        });
     }
 
     // S10: read a subtitle file beside a video.
@@ -433,10 +450,9 @@ FocusScope {
 
     // Plays one source for a few seconds and reports what the backend did.
     function playOne(url, seconds, callback) {
-        lastError = "";
         player.stop();
-        player.source = "";
-        wait(300, function() {
+        wait(400, function() {
+            lastError = "";
             player.source = url;
             player.play();
             waitFor(function() {
