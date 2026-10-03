@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.5 - unreleased
+## 0.0.5 - 3 October 2026
 
 - The Video tab shows the videos as a grid of cards, two across on a phone
   held upright. The button at the top right switches to a list and back, and
