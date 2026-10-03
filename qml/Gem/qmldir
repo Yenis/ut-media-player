@@ -6,6 +6,7 @@ AppShell 1.0 AppShell.qml
 AudioModePage 1.0 AudioModePage.qml
 GestureLayer 1.0 GestureLayer.qml
 Glyph 1.0 Glyph.qml
+GroupThumb 1.0 GroupThumb.qml
 IconButton 1.0 IconButton.qml
 MorePage 1.0 MorePage.qml
 OptionSheet 1.0 OptionSheet.qml

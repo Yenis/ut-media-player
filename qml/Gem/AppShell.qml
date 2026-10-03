@@ -107,6 +107,7 @@ FocusScope {
         page = "home";
     }
 
+    // One step back; false when there is nowhere to go back to.
     function back() {
         if (page === "video" && videoPage)
             videoPage.back();
@@ -114,6 +115,11 @@ FocusScope {
             closePlayer();
         else if (page === "diagnostics")
             page = "home";
+        else if (page === "home" && tab === "video")
+            return videoTab.back();
+        else
+            return false;
+        return true;
     }
 
     // The video player covers the system's top panel; nothing else does.
@@ -137,10 +143,8 @@ FocusScope {
     }
 
     Keys.onReleased: {
-        if ((event.key === Qt.Key_Back || event.key === Qt.Key_Escape) && page !== "home") {
-            back();
-            event.accepted = true;
-        }
+        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape)
+            event.accepted = back();
     }
 
     Keys.onPressed: {

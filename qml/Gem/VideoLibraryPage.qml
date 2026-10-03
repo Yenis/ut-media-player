@@ -6,8 +6,9 @@ import "../js/Library.js" as Library
 
 /*
  * The Video tab: the videos on the phone, as a grid of cards or as a list,
- * sorted, filtered and narrowed to the favourites as VLC's display settings
- * allow. Grouping and the rest of the item menu go here.
+ * sorted, filtered, narrowed to the favourites and grouped by folder or by
+ * name as VLC's display settings allow. A folder or group opens in place,
+ * with a way back in the header. The rest of the item menu goes here.
  */
 Item {
     id: page
@@ -17,11 +18,16 @@ Item {
     property var overlay: page          // what the sheets cover; the shell passes all of "home"
     property var videos: []
 
-    // VLC's defaults: the grid ("video_display_in_cards"), by name, A to Z.
+    // VLC's defaults: the grid ("video_display_in_cards"), by name, A to Z,
+    // grouped by name.
     property bool grid: true
     property string sort: "name"
     property bool descending: false
     property bool onlyFavourites: false
+    property string grouping: "name"    // "name", "folder" or "none"
+
+    // The folder or group being looked into, by its key; empty at the top.
+    property string openKey: ""
 
     property bool filtering: false
     property string filter: ""
@@ -31,7 +37,13 @@ Item {
     readonly property var played: store && store.revision >= 0 ? store.entries() : ({})
     readonly property var favourites: store && store.favouriteRevision >= 0 ? store.favourites() : ({})
 
-    readonly property var shown: Library.arrange(videos, sort, descending, filter, onlyFavourites, favourites)
+    // The videos that pass, in order; then the top level they form; then what
+    // is on screen, which is a folder's or group's content once one is open.
+    // An entry of `shown` with `videos` is a folder or group, any other a video.
+    readonly property var arranged: Library.arrange(videos, sort, descending, filter, onlyFavourites, favourites)
+    readonly property var topLevel: Library.grouped(arranged, grouping, sort, descending)
+    readonly property var openItem: openKey ? Library.findGroup(topLevel, openKey) : null
+    readonly property var shown: openKey ? (openItem ? openItem.videos : []) : topLevel
 
     property var menuVideo: null        // the video the item menu is open for
 
@@ -62,6 +74,45 @@ Item {
         descending = desc;
         _keep("sort", sort);
         _keep("descending", desc);
+    }
+
+    function setGrouping(key) {
+        grouping = Library.groupingInfo(key).key;
+        openKey = "";
+        _keep("grouping", grouping);
+    }
+
+    // Leaves the open folder or group; false if there was none.
+    function back() {
+        if (!openKey)
+            return false;
+        openKey = "";
+        return true;
+    }
+
+    function activate(item) {
+        search.dismiss();
+        if (item.videos)
+            openKey = item.key;
+        else
+            mediaChosen(item);
+    }
+
+    function allSeen(videos) {
+        for (var i = 0; i < videos.length; i++) {
+            var entry = played[videos[i].url];
+            if (!entry || !(entry.seen > 0))
+                return false;
+        }
+        return videos.length > 0;
+    }
+
+    function arts(videos) {
+        return videos.map(function(video) { return video.art; });
+    }
+
+    function countLabel(videos) {
+        return videos.length === 1 ? "1 video" : videos.length + " videos";
     }
 
     function setOnlyFavourites(on) {
@@ -97,11 +148,12 @@ Item {
 
     function closeSheets() {
         displaySheet.close();
+        groupingSheet.close();
         itemMenu.close();
     }
 
     function openItemMenu(index) {
-        if (index >= 0 && index < shown.length)
+        if (index >= 0 && index < shown.length && !shown[index].videos)
             openMenuFor(shown[index]);
     }
 
@@ -112,7 +164,9 @@ Item {
     }
 
     function shownTitles() {
-        return shown.map(function(video) { return video.title; });
+        return shown.map(function(item) {
+            return item.videos ? item.title + " [" + item.videos.length + "]" : item.title;
+        });
     }
 
     function progressOf(entry) {
@@ -134,6 +188,7 @@ Item {
         sort = Library.sortInfo(settings.value("sort", "name")).key;
         descending = _flag("descending", false);
         onlyFavourites = _flag("onlyFavourites", false);
+        grouping = Library.groupingInfo(settings.value("grouping", "name")).key;
     }
 
     Connections {
@@ -150,8 +205,9 @@ Item {
     PageHeader {
         id: header
         anchors { left: parent.left; right: parent.right; top: parent.top }
-        title: "Video"
-        canGoBack: false
+        title: page.openItem ? page.openItem.title : "Video"
+        canGoBack: page.openKey.length > 0
+        onBack: page.back()
         trailing: Row {
             IconButton {
                 glyph: "search"
@@ -195,6 +251,7 @@ Item {
         wrapMode: Text.WordWrap
         text: !page.library ? "The media library is not available."
               : page.videos.length === 0 ? "No videos found.\nPut some in the Videos folder and they will appear here."
+              : page.openKey && !page.filter.trim() && !page.onlyFavourites ? "No videos here."
               : page.filter.trim().length > 0 ? "No video matches “" + page.filter.trim() + "”."
               : "No favourites yet.\nA video's menu adds it to them."
         color: Theme.textDim
@@ -231,7 +288,8 @@ Item {
             width: cards.cellWidth
             height: cards.cellHeight
 
-            readonly property var entry: page.played[modelData.url] || null
+            readonly property bool isGroup: !!modelData.videos
+            readonly property var entry: isGroup ? null : (page.played[modelData.url] || null)
 
             Rectangle {
                 anchors.fill: parent
@@ -239,13 +297,21 @@ Item {
                 opacity: cardMouse.pressed ? 0.06 : 0
             }
 
+            GroupThumb {
+                visible: card.isGroup
+                anchors.fill: cardThumb
+                folder: card.isGroup && modelData.kind === "folder"
+                arts: card.isGroup ? page.arts(modelData.videos) : []
+                seen: card.isGroup && page.allSeen(modelData.videos)
+            }
             VideoThumb {
                 id: cardThumb
+                opacity: card.isGroup ? 0 : 1
                 anchors { left: parent.left; right: parent.right; top: parent.top
                           leftMargin: cards.pad; rightMargin: cards.pad; topMargin: cards.pad }
                 height: width * 10 / 16
-                art: modelData.art
-                resolution: Format.resolutionClass(modelData.width, modelData.height)
+                art: card.isGroup ? "" : modelData.art
+                resolution: card.isGroup ? "" : Format.resolutionClass(modelData.width, modelData.height)
                 seen: card.entry !== null && card.entry.seen > 0
                 favourite: !!page.favourites[modelData.url]
                 progress: page.progressOf(card.entry)
@@ -260,7 +326,7 @@ Item {
             }
             Text {
                 anchors { left: cardThumb.left; right: cardThumb.right; top: cardTitle.bottom }
-                text: Format.clock(modelData.duration)
+                text: card.isGroup ? page.countLabel(modelData.videos) : Format.clock(modelData.duration)
                 color: Theme.textFaint
                 font.pixelSize: Theme.fontXS
             }
@@ -268,11 +334,12 @@ Item {
             MouseArea {
                 id: cardMouse
                 anchors.fill: parent
-                onClicked: { search.dismiss(); page.mediaChosen(modelData); }
+                onClicked: page.activate(modelData)
             }
 
             // The item menu, on the thumbnail's corner as in VLC.
             IconButton {
+                visible: !card.isGroup
                 anchors { right: cardThumb.right; top: cardThumb.top }
                 implicitWidth: Theme.u(4.5)
                 implicitHeight: Theme.u(4.5)
@@ -297,8 +364,9 @@ Item {
             width: list.width
             height: Theme.u(8.25)
 
-            readonly property var entry: page.played[modelData.url] || null
-            readonly property string resolution: Format.resolutionClass(modelData.width, modelData.height)
+            readonly property bool isGroup: !!modelData.videos
+            readonly property var entry: isGroup ? null : (page.played[modelData.url] || null)
+            readonly property string resolution: isGroup ? "" : Format.resolutionClass(modelData.width, modelData.height)
 
             Rectangle {
                 anchors.fill: parent
@@ -306,13 +374,21 @@ Item {
                 opacity: rowMouse.pressed ? 0.06 : 0
             }
 
+            GroupThumb {
+                visible: row.isGroup
+                anchors.fill: rowThumb
+                folder: row.isGroup && modelData.kind === "folder"
+                arts: row.isGroup ? page.arts(modelData.videos) : []
+                seen: row.isGroup && page.allSeen(modelData.videos)
+            }
             VideoThumb {
                 id: rowThumb
+                opacity: row.isGroup ? 0 : 1
                 anchors { left: parent.left; leftMargin: Theme.u(2); verticalCenter: parent.verticalCenter }
                 width: Theme.u(10)
                 height: Theme.u(6.25)
                 sourcePixels: 256
-                art: modelData.art
+                art: row.isGroup ? "" : modelData.art
                 seen: row.entry !== null && row.entry.seen > 0
                 favourite: !!page.favourites[modelData.url]
                 progress: page.progressOf(row.entry)
@@ -332,7 +408,8 @@ Item {
                 }
                 Text {
                     width: parent.width
-                    text: Format.clock(modelData.duration) + (row.resolution ? "  •  " + row.resolution : "")
+                    text: row.isGroup ? page.countLabel(modelData.videos)
+                          : Format.clock(modelData.duration) + (row.resolution ? "  •  " + row.resolution : "")
                     color: Theme.textFaint
                     font.pixelSize: Theme.fontXS
                     elide: Text.ElideRight
@@ -342,11 +419,12 @@ Item {
             MouseArea {
                 id: rowMouse
                 anchors.fill: parent
-                onClicked: { search.dismiss(); page.mediaChosen(modelData); }
+                onClicked: page.activate(modelData)
             }
 
             IconButton {
                 id: rowMore
+                visible: !row.isGroup
                 anchors { right: parent.right; rightMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
                 glyphSize: Theme.u(2.2)
                 glyph: "more"
@@ -368,6 +446,8 @@ Item {
                   glyph: page.grid ? "list" : "grid", stay: true },
                 { key: "favourites", label: "Show only favourites", glyph: "star",
                   selected: page.onlyFavourites, value: page.onlyFavourites ? "on" : "off", stay: true },
+                { key: "grouping", label: "Group videos", glyph: "folder",
+                  value: Library.groupingInfo(page.grouping).short },
                 { label: "Sort by…" }
             ];
             for (var i = 0; i < Library.SORTS.length; i++) {
@@ -383,9 +463,22 @@ Item {
                 page.setGrid(!page.grid);
             else if (key === "favourites")
                 page.setOnlyFavourites(!page.onlyFavourites);
+            else if (key === "grouping")
+                groupingSheet.show();
             else if (key.indexOf("sort:") === 0)
                 page.setSort(key.substring(5), key.substring(5) === page.sort ? !page.descending : false);
         }
+    }
+
+    OptionSheet {
+        id: groupingSheet
+        parent: page.overlay
+        anchors.fill: parent
+        title: "Group videos"
+        options: Library.GROUPINGS.map(function(g) {
+            return { key: g.key, label: g.label, selected: g.key === page.grouping };
+        })
+        onChosen: page.setGrouping(key)
     }
 
     // A video's own menu. VLC's has many more entries; they join it with the

@@ -76,6 +76,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `tab <video\|audio\|browse\|playlists\|more>` | Shows a tab |
 | `view <grid\|list>` | How the Video tab shows its videos |
 | `sort <name\|filename\|length\|modified> [desc]`, `favonly <0\|1>`, `filter <text>` | Order and narrowing of the Video tab |
+| `group <name\|folder\|none>`, `opengroup <index>` | How the Video tab groups, and opening the folder or group at that place in the list; `back` leaves it |
 | `fav <path>` | Switches a video's favourite mark |
 | `focusfilter`, `hidekeyboard` | Opens the filter with the keyboard, and puts the keyboard away. `state` reports the keyboard's height |
 | `display`, `itemmenu <index>`, `closesheets` | The Video tab's display settings, the menu of the video at that place in the list, and closing both |

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.7 - unreleased
+
+- Videos can be grouped, from "Group videos" in the display settings: by
+  name, by folder, or not at all.
+- By name is the default, as in VLC: videos whose names begin alike, such as
+  the episodes of a series, become one entry showing their thumbnails and
+  how many they are.
+- By folder shows one entry per folder that holds videos.
+- A folder or group opens in place. The arrow in the header and the back key
+  lead out again.
+
 ## 0.0.6 - 3 October 2026
 
 - Display settings for the Video tab, behind the button at the top right:

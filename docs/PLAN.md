@@ -3,8 +3,9 @@
 Status: **Milestone 1 reached on 2 October 2026: a working video player**
 (version 0.0.3). Phases 0 and 1 are done. Phase 2 is under way: the app shell
 with VLC's five tabs is in (version 0.0.4), and the Video tab has its grid and
-list (version 0.0.5) and its sorting, favourites and filter (version 0.0.6).
-Grouping is next. Target device is the
+list (version 0.0.5), its sorting, favourites and filter (version 0.0.6) and
+grouping by folder and by name (version 0.0.7). Manual groups, the item menu
+and the video queue are next. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
 
@@ -394,7 +395,7 @@ How it is built:
 | Part | File | What it does |
 |---|---|---|
 | Shell | `qml/Gem/AppShell.qml`, `TabBar.qml` | The bar along the bottom and the page behind each tab. The players cover both |
-| Order, filter, favourites | `qml/js/Library.js`, `qml/Gem/SearchField.qml`, `PlayerStore.qml` | What the list shows and in which order; the filter's text field; favourites in the app's database |
+| Order, filter, favourites, grouping | `qml/js/Library.js`, `qml/Gem/SearchField.qml`, `PlayerStore.qml`, `GroupThumb.qml` | What the list shows and in which order; folders and groups; the filter's text field; favourites in the app's database |
 | Video tab | `qml/Gem/VideoLibraryPage.qml`, `VideoThumb.qml` | The videos on the phone as a grid of cards or a list, after VLC's `video_grid_card.xml` and `video_list_card.xml`. The choice is remembered |
 | Tabs still to be built | `qml/Gem/PlaceholderPage.qml` | Audio (Phase 3), Browse and Playlists (Phase 4) say what will be there |
 | More tab | `qml/Gem/MorePage.qml` | The version, and the way to the diagnostics page. Streams, history and settings join it in Phase 4 |
@@ -403,7 +404,13 @@ How it is built:
 - [x] Grid and list views with thumbnail, duration, resolution, progress and
       seen marker (version 0.0.5). Resolution is VLC's class ("1080p", "SD"),
       not the pixel size.
-- [ ] Grouping: none, by folder, by name; manual groups.
+- [x] Grouping: none, by folder, by name (version 0.0.7). By name is the
+      default, as in VLC. Its rule is in VLC's native media library, not in
+      the clone: names that begin with the same six characters, ignoring case
+      and a leading "the", as remembered and still to be checked against the
+      source. A folder or group opens in place, with a way back in the header.
+- [ ] Manual groups: add to group, rename, ungroup, regroup automatically.
+      They need the item menu, multiple selection and a name field.
 - [x] Sorting, "only favourites", filter within the list (version 0.0.6).
       Sorts: name, file name, length, recently added. VLC's "insertion date"
       is left out: the system's library does not record it. A video's menu

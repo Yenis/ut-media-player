@@ -80,6 +80,8 @@ Item {
         else if (name === "tab") { shell.page = "home"; shell.tab = argument; }
         else if (name === "view") shell.videoLibrary.setGrid(argument === "grid");
         else if (name === "sort") shell.videoLibrary.setSort(argument.split(" ")[0], argument.split(" ")[1] === "desc");
+        else if (name === "group") shell.videoLibrary.setGrouping(argument);
+        else if (name === "opengroup") shell.videoLibrary.activate(shell.videoLibrary.shown[parseInt(argument)]);
         else if (name === "favonly") shell.videoLibrary.setOnlyFavourites(argument === "1");
         else if (name === "filter") shell.videoLibrary.setFilter(argument);
         else if (name === "fav") shell.videoLibrary.toggleFavourite("file://" + argument);

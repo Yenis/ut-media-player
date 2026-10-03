@@ -1,11 +1,43 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the video library (versions 0.0.5 and 0.0.6), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
+is the video library (versions 0.0.5 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Video library, version 0.0.7
+
+### Checked on the computer, 3 October 2026
+
+The grouping rules in `qml/js/Library.js`, run under node with made-up names.
+
+| Check | Result |
+|---|---|
+| "The Office S01E01" and "office s01e02" form one group; a leading "the" and case are ignored | Pass |
+| "Holiday - 01" and "Holiday - 02" form the group "Holiday" | Pass |
+| A name on its own stays a video | Pass |
+| By folder: one entry per folder, in order of name, with the right counts | Pass |
+
+### Checked over adb, 3 October 2026
+
+| Check | Result |
+|---|---|
+| By name (the default): `series-episode-1` and `-2` show as "series-episode", 2 videos, with both thumbnails; everything else stays a video | Pass, in grid and list |
+| Opening the group shows its two videos, with its name and a back arrow in the header; `back` returns | Pass |
+| By folder: `camera.ubports` (1 video) and `gemplayer-test` (11 videos), each with a folder picture; the first carries a tick, its one video being seen | Pass |
+| Opening a folder lists its videos in the chosen order | Pass |
+| Do not group: all twelve videos | Pass |
+| The grouping is kept across a restart; the app starts at the top level | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Display settings → Group videos → each of the three choices | Still to do |
+| Tapping a group and a folder opens it; the header arrow and the back gesture lead out | Still to do |
+| Filter and "only favourites" while grouped, and inside a group | Still to do |
 
 ## Video library, version 0.0.6
 
@@ -165,6 +197,7 @@ They live on the phone in `~/Videos/gemplayer-test/` and
 | `h264-1080p30.mp4` | 60 s, 1080p, H.264 + AAC. The smoothness reference (S1) |
 | `h264-opus-720p.mkv`, `hevc-1080p.mp4`, `vp9-720p.webm`, `av1-720p.mp4` | Codecs and containers (S14) |
 | `portrait-1080x1920.mp4` | A portrait video, for aspect handling |
+| `series-episode-1.mp4`, `series-episode-2.mp4` | Two names that begin alike, for "Group by name" |
 | `sidecar.mp4` + `sidecar.srt` | A subtitle file beside a video (S10); also used for the seek and speed checks |
 | `multi-track.mkv` | Two audio tracks (English 440 Hz, German 880 Hz), two subtitle tracks, three chapters (S16) |
 | `long-35min.mp4` | 35 minutes with a short beep every 10 s, for the pocket test (S6) |

@@ -45,6 +45,12 @@ $FF -f lavfi -i "$(V 1280x720 30 20)" -f lavfi -i "$(A 440 20)" \
 $FF -f lavfi -i "$(V 1080x1920 30 10)" -f lavfi -i "$(A 440 10)" \
     -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac video/portrait-1080x1920.mp4
 
+# Two names that begin alike, for "Group by name".
+for n in 1 2; do
+    $FF -f lavfi -i "$(V 640x360 15 10)" -f lavfi -i "$(A 440 10)" \
+        -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac video/series-episode-$n.mp4
+done
+
 # S10: a subtitle file beside the video.
 $FF -f lavfi -i "$(V 1280x720 30 60)" -f lavfi -i "$(A 440 60)" \
     -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac video/sidecar.mp4
