@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.8 - unreleased
+## 0.0.8 - 3 October 2026
 
 - A queue. "Play all" in a video's menu plays everything shown, from that
   video on; in a folder's or group's menu it plays what is inside. Each video

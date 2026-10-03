@@ -27,14 +27,17 @@ Diagnostics.
 | Play all on a folder plays its videos | Pass |
 | Subtitles are no longer drawn over an open menu | Pass |
 
-### By hand
+### By hand, 3 October 2026
+
+Tried by Yenis on the phone and reported as working; the rows are what was
+set out to be tried, not a record of each one.
 
 | Check | Result |
 |---|---|
-| Previous, next and the queue button by touch; a tap in the queue's list | Still to do |
-| The three dots on a folder and a group | Still to do |
-| Play all, then turn the phone: the next video keeps the rotation and picture size | Still to do |
-| A queue played as audio with the screen off stops after the current video (the known limit) | Still to do |
+| Previous, next and the queue button by touch; a tap in the queue's list | Pass |
+| The three dots on a folder and a group | Pass |
+| Play all, then turn the phone: the next video keeps the rotation and picture size | Not reported |
+| A queue played as audio with the screen off stops after the current video (the known limit) | Not reported |
 
 ## Video library, version 0.0.7
 
