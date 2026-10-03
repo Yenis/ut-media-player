@@ -83,6 +83,8 @@ Item {
         else if (name === "favonly") shell.videoLibrary.setOnlyFavourites(argument === "1");
         else if (name === "filter") shell.videoLibrary.setFilter(argument);
         else if (name === "fav") shell.videoLibrary.toggleFavourite("file://" + argument);
+        else if (name === "focusfilter") shell.videoLibrary.openFilter();
+        else if (name === "hidekeyboard") shell.videoLibrary.dismissKeyboard();
         else if (name === "display") shell.videoLibrary.openDisplaySheet();
         else if (name === "closesheets") shell.videoLibrary.closeSheets();
         else if (name === "itemmenu") shell.videoLibrary.openItemMenu(parseInt(argument));
@@ -111,7 +113,7 @@ Item {
         var p = shell.playback;
         var v = shell.videoPage;
         console.log("REMOTE STATE " + JSON.stringify({
-            page: shell.page, tab: shell.tab, grid: shell.videoLibrary.grid, shown: shell.videoLibrary.shownTitles(), url: p.url, playing: p.playing, position: p.position,
+            page: shell.page, tab: shell.tab, grid: shell.videoLibrary.grid, shown: shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, playing: p.playing, position: p.position,
             raw: p.player.position, duration: p.duration, audioMode: p.audioMode,
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
             error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd],

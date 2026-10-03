@@ -15,8 +15,14 @@ FocusScope {
     /* Empty the field and put the on-screen keyboard away. */
     function reset() {
         input.text = "";
-        input.focus = false;
+        dismiss();
+    }
+
+    /* Put the keyboard away and keep what was typed. Nothing else in the app
+       takes focus, so the field has to give it up itself. */
+    function dismiss() {
         Qt.inputMethod.commit();
+        input.focus = false;
         Qt.inputMethod.hide();
     }
 
@@ -51,6 +57,8 @@ FocusScope {
             selectionColor: Qt.rgba(Theme.topaz.r, Theme.topaz.g, Theme.topaz.b, 0.35)
             clip: true
             inputMethodHints: Qt.ImhNoPredictiveText
+            // The keyboard's enter key.
+            onAccepted: field.dismiss()
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter

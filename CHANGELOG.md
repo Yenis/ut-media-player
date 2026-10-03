@@ -11,6 +11,8 @@
   type.
 - Favourites: the three dots on a video open its menu, which adds it to the
   favourites or removes it. A favourite carries a star on its thumbnail.
+- The keyboard goes away with its enter key, when the list is touched or
+  moved, and when a menu, a video or another tab is opened.
 - The grid and list switch moved from the top bar into the display settings,
   where VLC has it.
 

@@ -77,6 +77,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `view <grid\|list>` | How the Video tab shows its videos |
 | `sort <name\|filename\|length\|modified> [desc]`, `favonly <0\|1>`, `filter <text>` | Order and narrowing of the Video tab |
 | `fav <path>` | Switches a video's favourite mark |
+| `focusfilter`, `hidekeyboard` | Opens the filter with the keyboard, and puts the keyboard away. `state` reports the keyboard's height |
 | `display`, `itemmenu <index>`, `closesheets` | The Video tab's display settings, the menu of the video at that place in the list, and closing both |
 | `controls <0\|1>`, `lock <0\|1>`, `aspect <index>` | Player state |
 | `angle <0\|90\|270>`, `follow` | Force the content's rotation, or follow the sensor again |

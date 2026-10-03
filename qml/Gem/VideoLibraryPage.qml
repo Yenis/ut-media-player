@@ -83,7 +83,17 @@ Item {
         store.setFavourite(url, !favourites[url]);
     }
 
-    function openDisplaySheet() { displaySheet.show(); }
+    function dismissKeyboard() { search.dismiss(); }
+
+    function openFilter() {
+        filtering = true;
+        search.open();
+    }
+
+    function openDisplaySheet() {
+        search.dismiss();
+        displaySheet.show();
+    }
 
     function closeSheets() {
         displaySheet.close();
@@ -96,6 +106,7 @@ Item {
     }
 
     function openMenuFor(video) {
+        search.dismiss();
         menuVideo = video;
         itemMenu.show();
     }
@@ -109,6 +120,9 @@ Item {
     }
 
     onLibraryChanged: reload()
+
+    // The keyboard goes when the page does: another tab, or a video.
+    onVisibleChanged: if (!visible) search.dismiss()
 
     Settings {
         id: settings
@@ -146,8 +160,7 @@ Item {
                     if (page.filtering) {
                         page.closeFilter();
                     } else {
-                        page.filtering = true;
-                        search.open();
+                        page.openFilter();
                     }
                 }
             }
@@ -189,8 +202,15 @@ Item {
         lineHeight: 1.3
     }
 
+    // A tap beside the results puts the keyboard away, as does moving them.
+    MouseArea {
+        anchors { left: parent.left; right: parent.right; top: filterBar.bottom; bottom: parent.bottom }
+        onClicked: search.dismiss()
+    }
+
     GridView {
         id: cards
+        onMovementStarted: search.dismiss()
         visible: page.grid
         anchors { left: parent.left; right: parent.right; top: filterBar.bottom; bottom: parent.bottom
                   leftMargin: Theme.u(0.5); rightMargin: Theme.u(0.5) }
@@ -248,7 +268,7 @@ Item {
             MouseArea {
                 id: cardMouse
                 anchors.fill: parent
-                onClicked: page.mediaChosen(modelData)
+                onClicked: { search.dismiss(); page.mediaChosen(modelData); }
             }
 
             // The item menu, on the thumbnail's corner as in VLC.
@@ -266,6 +286,7 @@ Item {
 
     ListView {
         id: list
+        onMovementStarted: search.dismiss()
         visible: !page.grid
         anchors { left: parent.left; right: parent.right; top: filterBar.bottom; bottom: parent.bottom }
         clip: true
@@ -321,7 +342,7 @@ Item {
             MouseArea {
                 id: rowMouse
                 anchors.fill: parent
-                onClicked: page.mediaChosen(modelData)
+                onClicked: { search.dismiss(); page.mediaChosen(modelData); }
             }
 
             IconButton {

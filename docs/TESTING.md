@@ -20,16 +20,15 @@ Diagnostics.
 | "Show only favourites" leaves the two favourites | Pass |
 | Display settings sheet and a video's menu open over the whole screen, tab bar included | Pass (layout) |
 | The order is kept across a restart | Pass |
+| Keyboard: opens with the filter (883 px high); gone after `hidekeyboard`, after opening the display settings, and after switching tab | Pass |
 
-### By hand
+### By hand, 3 October 2026
 
 | Check | Result |
 |---|---|
-| The magnifying glass opens the filter and the keyboard; the list sits above the keyboard; typing narrows it | Still to do |
-| The cross empties the field; the magnifying glass again closes the filter | Still to do |
-| Display settings: each row by touch; tapping the order in use turns it round | Still to do |
-| The three dots on a card and on a row open the menu, and do not start the video | Still to do |
-| Add to favourites and remove again from the menu | Still to do |
+| The magnifying glass opens the filter and the keyboard; typing narrows the list | Pass |
+| Display settings, the three dots, favourites | Pass |
+| Putting the keyboard away | **Failed**: once open, it stayed until the filter was closed. Fixed in the same version: the enter key, a touch on the list, a menu, a video or another tab now put it away. To be tried by hand again |
 
 ## Video library, version 0.0.5
 
