@@ -10,6 +10,9 @@ A-B repeat and a sleep timer. The library, the audio player and settings are
 still to come. The plan and its progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
+Test builds are published on the repository's Releases page;
+[docs/INSTALL.md](docs/INSTALL.md) says how to put one on a phone.
+
 GemPlayer is not VLC and is not affiliated with VideoLAN. It does not contain
 libVLC. See [Credits](#credits).
 

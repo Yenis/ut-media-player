@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.0.3 - unreleased
+## 0.0.3 - 3 October 2026
+
+The first build published for testers.
 
 - **Fixed:** the volume swipe showed a level but changed nothing. It now sets
   the phone's media volume, as the volume keys do.
