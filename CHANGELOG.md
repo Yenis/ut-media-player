@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.11 - unreleased
+## 0.0.11 - 3 October 2026
 
 - "Information" in a video's menu opens a page about it: its picture and
   name, a button to play or resume it, its length, file size, resolution,
