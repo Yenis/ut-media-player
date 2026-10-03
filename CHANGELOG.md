@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.9 - unreleased
+## 0.0.9 - 3 October 2026
 
 - Several videos at once: a long press on a video, folder or group selects
   it, and taps add more or take them out again. A bar at the top then plays
