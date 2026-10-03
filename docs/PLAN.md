@@ -3,7 +3,8 @@
 Status: **Milestone 1 reached on 2 October 2026: a working video player**
 (version 0.0.3). Phases 0 and 1 are done. Phase 2 is under way: the app shell
 with VLC's five tabs is in (version 0.0.4), and the Video tab has its grid and
-list (version 0.0.5). Grouping and sorting are next. Target device is the
+list (version 0.0.5) and its sorting, favourites and filter (version 0.0.6).
+Grouping is next. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
 
@@ -393,6 +394,7 @@ How it is built:
 | Part | File | What it does |
 |---|---|---|
 | Shell | `qml/Gem/AppShell.qml`, `TabBar.qml` | The bar along the bottom and the page behind each tab. The players cover both |
+| Order, filter, favourites | `qml/js/Library.js`, `qml/Gem/SearchField.qml`, `PlayerStore.qml` | What the list shows and in which order; the filter's text field; favourites in the app's database |
 | Video tab | `qml/Gem/VideoLibraryPage.qml`, `VideoThumb.qml` | The videos on the phone as a grid of cards or a list, after VLC's `video_grid_card.xml` and `video_list_card.xml`. The choice is remembered |
 | Tabs still to be built | `qml/Gem/PlaceholderPage.qml` | Audio (Phase 3), Browse and Playlists (Phase 4) say what will be there |
 | More tab | `qml/Gem/MorePage.qml` | The version, and the way to the diagnostics page. Streams, history and settings join it in Phase 4 |
@@ -402,7 +404,11 @@ How it is built:
       seen marker (version 0.0.5). Resolution is VLC's class ("1080p", "SD"),
       not the pixel size.
 - [ ] Grouping: none, by folder, by name; manual groups.
-- [ ] Sorting, "only favourites", filter within the list.
+- [x] Sorting, "only favourites", filter within the list (version 0.0.6).
+      Sorts: name, file name, length, recently added. VLC's "insertion date"
+      is left out: the system's library does not record it. A video's menu
+      has its first two entries, Play and the favourite switch, so that there
+      are favourites to show; the rest comes with the item menu below.
 - [ ] Item menu and multiple selection; default action on tap.
 - [ ] Video queue: play a folder or group in order, queue shown over the video.
 - [ ] Media information screen.

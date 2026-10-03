@@ -3,8 +3,8 @@ import Gem 1.0
 
 /*
  * A video's thumbnail with what VLC draws on it: the resolution class and a
- * "seen" tick in the top left corner, and how far it was played along the
- * bottom edge. Layout after VLC's video_grid_card.xml and video_list_card.xml.
+ * "seen" tick in the top left corner, a star for a favourite in the bottom
+ * left, and how far it was played along the bottom edge. Layout after VLC's video_grid_card.xml and video_list_card.xml.
  */
 Rectangle {
     id: thumb
@@ -12,6 +12,7 @@ Rectangle {
     property url art
     property string resolution: ""      // "1080p", or empty for none
     property bool seen: false
+    property bool favourite: false
     property real progress: 0           // 0 to 1; 0 draws no bar
     property int sourcePixels: 512
 
@@ -59,6 +60,23 @@ Rectangle {
                 name: "check"
                 color: "white"
             }
+        }
+    }
+
+    Rectangle {
+        visible: thumb.favourite
+        anchors { left: parent.left; bottom: parent.bottom; margins: Theme.u(0.5)
+                  bottomMargin: Theme.u(0.5) + (thumb.progress > 0 ? Theme.u(0.4) : 0) }
+        width: Theme.u(2)
+        height: Theme.u(2)
+        radius: Theme.u(0.4)
+        color: Qt.rgba(0, 0, 0, 0.6)
+
+        Glyph {
+            anchors.centerIn: parent
+            width: Theme.u(1.3)
+            name: "star"
+            color: Theme.accent
         }
     }
 

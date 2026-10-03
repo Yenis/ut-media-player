@@ -22,6 +22,9 @@ Item {
     function _plain(file) {
         return {
             url: file.uri,
+            filename: file.filename,
+            // The scanner's eTag begins with the file's modification time, in seconds.
+            modified: parseInt(file.eTag) || 0,
             title: file.title,
             duration: file.duration * 1000,     // the scanner counts seconds
             // Coded size, rounded up to a multiple of 16: 1920x1088 for 1080p.

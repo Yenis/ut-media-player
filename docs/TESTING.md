@@ -1,11 +1,35 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the video library (version 0.0.5), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
+is the video library (versions 0.0.5 and 0.0.6), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Video library, version 0.0.6
+
+### Checked over adb, 3 October 2026
+
+| Check | Result |
+|---|---|
+| Default order: by name, A to Z, ignoring case | Pass |
+| Length, longest first; recently added, oldest first; file name, Z to A | Pass: each list read back in the right order |
+| Filter "720" leaves the three files with it in their name; "zzz" leaves none and says so | Pass |
+| A favourite gets a star on its thumbnail, in grid and list | Pass |
+| "Show only favourites" leaves the two favourites | Pass |
+| Display settings sheet and a video's menu open over the whole screen, tab bar included | Pass (layout) |
+| The order is kept across a restart | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| The magnifying glass opens the filter and the keyboard; the list sits above the keyboard; typing narrows it | Still to do |
+| The cross empties the field; the magnifying glass again closes the filter | Still to do |
+| Display settings: each row by touch; tapping the order in use turns it round | Still to do |
+| The three dots on a card and on a row open the menu, and do not start the video | Still to do |
+| Add to favourites and remove again from the menu | Still to do |
 
 ## Video library, version 0.0.5
 
@@ -27,7 +51,7 @@ and the last 10 s as finished. That is Phase 1's rule, not the library's.
 
 | Check | Result |
 |---|---|
-| The button at the top right switches between grid and list | Still to do |
+| The button at the top right switches between grid and list (from 0.0.6: "Display in list" in the display settings) | Still to do |
 | Tapping a card and a row opens the video | Still to do |
 | Scrolling both views | Still to do |
 | The grid with the phone on its side (expected: four columns, if the system rotates the app) | Still to do |

@@ -75,6 +75,9 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
 | `tab <video\|audio\|browse\|playlists\|more>` | Shows a tab |
 | `view <grid\|list>` | How the Video tab shows its videos |
+| `sort <name\|filename\|length\|modified> [desc]`, `favonly <0\|1>`, `filter <text>` | Order and narrowing of the Video tab |
+| `fav <path>` | Switches a video's favourite mark |
+| `display`, `itemmenu <index>`, `closesheets` | The Video tab's display settings, the menu of the video at that place in the list, and closing both |
 | `controls <0\|1>`, `lock <0\|1>`, `aspect <index>` | Player state |
 | `angle <0\|90\|270>`, `follow` | Force the content's rotation, or follow the sensor again |
 | `sheet <menu\|aspects\|subtitles\|bookmarks\|info\|jump\|sleep>` | Opens a sheet |
@@ -135,6 +138,7 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | System volume, screen brightness | The sound and power indicators publish their sliders as actions on the session bus; `QMenuModel 1.0`'s `QDBusActionGroup` reads and sets them | `qml/platform/SystemVolume.qml`, `SystemBrightness.qml` |
 | User folders | `Qt.labs.platform` `StandardPaths` | `qml/platform/Folders.qml` |
 | Listing a folder | `Qt.labs.folderlistmodel` | `qml/Gem/SubtitleTrack.qml` |
+| On-screen keyboard height | `Qt.inputMethod`, as GemTicker does; a plain Window does not make room for the keyboard itself | `qml/Gem/AppShell.qml` |
 | Reading a text file | `XMLHttpRequest` on a `file://` address. Qt warns that this will be off by default one day | `qml/Gem/SubtitleTrack.qml` |
 
 QML cannot delete or rename a file, call an arbitrary D-Bus method, or open a

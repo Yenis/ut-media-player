@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.6 - unreleased
+
+- Display settings for the Video tab, behind the button at the top right:
+  grid or list, "Show only favourites", and the order. Videos can be sorted
+  by name, file name, length or how recently they were added; choosing the
+  order in use turns it round. All of it is remembered.
+- The videos are now in order of name by default.
+- A filter: the magnifying glass opens a field that narrows the list as you
+  type.
+- Favourites: the three dots on a video open its menu, which adds it to the
+  favourites or removes it. A favourite carries a star on its thumbnail.
+- The grid and list switch moved from the top bar into the display settings,
+  where VLC has it.
+
 ## 0.0.5 - 3 October 2026
 
 - The Video tab shows the videos as a grid of cards, two across on a phone

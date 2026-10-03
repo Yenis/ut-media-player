@@ -2,23 +2,38 @@ import QtQuick 2.12
 import Qt.labs.settings 1.0
 import Gem 1.0
 import "../js/Format.js" as Format
+import "../js/Library.js" as Library
 
 /*
- * The Video tab: the videos on the phone, as a grid of cards or as a list.
- * Grouping, sorting and the item menu of Phase 2 go here.
+ * The Video tab: the videos on the phone, as a grid of cards or as a list,
+ * sorted, filtered and narrowed to the favourites as VLC's display settings
+ * allow. Grouping and the rest of the item menu go here.
  */
 Item {
     id: page
 
     property var library: null          // platform/MediaLibrary.qml, or null off the device
     property var store: null            // PlayerStore
+    property var overlay: page          // what the sheets cover; the shell passes all of "home"
     property var videos: []
 
-    // VLC's default is the grid ("video_display_in_cards").
+    // VLC's defaults: the grid ("video_display_in_cards"), by name, A to Z.
     property bool grid: true
+    property string sort: "name"
+    property bool descending: false
+    property bool onlyFavourites: false
 
-    // What was played, by address, read once per change and not once per card.
+    property bool filtering: false
+    property string filter: ""
+
+    // What was played and what is a favourite, by address, read once per
+    // change and not once per card.
     readonly property var played: store && store.revision >= 0 ? store.entries() : ({})
+    readonly property var favourites: store && store.favouriteRevision >= 0 ? store.favourites() : ({})
+
+    readonly property var shown: Library.arrange(videos, sort, descending, filter, onlyFavourites, favourites)
+
+    property var menuVideo: null        // the video the item menu is open for
 
     signal mediaChosen(var media)
 
@@ -26,10 +41,67 @@ Item {
         videos = library ? library.videos() : [];
     }
 
+    function _keep(key, value) {
+        settings.setValue(key, value);
+        settings.sync();
+    }
+
+    // Settings hands a stored true back as the text "true".
+    function _flag(key, fallback) {
+        var value = settings.value(key, fallback);
+        return value === true || value === "true";
+    }
+
     function setGrid(on) {
         grid = on;
-        settings.setValue("grid", on);
-        settings.sync();
+        _keep("grid", on);
+    }
+
+    function setSort(key, desc) {
+        sort = Library.sortInfo(key).key;
+        descending = desc;
+        _keep("sort", sort);
+        _keep("descending", desc);
+    }
+
+    function setOnlyFavourites(on) {
+        onlyFavourites = on;
+        _keep("onlyFavourites", on);
+    }
+
+    function setFilter(text) {
+        filtering = true;
+        search.text = text;
+    }
+
+    function closeFilter() {
+        search.reset();
+        filtering = false;
+    }
+
+    function toggleFavourite(url) {
+        store.setFavourite(url, !favourites[url]);
+    }
+
+    function openDisplaySheet() { displaySheet.show(); }
+
+    function closeSheets() {
+        displaySheet.close();
+        itemMenu.close();
+    }
+
+    function openItemMenu(index) {
+        if (index >= 0 && index < shown.length)
+            openMenuFor(shown[index]);
+    }
+
+    function openMenuFor(video) {
+        menuVideo = video;
+        itemMenu.show();
+    }
+
+    function shownTitles() {
+        return shown.map(function(video) { return video.title; });
     }
 
     function progressOf(entry) {
@@ -43,7 +115,12 @@ Item {
         category: "videoLibrary"
     }
 
-    Component.onCompleted: grid = settings.value("grid", true) !== "false" && settings.value("grid", true) !== false
+    Component.onCompleted: {
+        grid = _flag("grid", true);
+        sort = Library.sortInfo(settings.value("sort", "name")).key;
+        descending = _flag("descending", false);
+        onlyFavourites = _flag("onlyFavourites", false);
+    }
 
     Connections {
         target: page.library
@@ -61,21 +138,52 @@ Item {
         anchors { left: parent.left; right: parent.right; top: parent.top }
         title: "Video"
         canGoBack: false
-        trailing: IconButton {
-            // Shows what a tap switches to, as VLC's menu entry does.
-            glyph: page.grid ? "list" : "grid"
-            onClicked: page.setGrid(!page.grid)
+        trailing: Row {
+            IconButton {
+                glyph: "search"
+                color: page.filtering ? Theme.accent : Theme.textDim
+                onClicked: {
+                    if (page.filtering) {
+                        page.closeFilter();
+                    } else {
+                        page.filtering = true;
+                        search.open();
+                    }
+                }
+            }
+            IconButton {
+                glyph: "settings"
+                color: page.onlyFavourites ? Theme.accent : Theme.textDim
+                onClicked: page.openDisplaySheet()
+            }
+        }
+    }
+
+    Item {
+        id: filterBar
+        anchors { left: parent.left; right: parent.right; top: header.bottom }
+        height: page.filtering ? Theme.u(7) : 0
+        visible: page.filtering
+
+        SearchField {
+            id: search
+            anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter
+                      leftMargin: Theme.u(2); rightMargin: Theme.u(2) }
+            placeholder: "Filter videos"
+            onTextChanged: page.filter = text
         }
     }
 
     Text {
-        visible: page.videos.length === 0
+        visible: page.shown.length === 0
         anchors.centerIn: parent
         width: parent.width - Theme.u(8)
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.WordWrap
-        text: page.library ? "No videos found.\nPut some in the Videos folder and they will appear here."
-                           : "The media library is not available."
+        text: !page.library ? "The media library is not available."
+              : page.videos.length === 0 ? "No videos found.\nPut some in the Videos folder and they will appear here."
+              : page.filter.trim().length > 0 ? "No video matches “" + page.filter.trim() + "”."
+              : "No favourites yet.\nA video's menu adds it to them."
         color: Theme.textDim
         font.pixelSize: Theme.fontM
         lineHeight: 1.3
@@ -84,11 +192,11 @@ Item {
     GridView {
         id: cards
         visible: page.grid
-        anchors { left: parent.left; right: parent.right; top: header.bottom; bottom: parent.bottom
+        anchors { left: parent.left; right: parent.right; top: filterBar.bottom; bottom: parent.bottom
                   leftMargin: Theme.u(0.5); rightMargin: Theme.u(0.5) }
         topMargin: Theme.u(0.5)
         clip: true
-        model: page.grid ? page.videos : []
+        model: page.grid ? page.shown : []
 
         // As many 160 dp columns as fit, and never fewer than two.
         readonly property int columns: Math.max(2, Math.floor(width / Theme.u(20)))
@@ -119,6 +227,7 @@ Item {
                 art: modelData.art
                 resolution: Format.resolutionClass(modelData.width, modelData.height)
                 seen: card.entry !== null && card.entry.seen > 0
+                favourite: !!page.favourites[modelData.url]
                 progress: page.progressOf(card.entry)
             }
             Text {
@@ -141,15 +250,26 @@ Item {
                 anchors.fill: parent
                 onClicked: page.mediaChosen(modelData)
             }
+
+            // The item menu, on the thumbnail's corner as in VLC.
+            IconButton {
+                anchors { right: cardThumb.right; top: cardThumb.top }
+                implicitWidth: Theme.u(4.5)
+                implicitHeight: Theme.u(4.5)
+                glyphSize: Theme.u(2.2)
+                glyph: "more"
+                color: "white"
+                onClicked: page.openMenuFor(modelData)
+            }
         }
     }
 
     ListView {
         id: list
         visible: !page.grid
-        anchors { left: parent.left; right: parent.right; top: header.bottom; bottom: parent.bottom }
+        anchors { left: parent.left; right: parent.right; top: filterBar.bottom; bottom: parent.bottom }
         clip: true
-        model: page.grid ? [] : page.videos
+        model: page.grid ? [] : page.shown
 
         delegate: Item {
             id: row
@@ -173,11 +293,12 @@ Item {
                 sourcePixels: 256
                 art: modelData.art
                 seen: row.entry !== null && row.entry.seen > 0
+                favourite: !!page.favourites[modelData.url]
                 progress: page.progressOf(row.entry)
             }
 
             Column {
-                anchors { left: rowThumb.right; leftMargin: Theme.u(1.5); right: parent.right; rightMargin: Theme.u(2)
+                anchors { left: rowThumb.right; leftMargin: Theme.u(1.5); right: rowMore.left
                           verticalCenter: parent.verticalCenter }
                 spacing: Theme.u(0.5)
 
@@ -202,6 +323,70 @@ Item {
                 anchors.fill: parent
                 onClicked: page.mediaChosen(modelData)
             }
+
+            IconButton {
+                id: rowMore
+                anchors { right: parent.right; rightMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
+                glyphSize: Theme.u(2.2)
+                glyph: "more"
+                onClicked: page.openMenuFor(modelData)
+            }
+        }
+    }
+
+    // VLC's display settings: grid or list, only favourites, and the order.
+    // Choosing the order already in use turns it round.
+    OptionSheet {
+        id: displaySheet
+        parent: page.overlay
+        anchors.fill: parent
+        title: "Display settings"
+        options: {
+            var rows = [
+                { key: "view", label: page.grid ? "Display in list" : "Display in grid",
+                  glyph: page.grid ? "list" : "grid", stay: true },
+                { key: "favourites", label: "Show only favourites", glyph: "star",
+                  selected: page.onlyFavourites, value: page.onlyFavourites ? "on" : "off", stay: true },
+                { label: "Sort by…" }
+            ];
+            for (var i = 0; i < Library.SORTS.length; i++) {
+                var s = Library.SORTS[i];
+                var current = s.key === page.sort;
+                rows.push({ key: "sort:" + s.key, label: s.label, selected: current, stay: true,
+                            value: current ? (page.descending ? s.descending : s.ascending) : "" });
+            }
+            return rows;
+        }
+        onChosen: {
+            if (key === "view")
+                page.setGrid(!page.grid);
+            else if (key === "favourites")
+                page.setOnlyFavourites(!page.onlyFavourites);
+            else if (key.indexOf("sort:") === 0)
+                page.setSort(key.substring(5), key.substring(5) === page.sort ? !page.descending : false);
+        }
+    }
+
+    // A video's own menu. VLC's has many more entries; they join it with the
+    // item menu step of Phase 2.
+    OptionSheet {
+        id: itemMenu
+        parent: page.overlay
+        anchors.fill: parent
+        title: page.menuVideo ? page.menuVideo.title : ""
+        options: {
+            var favourite = page.menuVideo ? !!page.favourites[page.menuVideo.url] : false;
+            return [
+                { key: "play", label: "Play", glyph: "play" },
+                { key: "favourite", glyph: "star", selected: favourite,
+                  label: favourite ? "Remove from favourites" : "Add to favourites" }
+            ];
+        }
+        onChosen: {
+            if (key === "play")
+                page.mediaChosen(page.menuVideo);
+            else if (key === "favourite")
+                page.toggleFavourite(page.menuVideo.url);
         }
     }
 }

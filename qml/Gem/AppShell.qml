@@ -36,6 +36,12 @@ FocusScope {
     readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
 
+    // Height of the on-screen keyboard, so content can sit above it. Lomiri's
+    // MainView would do this for us; a plain Window has to do it itself.
+    readonly property real keyboardHeight: Qt.inputMethod.visible
+        ? Qt.inputMethod.keyboardRectangle.height / Screen.devicePixelRatio
+        : 0
+
     PlayerStore { id: playerStore }
 
     Playback {
@@ -143,7 +149,9 @@ FocusScope {
     }
 
     Item {
+        id: home
         anchors.fill: parent
+        anchors.bottomMargin: shell.keyboardHeight
         visible: shell.page === "home"
 
         Item {
@@ -155,6 +163,7 @@ FocusScope {
                 visible: shell.tab === "video"
                 library: shell.library
                 store: playerStore
+                overlay: home
                 onMediaChosen: shell.openMedia(media)
             }
             PlaceholderPage {
@@ -188,6 +197,9 @@ FocusScope {
         TabBar {
             id: tabBar
             anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+            // Out of the way while something is being typed.
+            height: shell.keyboardHeight > 0 ? 0 : implicitHeight
+            clip: true
             tabs: shell.tabs
             current: shell.tab
             onChosen: shell.tab = name

@@ -198,6 +198,19 @@ Canvas {
         case "check":
             stroke([0.16, 0.54, 0.4, 0.78, 0.86, 0.24]);
             break;
+        case "search":
+            arc(0.42, 0.42, 0.28, 0, 2);
+            stroke([0.63, 0.63, 0.88, 0.88]);
+            break;
+        case "star":
+            var tips = [];
+            for (var t = 0; t < 10; t++) {
+                var reach = t % 2 === 0 ? 0.44 : 0.19;
+                var turn = -Math.PI / 2 + t * Math.PI / 5;
+                tips.push(0.5 + reach * Math.cos(turn), 0.52 + reach * Math.sin(turn));
+            }
+            fill(tips);
+            break;
         case "refresh":
             arc(0.5, 0.5, 0.38, 0.45, 1.95);
             fill([0.32, 0.84, 0.62, 0.78, 0.5, 1.0]);

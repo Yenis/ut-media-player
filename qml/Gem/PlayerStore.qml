@@ -4,7 +4,7 @@ import "../js/DbHandle.js" as DbHandle
 
 /*
  * What the player remembers about each file: where it was left, whether it
- * was seen, and its bookmarks. Kept in the app's SQLite database
+ * was seen, its bookmarks, and whether it is a favourite. Kept in the app's SQLite database
  * (~/.local/share/gemplayer.yenis/), opened on first use so nothing touches
  * storage before Main.qml has set the app identity.
  */
@@ -14,6 +14,7 @@ QtObject {
     // Count changes, so views showing progress or bookmarks can refresh.
     property int revision: 0
     property int bookmarkRevision: 0
+    property int favouriteRevision: 0
 
     // A file counts as finished this close to its end, and as not started this
     // close to its beginning. VLC decides this in its native media library,
@@ -33,6 +34,7 @@ QtObject {
             tx.executeSql("CREATE TABLE IF NOT EXISTS bookmarks("
                           + "url TEXT NOT NULL, position INTEGER NOT NULL, title TEXT NOT NULL, "
                           + "PRIMARY KEY(url, position))");
+            tx.executeSql("CREATE TABLE IF NOT EXISTS favourites(url TEXT PRIMARY KEY)");
         });
         DbHandle.handle = opened;
         return opened;
@@ -86,6 +88,29 @@ QtObject {
     // Played to the end: back to the start, and marked as seen.
     function finish(url, duration) {
         save(url, duration, duration);
+    }
+
+    // Every favourite, as { url: true }.
+    function favourites() {
+        var all = {};
+        db().readTransaction(function(tx) {
+            var rows = tx.executeSql("SELECT url FROM favourites").rows;
+            for (var i = 0; i < rows.length; i++)
+                all[rows.item(i).url] = true;
+        });
+        return all;
+    }
+
+    function setFavourite(url, on) {
+        if (!url)
+            return;
+        db().transaction(function(tx) {
+            if (on)
+                tx.executeSql("INSERT OR IGNORE INTO favourites(url) VALUES(?)", [url]);
+            else
+                tx.executeSql("DELETE FROM favourites WHERE url = ?", [url]);
+        });
+        favouriteRevision++;
     }
 
     // [{ position, title }] for a file, in playing order.
