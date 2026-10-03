@@ -1,8 +1,8 @@
 # GemPlayer - a VLC-style media player for Ubuntu Touch - plan
 
 Status: **Milestone 1 reached on 2 October 2026: a working video player**
-(version 0.0.3). Phases 0 and 1 are done. Next is Phase 2, the
-app shell with VLC's five tabs and the video library. Target device is the
+(version 0.0.3). Phases 0 and 1 are done. Phase 2 is under way: the app shell
+with VLC's five tabs is in (version 0.0.4), the video library is next. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
 
@@ -327,7 +327,7 @@ How it is built:
 | Menu features | `qml/Gem/TimePicker.qml`, `SleepTimer.qml`, `PlayerStore.qml` | Keypad for jump and sleep, the timer, bookmarks |
 | Controls | `qml/Gem/PlayerControls.qml`, `SeekBar.qml`, `OptionSheet.qml`, `Glyph.qml` | Title bar, timeline, buttons, menu, icons |
 | Audio mode | `qml/Gem/AudioModePage.qml` | What shows while a video plays as audio |
-| Way in | `qml/Gem/HomePage.qml`, `qml/platform/MediaLibrary.qml`, `qml/platform/ContentImport.qml` | A plain list of videos until Phase 2; files from other apps |
+| Way in | `qml/Gem/VideoLibraryPage.qml`, `qml/platform/MediaLibrary.qml`, `qml/platform/ContentImport.qml` | A plain list of videos until Phase 2 builds the library; files from other apps |
 | Development aid | `qml/dev/Remote.qml` | Drives and photographs the app over adb. Off unless a marker file exists; removed in Phase 5 |
 
 Two rules the spike imposed: the video surface exists before a file is opened
@@ -387,7 +387,16 @@ Discuss items this phase reached, for a decision (D2):
 
 ## Phase 2 - App shell and video library
 
-- [ ] The five tabs: Video, Audio, Browse, Playlists, More.
+How it is built:
+
+| Part | File | What it does |
+|---|---|---|
+| Shell | `qml/Gem/AppShell.qml`, `TabBar.qml` | The bar along the bottom and the page behind each tab. The players cover both |
+| Video tab | `qml/Gem/VideoLibraryPage.qml` | The videos on the phone |
+| Tabs still to be built | `qml/Gem/PlaceholderPage.qml` | Audio (Phase 3), Browse and Playlists (Phase 4) say what will be there |
+| More tab | `qml/Gem/MorePage.qml` | The version, and the way to the diagnostics page. Streams, history and settings join it in Phase 4 |
+
+- [x] The five tabs: Video, Audio, Browse, Playlists, More (version 0.0.4).
 - [ ] Grid and list views with thumbnail, duration, resolution, progress and
       seen marker.
 - [ ] Grouping: none, by folder, by name; manual groups.

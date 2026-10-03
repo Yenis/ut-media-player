@@ -77,6 +77,7 @@ Item {
         else if (name === "video") shell.toVideo();
         else if (name === "back") shell.back();
         else if (name === "home") shell.page = "home";
+        else if (name === "tab") { shell.page = "home"; shell.tab = argument; }
         else if (name === "diagnostics") shell.page = "diagnostics";
         else if (v && name === "controls") { if (argument === "1") v.showControls(); else v.controlsShown = false; }
         else if (v && name === "angle") { v.orientationLocked = true; v.contentAngle = parseInt(argument); }
@@ -102,7 +103,7 @@ Item {
         var p = shell.playback;
         var v = shell.videoPage;
         console.log("REMOTE STATE " + JSON.stringify({
-            page: shell.page, url: p.url, playing: p.playing, position: p.position,
+            page: shell.page, tab: shell.tab, url: p.url, playing: p.playing, position: p.position,
             raw: p.player.position, duration: p.duration, audioMode: p.audioMode,
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
             error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd],

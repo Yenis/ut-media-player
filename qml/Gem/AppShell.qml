@@ -7,8 +7,9 @@ import "../js/Format.js" as Format
  * The app: the one Playback object, the store of resume points, and the pages.
  * Created by Main.qml only after the app identity is set.
  *
- * Phase 1: a list of videos, the video player, and a minimal "playing as
- * audio" page. The sleep timer lives here because it outlasts any one page.
+ * Behind the tab bar are the five main pages, as in VLC; the players and the
+ * diagnostics page cover them. The sleep timer lives here because it outlasts
+ * any one page.
  */
 FocusScope {
     id: shell
@@ -18,6 +19,16 @@ FocusScope {
 
     // "home", "video", "audio" or "diagnostics"
     property string page: "home"
+
+    // The page shown at "home": "video", "audio", "browse", "playlists" or "more"
+    property string tab: "video"
+    readonly property var tabs: [
+        { name: "video", title: "Video", glyph: "video" },
+        { name: "audio", title: "Audio", glyph: "audio" },
+        { name: "browse", title: "Browse", glyph: "folder" },
+        { name: "playlists", title: "Playlists", glyph: "playlist" },
+        { name: "more", title: "More", glyph: "dots" }
+    ]
 
     readonly property alias playback: core
     readonly property alias videoPage: videoView
@@ -130,13 +141,55 @@ FocusScope {
             event.accepted = true;
     }
 
-    HomePage {
+    Item {
         anchors.fill: parent
         visible: shell.page === "home"
-        library: shell.library
-        store: playerStore
-        onMediaChosen: shell.openMedia(media)
-        onDiagnosticsRequested: shell.page = "diagnostics"
+
+        Item {
+            anchors { left: parent.left; right: parent.right; top: parent.top; bottom: tabBar.top }
+
+            VideoLibraryPage {
+                anchors.fill: parent
+                visible: shell.tab === "video"
+                library: shell.library
+                store: playerStore
+                onMediaChosen: shell.openMedia(media)
+            }
+            PlaceholderPage {
+                anchors.fill: parent
+                visible: shell.tab === "audio"
+                title: "Audio"
+                glyph: "audio"
+                text: "Artists, albums, tracks and genres will be here."
+            }
+            PlaceholderPage {
+                anchors.fill: parent
+                visible: shell.tab === "browse"
+                title: "Browse"
+                glyph: "folder"
+                text: "The phone's folders and favourite places will be here."
+            }
+            PlaceholderPage {
+                anchors.fill: parent
+                visible: shell.tab === "playlists"
+                title: "Playlists"
+                glyph: "playlist"
+                text: "Your playlists will be here."
+            }
+            MorePage {
+                anchors.fill: parent
+                visible: shell.tab === "more"
+                onDiagnosticsRequested: shell.page = "diagnostics"
+            }
+        }
+
+        TabBar {
+            id: tabBar
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+            tabs: shell.tabs
+            current: shell.tab
+            onChosen: shell.tab = name
+        }
     }
 
     // Always there, shown or not: the backend only starts a video if its

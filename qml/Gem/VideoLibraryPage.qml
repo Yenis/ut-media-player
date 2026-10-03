@@ -3,8 +3,8 @@ import Gem 1.0
 import "../js/Format.js" as Format
 
 /*
- * Phase 1's way in: a plain list of the videos on the phone. Phase 2 replaces
- * it with the library proper (grid, folders, sorting, search).
+ * The Video tab: the videos on the phone. Still Phase 1's plain list; the
+ * grid, grouping and sorting of Phase 2 go here.
  */
 Item {
     id: page
@@ -14,7 +14,6 @@ Item {
     property var videos: []
 
     signal mediaChosen(var media)
-    signal diagnosticsRequested()
 
     function reload() {
         videos = library ? library.videos() : [];
@@ -33,28 +32,11 @@ Item {
         color: Theme.bg
     }
 
-    Item {
+    PageHeader {
         id: header
         anchors { left: parent.left; right: parent.right; top: parent.top }
-        height: Theme.u(8)
-
-        Text {
-            anchors { left: parent.left; leftMargin: Theme.u(2); verticalCenter: parent.verticalCenter }
-            text: "GemPlayer"
-            color: Theme.text
-            font.pixelSize: Theme.fontXL
-            font.bold: true
-        }
-        IconButton {
-            anchors { right: parent.right; rightMargin: Theme.u(1); verticalCenter: parent.verticalCenter }
-            glyph: "settings"
-            onClicked: page.diagnosticsRequested()
-        }
-        Rectangle {
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
-            height: 1
-            color: Theme.line
-        }
+        title: "Video"
+        canGoBack: false
     }
 
     Text {

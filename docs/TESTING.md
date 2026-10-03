@@ -1,10 +1,29 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the player (versions 0.0.2 and 0.0.3); the rest is the Phase 0 spike from
+is the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
+the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
-a QML-only media player. The spike is still in the app, behind the button at
-the top right of the list.
+a QML-only media player. The spike is still in the app, under More →
+Diagnostics.
+
+## App shell, version 0.0.4
+
+### Checked over adb, 3 October 2026
+
+| Check | Result |
+|---|---|
+| Each of the five tabs shows its page, and the bar marks the one shown | Pass |
+| The Video tab lists the videos as before | Pass |
+| A video opens over the tabs, plays, and "back" returns to the tab it was opened from | Pass |
+| More → Diagnostics opens the spike page; closing it returns to More | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Tapping each tab in the bar | Still to do |
+| Tapping a video in the list, and More → Diagnostics | Still to do |
 
 ## Player, version 0.0.3
 

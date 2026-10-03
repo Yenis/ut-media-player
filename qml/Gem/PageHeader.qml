@@ -5,6 +5,8 @@ Item {
     id: header
 
     property string title: ""
+    // Off for the pages behind the tabs, which have nowhere to go back to.
+    property bool canGoBack: true
     property alias trailing: trailingSlot.data
     signal back()
 
@@ -13,13 +15,15 @@ Item {
     IconButton {
         id: backButton
         anchors { left: parent.left; leftMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
+        visible: header.canGoBack
         glyph: "back"
         color: Theme.text
         onClicked: header.back()
     }
 
     Text {
-        anchors { left: backButton.right; leftMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
+        anchors { left: parent.left; verticalCenter: parent.verticalCenter
+                  leftMargin: header.canGoBack ? backButton.width + Theme.u(1) : Theme.u(2) }
         text: header.title
         color: Theme.text
         font.pixelSize: Theme.fontL

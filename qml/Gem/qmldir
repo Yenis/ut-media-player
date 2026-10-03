@@ -6,10 +6,11 @@ AppShell 1.0 AppShell.qml
 AudioModePage 1.0 AudioModePage.qml
 GestureLayer 1.0 GestureLayer.qml
 Glyph 1.0 Glyph.qml
-HomePage 1.0 HomePage.qml
 IconButton 1.0 IconButton.qml
+MorePage 1.0 MorePage.qml
 OptionSheet 1.0 OptionSheet.qml
 PageHeader 1.0 PageHeader.qml
+PlaceholderPage 1.0 PlaceholderPage.qml
 Playback 1.0 Playback.qml
 PlayerControls 1.0 PlayerControls.qml
 PlayerStore 1.0 PlayerStore.qml
@@ -19,7 +20,9 @@ SegmentedChoice 1.0 SegmentedChoice.qml
 SettingRow 1.0 SettingRow.qml
 SleepTimer 1.0 SleepTimer.qml
 SubtitleTrack 1.0 SubtitleTrack.qml
+TabBar 1.0 TabBar.qml
 TextButton 1.0 TextButton.qml
 TimePicker 1.0 TimePicker.qml
 Toggle 1.0 Toggle.qml
+VideoLibraryPage 1.0 VideoLibraryPage.qml
 VideoPlayerPage 1.0 VideoPlayerPage.qml

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.4 - unreleased
+
+- A bar along the bottom with VLC's five tabs: Video, Audio, Browse,
+  Playlists and More. Video holds the list of videos; Audio, Browse and
+  Playlists say what is to come.
+- The More tab shows the version, and the diagnostics page is opened from
+  there.
+
 ## 0.0.3 - 3 October 2026
 
 The first build published for testers.

@@ -73,6 +73,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `open <path>` | Opens a file in the player |
 | `play`, `pause`, `seek <ms>`, `seekby <ms>` | Playback |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
+| `tab <video\|audio\|browse\|playlists\|more>` | Shows a tab |
 | `controls <0\|1>`, `lock <0\|1>`, `aspect <index>` | Player state |
 | `angle <0\|90\|270>`, `follow` | Force the content's rotation, or follow the sensor again |
 | `sheet <menu\|aspects\|subtitles\|bookmarks\|info\|jump\|sleep>` | Opens a sheet |
