@@ -1,12 +1,33 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Information page, version 0.0.11
+
+### Checked over adb, 3 October 2026
+
+| Check | Result |
+|---|---|
+| "Information" in a video's menu, between "Play as audio" and the favourite switch | Pass (layout) |
+| The page for `long-35min`: picture with its progress bar, "Resume", length 35:00, SD, MP4, file, folder, changed 2 October 2026 09:34, played up to 2:00 | Pass |
+| File size against `ls -l`: 73.8 MB for the camera video of 73 807 820 bytes | Pass. The row was missing at first: the folder to list was worked out from a value that had not updated yet. Fixed |
+| A video watched to the end shows a tick on its picture and "Play" | Pass |
+| `back` closes the page | Pass |
+| One video selected: an information button joins the bar, and opens the page | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Information from the menu by touch; the header arrow and the back gesture close it | Still to do |
+| Play or Resume on the page starts the video | Still to do |
+| A long folder path or file name wraps and stays readable | Still to do |
 
 ## Groups made by hand, version 0.0.10
 

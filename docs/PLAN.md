@@ -6,7 +6,8 @@ with VLC's five tabs is in (version 0.0.4), and the Video tab has its grid and
 list (version 0.0.5), its sorting, favourites and filter (version 0.0.6) and
 grouping by folder and by name (version 0.0.7), and the video queue with the
 item menu (version 0.0.8), multiple selection (version 0.0.9) and groups made
-by hand (version 0.0.10). The media information screen is next, then the
+by hand (version 0.0.10) and the media information screen (version 0.0.11).
+Everything to build in Phase 2 is built; what is left is to decide the
 Discuss items and the note on networking. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -398,6 +399,7 @@ How it is built:
 | Part | File | What it does |
 |---|---|---|
 | Shell | `qml/Gem/AppShell.qml`, `TabBar.qml` | The bar along the bottom and the page behind each tab. The players cover both |
+| Information | `qml/Gem/MediaInfoPage.qml` | What is known about one video; the file's size comes from a listing of its folder |
 | Asking for a name | `qml/Gem/NameDialog.qml` | One line of text with Cancel and a confirming button, placed clear of the keyboard. For groups now, playlists and bookmarks later |
 | Order, filter, favourites, grouping | `qml/js/Library.js`, `qml/Gem/SearchField.qml`, `PlayerStore.qml`, `GroupThumb.qml` | What the list shows and in which order; folders and groups; the filter's text field; favourites in the app's database |
 | Queue | `qml/Gem/Playback.qml`, `PlayerControls.qml`, `VideoPlayerPage.qml` | The list of what plays after what, moved on by the app; previous, next and the queue's list in the player |
@@ -442,7 +444,12 @@ How it is built:
       Phase 3), "Add to playlist" for Phase 4, "Add to group" for manual
       groups, "Information" for its screen below. Delete, rename and share
       are Discuss items (compiled code; sharing was not tried in the spike).
-- [ ] Media information screen.
+- [x] Media information screen (version 0.0.11), from "Information" in a
+      video's menu or in the selection bar with one video selected: picture,
+      name, a Play or Resume button, length, file size, resolution class,
+      format, file, folder, date changed, how far it was played. VLC's list
+      of tracks and codecs is left out: neither the library nor the playback
+      service reports them (S16).
 - [ ] Discuss, when reached: choosing library folders, film metadata.
 - [ ] **Before closing this phase, raise with Yenis** (asked for on 3 October
       2026): the app is to do nothing over the network except play streams.

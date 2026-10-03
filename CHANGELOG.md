@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.11 - unreleased
+
+- "Information" in a video's menu opens a page about it: its picture and
+  name, a button to play or resume it, its length, file size, resolution,
+  format, file and folder, when it was last changed, and how far it was
+  played. With one video selected, the bar at the top has a button for it
+  too.
+- A video's menu is now in VLC's order: Information and the favourite switch
+  come before the group entries, and "Mark as played" is last.
+
 ## 0.0.10 - 3 October 2026
 
 - Groups of your own, under "Group by name". Select two or more videos and

@@ -9,7 +9,8 @@ import "../js/Library.js" as Library
  * sorted, filtered, narrowed to the favourites and grouped by folder or by
  * name as VLC's display settings allow. A folder or group opens in place,
  * with a way back in the header. Every entry has a menu behind its three
- * dots, and a long press starts a selection, as in VLC.
+ * dots, and a long press starts a selection, as in VLC. "Information" in a
+ * video's menu opens a page about it over this one.
  */
 Item {
     id: page
@@ -62,6 +63,8 @@ Item {
 
     property var groupingVideos: []     // the videos "Add to video group" is about
     property var renamingGroup: null    // the group "Rename video group" is about
+
+    property var infoVideo: null        // the video the information page shows
 
     property var menuItem: null         // the video, folder or group the item menu is open for
 
@@ -204,6 +207,11 @@ Item {
             addToGroup(videos);
             return;
         }
+        if (key === "info") {
+            clearSelection();
+            infoVideo = videos[0];
+            return;
+        }
         if (key === "favourite") {
             var on = !allSelectedFavourites();
             for (var i = 0; i < videos.length; i++)
@@ -226,6 +234,10 @@ Item {
     // Ends a selection, or leaves the open folder or group; false if there
     // was neither.
     function back() {
+        if (infoVideo) {
+            infoVideo = null;
+            return true;
+        }
         if (selecting) {
             clearSelection();
             return true;
@@ -288,6 +300,9 @@ Item {
                 store.setSeen(videos[k].url, key === "played", videos[k].duration);
         } else if (key === "favourite") {
             toggleFavourite(item.url);
+        } else if (key === "info") {
+            search.dismiss();
+            infoVideo = item;
         } else if (key === "addToGroup") {
             addToGroup(videos);
         } else if (key === "removeFromGroup") {
@@ -389,6 +404,7 @@ Item {
         if (!visible) {
             search.dismiss();
             clearSelection();
+            infoVideo = null;
         }
     }
 
@@ -467,6 +483,13 @@ Item {
         Row {
             anchors { right: parent.right; rightMargin: Theme.u(1); verticalCenter: parent.verticalCenter }
 
+            IconButton {
+                // For one video only, as in VLC.
+                visible: page.selectionCount === 1 && page.selectedVideos().length === 1
+                glyph: "info"
+                color: Theme.text
+                onClicked: page.selectionAction("info")
+            }
             IconButton {
                 glyph: "play"
                 color: Theme.text
@@ -796,15 +819,13 @@ Item {
                 return [];
             if (item.videos) {
                 var all = page.allSeen(item.videos);
-                var groupRows = [
-                    { key: "playAll", label: "Play all", glyph: "playlist" },
-                    { key: all ? "notPlayed" : "played", glyph: "check",
-                      label: all ? "Mark all as not played" : "Mark all as played" }
-                ];
+                var groupRows = [{ key: "playAll", label: "Play all", glyph: "playlist" }];
                 if (item.kind === "group") {
                     groupRows.push({ key: "rename", label: "Rename video group", glyph: "subtitles" });
                     groupRows.push({ key: "ungroup", label: "Ungroup", glyph: "clear" });
                 }
+                groupRows.push({ key: all ? "notPlayed" : "played", glyph: "check",
+                                 label: all ? "Mark all as not played" : "Mark all as played" });
                 return groupRows;
             }
             var entry = page.played[item.url] || null;
@@ -816,8 +837,7 @@ Item {
             if (page.allShown().length > 1)
                 rows.push({ key: "playAll", label: "Play all", glyph: "playlist" });
             rows.push({ key: "asAudio", label: "Play as audio", glyph: "audio" });
-            rows.push({ key: seen ? "notPlayed" : "played", glyph: "check",
-                        label: seen ? "Mark as not played" : "Mark as played" });
+            rows.push({ key: "info", label: "Information", glyph: "info" });
             rows.push({ key: "favourite", glyph: "star", selected: favourite,
                         label: favourite ? "Remove from favourites" : "Add to favourites" });
             if (page.canGroup) {
@@ -827,10 +847,26 @@ Item {
                 else if (page.isAlone(item))
                     rows.push({ key: "regroup", label: "Regroup automatically", glyph: "refresh" });
             }
+            rows.push({ key: seen ? "notPlayed" : "played", glyph: "check",
+                        label: seen ? "Mark as not played" : "Mark as played" });
             return rows;
         }
         onChosen: page.itemAction(page.menuItem, key)
     }
+    MediaInfoPage {
+        parent: page.overlay
+        anchors.fill: parent
+        media: page.infoVideo
+        entry: page.infoVideo ? (page.played[page.infoVideo.url] || null) : null
+        favourite: page.infoVideo ? !!page.favourites[page.infoVideo.url] : false
+        onCloseRequested: page.infoVideo = null
+        onPlayRequested: {
+            var video = page.infoVideo;
+            page.infoVideo = null;
+            page.playRequested([video], 0, {});
+        }
+    }
+
     // "Add to video group": a new group, as VLC offers for more than one
     // video, or one of the groups there are.
     OptionSheet {

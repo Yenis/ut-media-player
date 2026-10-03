@@ -78,9 +78,9 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `view <grid\|list>` | How the Video tab shows its videos |
 | `sort <name\|filename\|length\|modified> [desc]`, `favonly <0\|1>`, `filter <text>` | Order and narrowing of the Video tab |
 | `group <name\|folder\|none>`, `opengroup <index>` | How the Video tab groups, and opening the folder or group at that place in the list; `back` leaves it |
-| `itemaction <index> <play\|fromStart\|playAll\|asAudio\|played\|notPlayed\|favourite\|addToGroup\|removeFromGroup\|regroup\|rename\|ungroup>` | One choice from the menu of the entry at that place in the list |
+| `itemaction <index> <play\|fromStart\|playAll\|asAudio\|played\|notPlayed\|favourite\|info\|addToGroup\|removeFromGroup\|regroup\|rename\|ungroup>` | One choice from the menu of the entry at that place in the list |
 | `tap <index>`, `tapaction <play\|playAll>` | A tap on the entry at that place in the list, and what a tap on a video does |
-| `select <index>`, `selaction <play\|asAudio\|favourite\|group>` | Adds an entry to the selection or takes it out, and the selection bar's buttons; `back` ends a selection |
+| `select <index>`, `selaction <play\|asAudio\|favourite\|group\|info>` | Adds an entry to the selection or takes it out, and the selection bar's buttons; `back` ends a selection |
 | `newgroup <name>`, `joingroup <index>` | Puts the selection into a new group, or into the group at that place in the list |
 | `renamegroup <index> <name>`, `clearselection` | Renames the group at that place; ends a selection without acting on it |
 | `fav <path>` | Switches a video's favourite mark |
@@ -148,6 +148,7 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | User folders | `Qt.labs.platform` `StandardPaths` | `qml/platform/Folders.qml` |
 | Listing a folder | `Qt.labs.folderlistmodel` | `qml/Gem/SubtitleTrack.qml` |
 | On-screen keyboard height | `Qt.inputMethod`, as GemTicker does; a plain Window does not make room for the keyboard itself | `qml/Gem/AppShell.qml` |
+| A file's size | `Qt.labs.folderlistmodel`: list the file's folder and read the `fileSize` role. QML has no way to ask about one file | `qml/Gem/MediaInfoPage.qml` |
 | Reading a text file | `XMLHttpRequest` on a `file://` address. Qt warns that this will be off by default one day | `qml/Gem/SubtitleTrack.qml` |
 
 QML cannot delete or rename a file, call an arbitrary D-Bus method, or open a

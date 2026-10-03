@@ -32,6 +32,17 @@ function resolutionClass(width, height) {
     return "SD";
 }
 
+// "755 KB", "1.4 GB": a file's size in the units a person reads.
+function fileSize(bytes) {
+    var units = ["bytes", "KB", "MB", "GB", "TB"];
+    var value = Math.max(0, bytes), unit = 0;
+    while (value >= 1000 && unit < units.length - 1) {
+        value /= 1000;
+        unit++;
+    }
+    return (unit === 0 || value >= 100 ? Math.round(value) : value.toFixed(1)) + " " + units[unit];
+}
+
 // The last part of a path or URL, without the extension, for files that have
 // no title of their own.
 function baseName(path) {
