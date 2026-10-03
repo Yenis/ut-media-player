@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.4 - unreleased
+## 0.0.4 - 3 October 2026
 
 - A bar along the bottom with VLC's five tabs: Video, Audio, Browse,
   Playlists and More. Video holds the list of videos; Audio, Browse and

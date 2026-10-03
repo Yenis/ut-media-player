@@ -11,7 +11,8 @@ library, the audio player and settings are still to come. The plan and its
 progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
-Test builds are published on the repository's Releases page;
+Test builds are published on the
+[Releases page](https://github.com/Yenis/ut-media-player/releases);
 [docs/INSTALL.md](docs/INSTALL.md) says how to put one on a phone.
 
 GemPlayer is not VLC and is not affiliated with VideoLAN. It does not contain

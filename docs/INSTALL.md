@@ -14,12 +14,13 @@ full guide with the first real release.
 
 ## Install a package
 
-Download the `.click` file from the repository's Releases page on GitHub,
+Download the `.click` file from the
+[Releases page](https://github.com/Yenis/ut-media-player/releases) on GitHub,
 then, with the phone connected:
 
 ```bash
-adb push gemplayer.yenis_0.0.3_all.click /home/phablet/
-adb shell "pkcon install-local --allow-untrusted /home/phablet/gemplayer.yenis_0.0.3_all.click"
+adb push gemplayer.yenis_0.0.4_all.click /home/phablet/
+adb shell "pkcon install-local --allow-untrusted /home/phablet/gemplayer.yenis_0.0.4_all.click"
 ```
 
 The file name ends in `_all.click`: it contains no compiled code and fits
