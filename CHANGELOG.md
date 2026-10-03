@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.10 - unreleased
+## 0.0.10 - 3 October 2026
 
 - Groups of your own, under "Group by name". Select two or more videos and
   tap the folder in the bar at the top to put them into a new group, which
