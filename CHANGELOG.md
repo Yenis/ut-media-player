@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.7 - unreleased
+## 0.0.7 - 3 October 2026
 
 - Videos can be grouped, from "Group videos" in the display settings: by
   name, by folder, or not at all.

@@ -31,13 +31,16 @@ The grouping rules in `qml/js/Library.js`, run under node with made-up names.
 | Do not group: all twelve videos | Pass |
 | The grouping is kept across a restart; the app starts at the top level | Pass |
 
-### By hand
+### By hand, 3 October 2026
+
+Tried by Yenis on the phone and reported as working; the rows are what was
+set out to be tried, not a record of each one.
 
 | Check | Result |
 |---|---|
-| Display settings → Group videos → each of the three choices | Still to do |
-| Tapping a group and a folder opens it; the header arrow and the back gesture lead out | Still to do |
-| Filter and "only favourites" while grouped, and inside a group | Still to do |
+| Display settings → Group videos → each of the three choices | Pass |
+| Tapping a group and a folder opens it; the header arrow and the back gesture lead out | Pass |
+| Filter and "only favourites" while grouped, and inside a group | Pass |
 
 ## Video library, version 0.0.6
 
