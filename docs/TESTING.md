@@ -23,19 +23,20 @@ the top right of the list.
 | Screenshot: `GemPlayer sidecar 0-16.png` in Pictures | Pass |
 | Labels for sleep timer, A-B repeat and subtitle delay | Pass |
 
-### To be checked by hand
+### Checked by hand, 2 October 2026
 
-| Check | Look for |
+| Check | Result |
 |---|---|
-| Swipe on the right half | The sound gets louder and quieter, and the phone's volume indicator agrees afterwards |
-| Swipe on the left half | The screen itself gets darker and brighter; leaving the player gives the old brightness back |
-| Menu → Jump to time, type `1`, `:30`, OK | Playback jumps to about 1:30 |
-| Menu → Sleep timer, type `1`, OK | The label counts down; playback pauses after a minute |
-| Menu → Bookmarks → Add bookmark; later tap it; hold it | Jumps there; holding removes it |
-| Menu → A-B repeat twice, some seconds apart | It loops; the label under the title turns it off |
-| `sidecar` in the list | Subtitles show; the subtitles button hides them and shifts them |
-| Menu → Screenshot | A picture appears in the Gallery |
-| A real film of your own | Anything that looks or feels wrong |
+| Volume swipe on a video with real sound | Pass |
+| Brightness swipe: the screen itself dims, and recovers on leaving the player | Pass |
+| Jump to time: `1`, `:30`, OK | Pass |
+| Sleep timer: `1`, OK; paused after a minute | Pass |
+| Bookmarks: add, tap, hold to remove | Pass |
+| A-B repeat | Pass |
+| Subtitles of `sidecar`, and the subtitles button | Pass |
+| Screenshot appears in the Gallery | Not reported |
+| A real film with its own `.srt` | Still to do |
+| A hardware keyboard | Still to do |
 
 ## Player, version 0.0.2
 

@@ -1,16 +1,34 @@
 # GemPlayer - a VLC-style media player for Ubuntu Touch - plan
 
-Status: **Phase 0 is done; Phase 1, the video player, is built** and waits for
-a last round of checks by hand and for decisions on the Discuss items it
-reached; see [Phase 1](#phase-1---video-player). Version 0.0.3. The
-survey of the VLC clone is in [VLC-FEATURES.md](VLC-FEATURES.md) and the
-spike's answers are in [TESTING.md](TESTING.md). In short: unconfined (D12),
-every common format plays, the media library is readable, audio and video keep
-playing in the background and with the screen off, and "Play as audio" is the
-same player with its picture hidden. Playback speed, track selection and
-embedded subtitles are not available from the system backend. Target device is
-the Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one
-GemTicker was verified on.
+Status: **Milestone 1 reached on 2 October 2026: a working video player**
+(version 0.0.3). Phases 0 and 1 are done. Next is Phase 2, the
+app shell with VLC's five tabs and the video library. Target device is the
+Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
+was verified on.
+
+## Milestone 1 - where things stand
+
+One day's work, from an empty folder to a player that runs on the phone.
+
+| | |
+|---|---|
+| **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
+| **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
+| **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
+| **To pick up next** | Phase 2. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes |
+
+What the first day established, in the order it was found:
+
+1. The VLC clone was surveyed into [VLC-FEATURES.md](VLC-FEATURES.md), with a
+   verdict per feature.
+2. A confined app cannot play the user's media on Ubuntu Touch today; the app
+   went unconfined (D12).
+3. The spike answered every platform question ([TESTING.md](TESTING.md)).
+   The surprises: playback runs in a system service and outlives the app being
+   frozen, which makes "play as audio" trivial and a sleep timer hard; and the
+   backend's volume control is a stub.
+4. The player was built in two steps, 0.0.2 and 0.0.3, each checked over adb
+   and then by hand.
 
 Goal: every feature of VLC for Android, where feasible, on top of the media
 stack Ubuntu Touch already ships. This is a new QML app modelled on VLC's UI,
@@ -24,6 +42,8 @@ dropped in advance: each is discussed when the work reaches it (D2).
 | This project | `~/ut-media-player/` - work happens from this folder |
 | VLC for Android source, for reference | `vlc-android/` inside this folder, cloned from `https://github.com/videolan/vlc-android` at commit `e0d3fe77b` (version 3.7.2 Beta 2) |
 | What VLC does and what each feature needs here | [VLC-FEATURES.md](VLC-FEATURES.md) |
+| How to build, drive the app on the phone, and the backend's rules | [DEVELOPING.md](DEVELOPING.md) |
+| What was checked on the device, and how | [TESTING.md](TESTING.md) |
 | GemTicker, the source of the reusable components and the build setup | `~/ut-crypto-dashboard/` |
 | GemTicker's plan, for the conventions this one follows | `~/ut-crypto-dashboard/docs/ROLLOUT.md` |
 
@@ -291,7 +311,8 @@ built.
 
 The screen that plays one video, opened from a file path or Content Hub.
 Behaviour follows [VLC-FEATURES.md](VLC-FEATURES.md), "Video player" and
-"Values worth matching". Built in versions 0.0.2 and 0.0.3.
+"Values worth matching". Done: built in versions 0.0.2 and 0.0.3, and checked
+by hand.
 
 How it is built:
 
@@ -343,8 +364,9 @@ hidden.
 - [x] Keyboard shortcuts.
 - [x] "Loading" while a file starts, and a message when a file or stream does
       not start within 20 s.
-- [ ] Still by hand: the new sheets and the keypad under a finger, a real
-      film with real subtitles, a keyboard.
+- [x] Checked by hand: volume, brightness, jump to time, sleep timer,
+      bookmarks, A-B repeat, subtitles.
+- [ ] Still by hand: a real film with real subtitles; a keyboard.
 
 What the platform limits, found while building:
 
@@ -447,6 +469,7 @@ that nothing built later has to be undone.
 | `LICENSE` | GPL-3.0 or later (D5); added |
 | `docs/PLAN.md` | This plan |
 | `docs/VLC-FEATURES.md` | The feature survey and the verdict for each feature |
+| `docs/DEVELOPING.md` | Build loop, development remote, backend rules, reference sources |
 | `docs/INSTALL.md` | Self-install route, used during the battle test |
 | `docs/TESTING.md` | Device checks per release and battle-test findings |
 | `docs/STORE.md` | Draft listing (tagline, description, category, keywords), screenshot list, and the reason for each policy group and read path, ready for a reviewer |

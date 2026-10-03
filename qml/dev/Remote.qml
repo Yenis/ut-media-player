@@ -14,6 +14,7 @@ import Qt.labs.platform 1.0
  *   adb shell "echo '7 open /home/phablet/Videos/x.mp4' > ~/.cache/gemplayer.yenis/dev-remote.txt"
  *
  * "shot <name>" saves the app's own window to ~/.cache/gemplayer.yenis/shots/<name>.png.
+ * tools/dev.sh wraps all of this; docs/DEVELOPING.md lists the commands.
  */
 Item {
     id: remote

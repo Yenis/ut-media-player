@@ -57,6 +57,9 @@ clickable launch
 clickable logs       # follow the app's log output
 ```
 
+`tools/dev.sh deploy` does the first three in one go and restarts the app;
+[docs/DEVELOPING.md](docs/DEVELOPING.md) explains why that is needed.
+
 The click is QML-only: `qmlscene` runs `qml/Main.qml`, there is no compiled
 code, and one package serves every architecture.
 
@@ -74,6 +77,7 @@ source. It is ignored by git and never enters the package.
 |---|---|
 | [docs/PLAN.md](docs/PLAN.md) | Decisions, phases, and what is done |
 | [docs/VLC-FEATURES.md](docs/VLC-FEATURES.md) | What VLC for Android does, and the state of each feature here |
+| [docs/DEVELOPING.md](docs/DEVELOPING.md) | Build loop, checking changes on the phone, platform rules |
 | [docs/TESTING.md](docs/TESTING.md) | Device checks and their results |
 | [docs/INSTALL.md](docs/INSTALL.md) | Installing a build on your phone |
 | [docs/STORE.md](docs/STORE.md) | Notes for the OpenStore submission |
