@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.6 - unreleased
+## 0.0.6 - 3 October 2026
 
 - Display settings for the Video tab, behind the button at the top right:
   grid or list, "Show only favourites", and the order. Videos can be sorted
