@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.10 - unreleased
+
+- Groups of your own, under "Group by name". Select two or more videos and
+  tap the folder in the bar at the top to put them into a new group, which
+  you name, or into one of the groups there are. A single video's menu has
+  "Add to video group" too.
+- A group's menu gained "Rename video group" and "Ungroup". Inside a group,
+  a video's menu has "Remove from video group".
+- A video taken out of its group stays on its own; "Regroup automatically"
+  in its menu lets it join videos with a similar name again.
+
 ## 0.0.9 - 3 October 2026
 
 - Several videos at once: a long press on a video, folder or group selects

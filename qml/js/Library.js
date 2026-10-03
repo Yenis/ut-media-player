@@ -112,33 +112,51 @@ function _commonTitle(videos) {
 // "Group by name": videos alone stay as they are; two or more that begin
 // alike become { key, kind: "group", title, videos } at the place of the
 // first of them.
-function byName(videos) {
+//
+// `manual` is what was arranged by hand, as PlayerStore.videoGroups() gives
+// it: a video put into a group goes there, under the group's own name and
+// with `groupId` set, and a video kept on its own (group 0) joins nothing.
+function byName(videos, manual) {
+    var names = manual ? manual.names : {};
+    var members = manual ? manual.members : {};
     var buckets = {}, order = [];
     for (var i = 0; i < videos.length; i++) {
-        var prefix = _prefix(videos[i].title);
-        if (!buckets[prefix]) {
-            buckets[prefix] = [];
-            order.push(prefix);
+        var id = members[videos[i].url];
+        var bucket = id > 0 && names[id] !== undefined ? "m" + id
+                   : id === 0 ? "alone:" + videos[i].url
+                   : "a" + _prefix(videos[i].title);
+        if (!buckets[bucket]) {
+            buckets[bucket] = [];
+            order.push(bucket);
         }
-        buckets[prefix].push(videos[i]);
+        buckets[bucket].push(videos[i]);
     }
     var items = [];
     for (var k = 0; k < order.length; k++) {
-        var members = buckets[order[k]];
-        if (members.length === 1)
-            items.push(members[0]);
+        var inside = buckets[order[k]];
+        var byHand = order[k].charAt(0) === "m";
+        if (inside.length === 1)
+            items.push(inside[0]);
+        else if (byHand)
+            items.push({ key: "group:" + order[k], kind: "group", videos: inside,
+                         groupId: parseInt(order[k].substring(1)), title: names[order[k].substring(1)] });
         else
-            items.push({ key: "group:" + order[k], kind: "group", title: _commonTitle(members), videos: members });
+            items.push({ key: "group:" + order[k], kind: "group", videos: inside, groupId: 0,
+                         title: _commonTitle(inside) });
     }
     return items;
 }
 
+function commonTitle(videos) {
+    return videos.length > 1 ? _commonTitle(videos) : "";
+}
+
 // The top level of the list for a grouping: "none", "folder" or "name".
-function grouped(videos, grouping, sort, descending) {
+function grouped(videos, grouping, sort, descending, manual) {
     if (grouping === "folder")
         return byFolder(videos, descending && (sort === "name" || sort === "filename"));
     if (grouping === "name")
-        return byName(videos);
+        return byName(videos, manual);
     return videos;
 }
 

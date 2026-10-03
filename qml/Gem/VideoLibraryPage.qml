@@ -42,7 +42,10 @@ Item {
     // is on screen, which is a folder's or group's content once one is open.
     // An entry of `shown` with `videos` is a folder or group, any other a video.
     readonly property var arranged: Library.arrange(videos, sort, descending, filter, onlyFavourites, favourites)
-    readonly property var topLevel: Library.grouped(arranged, grouping, sort, descending)
+    // Groups made by hand; they count under "Group by name" only.
+    readonly property var manualGroups: store && store.groupRevision >= 0 ? store.videoGroups() : ({ names: {}, members: {} })
+    readonly property bool canGroup: grouping === "name"
+    readonly property var topLevel: Library.grouped(arranged, grouping, sort, descending, manualGroups)
     readonly property var openItem: openKey ? Library.findGroup(topLevel, openKey) : null
     readonly property var shown: openKey ? (openItem ? openItem.videos : []) : topLevel
 
@@ -56,6 +59,9 @@ Item {
     property var selection: ({})
     readonly property int selectionCount: Object.keys(selection).length
     readonly property bool selecting: selectionCount > 0
+
+    property var groupingVideos: []     // the videos "Add to video group" is about
+    property var renamingGroup: null    // the group "Rename video group" is about
 
     property var menuItem: null         // the video, folder or group the item menu is open for
 
@@ -136,9 +142,68 @@ Item {
         return videos.length > 0;
     }
 
+    // ---- groups made by hand ---------------------------------------------------
+
+    function _urls(videos) {
+        return videos.map(function(video) { return video.url; });
+    }
+
+    // A group that formed by name becomes one kept by hand, so that it can
+    // take a name and members of its own. Returns its id.
+    function _groupId(group) {
+        return group.groupId > 0 ? group.groupId : store.createVideoGroup(group.title, _urls(group.videos));
+    }
+
+    function addToGroup(videos) {
+        if (videos.length === 0)
+            return;
+        groupingVideos = videos;
+        groupPicker.show();
+    }
+
+    function addToNewGroup(videos, name) {
+        store.createVideoGroup(name, _urls(videos));
+    }
+
+    function addToExistingGroup(videos, key) {
+        var group = Library.findGroup(Library.grouped(arranged, "name", sort, descending, manualGroups), key);
+        if (group)
+            store.setVideoGroup(_urls(videos), _groupId(group));
+        _leaveIfGone();
+    }
+
+    // A group left with one video is no group any more; if it was the one
+    // being looked into, go back to the top.
+    function _leaveIfGone() {
+        if (openKey && !openItem && !filter.trim() && !onlyFavourites)
+            openKey = "";
+    }
+
+    function renameGroup(group, name) {
+        store.renameVideoGroup(_groupId(group), name);
+        openKey = "";
+    }
+
+    // Its videos stand alone afterwards, and do not fall back into a group
+    // by name: that is what "Regroup automatically" is for.
+    function ungroup(group) {
+        store.setVideoGroup(_urls(group.videos), 0);
+        openKey = "";
+    }
+
+    // Placed by hand: kept on its own, or the last one left in a group.
+    function isAlone(video) {
+        return manualGroups.members[video.url] !== undefined;
+    }
+
     // What the selection bar's buttons do; each ends the selection, as in VLC.
     function selectionAction(key) {
         var videos = selectedVideos();
+        if (key === "group") {
+            clearSelection();
+            addToGroup(videos);
+            return;
+        }
         if (key === "favourite") {
             var on = !allSelectedFavourites();
             for (var i = 0; i < videos.length; i++)
@@ -223,6 +288,18 @@ Item {
                 store.setSeen(videos[k].url, key === "played", videos[k].duration);
         } else if (key === "favourite") {
             toggleFavourite(item.url);
+        } else if (key === "addToGroup") {
+            addToGroup(videos);
+        } else if (key === "removeFromGroup") {
+            store.setVideoGroup([item.url], 0);
+            _leaveIfGone();
+        } else if (key === "regroup") {
+            store.regroupVideos([item.url]);
+        } else if (key === "rename") {
+            renamingGroup = item;
+            renameDialog.show(item.title);
+        } else if (key === "ungroup") {
+            ungroup(item);
         }
     }
 
@@ -278,6 +355,9 @@ Item {
         displaySheet.close();
         groupingSheet.close();
         itemMenu.close();
+        groupPicker.close();
+        newGroupDialog.close();
+        renameDialog.close();
     }
 
     function openItemMenu(index) {
@@ -401,6 +481,12 @@ Item {
                 glyph: "star"
                 color: page.selecting && page.allSelectedFavourites() ? Theme.accent : Theme.text
                 onClicked: page.selectionAction("favourite")
+            }
+            IconButton {
+                visible: page.canGroup
+                glyph: "folder"
+                color: Theme.text
+                onClicked: page.selectionAction("group")
             }
         }
         Rectangle {
@@ -710,11 +796,16 @@ Item {
                 return [];
             if (item.videos) {
                 var all = page.allSeen(item.videos);
-                return [
+                var groupRows = [
                     { key: "playAll", label: "Play all", glyph: "playlist" },
                     { key: all ? "notPlayed" : "played", glyph: "check",
                       label: all ? "Mark all as not played" : "Mark all as played" }
                 ];
+                if (item.kind === "group") {
+                    groupRows.push({ key: "rename", label: "Rename video group", glyph: "subtitles" });
+                    groupRows.push({ key: "ungroup", label: "Ungroup", glyph: "clear" });
+                }
+                return groupRows;
             }
             var entry = page.played[item.url] || null;
             var seen = entry !== null && entry.seen > 0;
@@ -729,8 +820,62 @@ Item {
                         label: seen ? "Mark as not played" : "Mark as played" });
             rows.push({ key: "favourite", glyph: "star", selected: favourite,
                         label: favourite ? "Remove from favourites" : "Add to favourites" });
+            if (page.canGroup) {
+                rows.push({ key: "addToGroup", label: "Add to video group", glyph: "folder" });
+                if (page.openItem && page.openItem.kind === "group")
+                    rows.push({ key: "removeFromGroup", label: "Remove from video group", glyph: "clear" });
+                else if (page.isAlone(item))
+                    rows.push({ key: "regroup", label: "Regroup automatically", glyph: "refresh" });
+            }
             return rows;
         }
         onChosen: page.itemAction(page.menuItem, key)
+    }
+    // "Add to video group": a new group, as VLC offers for more than one
+    // video, or one of the groups there are.
+    OptionSheet {
+        id: groupPicker
+        parent: page.overlay
+        anchors.fill: parent
+        title: "Add to video group"
+        options: {
+            if (!open)
+                return [];
+            var rows = [];
+            if (page.groupingVideos.length > 1)
+                rows.push({ key: "new", label: "New group", glyph: "add" });
+            var all = Library.grouped(page.arranged, "name", page.sort, page.descending, page.manualGroups);
+            for (var i = 0; i < all.length; i++)
+                if (all[i].videos)
+                    rows.push({ key: all[i].key, label: all[i].title, glyph: "folder",
+                                value: page.countLabel(all[i].videos) });
+            if (rows.length === 0)
+                rows.push({ label: "There are no groups yet. Select two or more videos to make one." });
+            return rows;
+        }
+        onChosen: {
+            if (key === "new")
+                newGroupDialog.show(Library.commonTitle(page.groupingVideos));
+            else
+                page.addToExistingGroup(page.groupingVideos, key);
+        }
+    }
+
+    NameDialog {
+        id: newGroupDialog
+        parent: page.overlay
+        anchors.fill: parent
+        title: "New group"
+        confirmLabel: "Create"
+        onAccepted: page.addToNewGroup(page.groupingVideos, name)
+    }
+
+    NameDialog {
+        id: renameDialog
+        parent: page.overlay
+        anchors.fill: parent
+        title: "Rename video group"
+        confirmLabel: "Rename"
+        onAccepted: page.renameGroup(page.renamingGroup, name)
     }
 }

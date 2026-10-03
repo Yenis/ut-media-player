@@ -78,9 +78,11 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `view <grid\|list>` | How the Video tab shows its videos |
 | `sort <name\|filename\|length\|modified> [desc]`, `favonly <0\|1>`, `filter <text>` | Order and narrowing of the Video tab |
 | `group <name\|folder\|none>`, `opengroup <index>` | How the Video tab groups, and opening the folder or group at that place in the list; `back` leaves it |
-| `itemaction <index> <play\|fromStart\|playAll\|asAudio\|played\|notPlayed\|favourite>` | One choice from the menu of the entry at that place in the list |
+| `itemaction <index> <play\|fromStart\|playAll\|asAudio\|played\|notPlayed\|favourite\|addToGroup\|removeFromGroup\|regroup\|rename\|ungroup>` | One choice from the menu of the entry at that place in the list |
 | `tap <index>`, `tapaction <play\|playAll>` | A tap on the entry at that place in the list, and what a tap on a video does |
-| `select <index>`, `selaction <play\|asAudio\|favourite>` | Adds an entry to the selection or takes it out, and the selection bar's buttons; `back` ends a selection |
+| `select <index>`, `selaction <play\|asAudio\|favourite\|group>` | Adds an entry to the selection or takes it out, and the selection bar's buttons; `back` ends a selection |
+| `newgroup <name>`, `joingroup <index>` | Puts the selection into a new group, or into the group at that place in the list |
+| `renamegroup <index> <name>`, `clearselection` | Renames the group at that place; ends a selection without acting on it |
 | `fav <path>` | Switches a video's favourite mark |
 | `focusfilter`, `hidekeyboard` | Opens the filter with the keyboard, and puts the keyboard away. `state` reports the keyboard's height |
 | `display`, `itemmenu <index>`, `closesheets` | The Video tab's display settings, the menu of the video at that place in the list, and closing both |

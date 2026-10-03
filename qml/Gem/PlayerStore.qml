@@ -15,6 +15,7 @@ QtObject {
     property int revision: 0
     property int bookmarkRevision: 0
     property int favouriteRevision: 0
+    property int groupRevision: 0
 
     // A file counts as finished this close to its end, and as not started this
     // close to its beginning. VLC decides this in its native media library,
@@ -35,6 +36,10 @@ QtObject {
                           + "url TEXT NOT NULL, position INTEGER NOT NULL, title TEXT NOT NULL, "
                           + "PRIMARY KEY(url, position))");
             tx.executeSql("CREATE TABLE IF NOT EXISTS favourites(url TEXT PRIMARY KEY)");
+            // Video groups made by hand. A member row with group 0 keeps a
+            // video on its own, out of the groups that form by name.
+            tx.executeSql("CREATE TABLE IF NOT EXISTS video_groups(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL)");
+            tx.executeSql("CREATE TABLE IF NOT EXISTS video_group_members(url TEXT PRIMARY KEY, group_id INTEGER NOT NULL)");
         });
         DbHandle.handle = opened;
         return opened;
@@ -125,6 +130,61 @@ QtObject {
                 tx.executeSql("DELETE FROM favourites WHERE url = ?", [url]);
         });
         favouriteRevision++;
+    }
+
+    // The groups made by hand: { names: { id: name }, members: { url: id } }.
+    // A member with id 0 is a video kept on its own.
+    function videoGroups() {
+        var data = { names: {}, members: {} };
+        db().readTransaction(function(tx) {
+            var groups = tx.executeSql("SELECT id, name FROM video_groups").rows;
+            for (var i = 0; i < groups.length; i++)
+                data.names[groups.item(i).id] = groups.item(i).name;
+            var members = tx.executeSql("SELECT url, group_id FROM video_group_members").rows;
+            for (var k = 0; k < members.length; k++)
+                data.members[members.item(k).url] = members.item(k).group_id;
+        });
+        return data;
+    }
+
+    function _assign(tx, urls, id) {
+        for (var i = 0; i < urls.length; i++)
+            tx.executeSql("INSERT OR REPLACE INTO video_group_members(url, group_id) VALUES(?, ?)", [urls[i], id]);
+        // A group nobody is in any more is gone.
+        tx.executeSql("DELETE FROM video_groups WHERE id NOT IN (SELECT group_id FROM video_group_members)");
+    }
+
+    function createVideoGroup(name, urls) {
+        var id = 0;
+        db().transaction(function(tx) {
+            id = parseInt(tx.executeSql("INSERT INTO video_groups(name) VALUES(?)", [name]).insertId);
+            _assign(tx, urls, id);
+        });
+        groupRevision++;
+        return id;
+    }
+
+    // Into group `id`; 0 keeps each of them on its own.
+    function setVideoGroup(urls, id) {
+        db().transaction(function(tx) { _assign(tx, urls, id); });
+        groupRevision++;
+    }
+
+    function renameVideoGroup(id, name) {
+        db().transaction(function(tx) {
+            tx.executeSql("UPDATE video_groups SET name = ? WHERE id = ?", [name, id]);
+        });
+        groupRevision++;
+    }
+
+    // Back to the groups that form by name.
+    function regroupVideos(urls) {
+        db().transaction(function(tx) {
+            for (var i = 0; i < urls.length; i++)
+                tx.executeSql("DELETE FROM video_group_members WHERE url = ?", [urls[i]]);
+            tx.executeSql("DELETE FROM video_groups WHERE id NOT IN (SELECT group_id FROM video_group_members)");
+        });
+        groupRevision++;
     }
 
     // [{ position, title }] for a file, in playing order.

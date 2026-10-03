@@ -9,6 +9,7 @@ Glyph 1.0 Glyph.qml
 GroupThumb 1.0 GroupThumb.qml
 IconButton 1.0 IconButton.qml
 MorePage 1.0 MorePage.qml
+NameDialog 1.0 NameDialog.qml
 OptionSheet 1.0 OptionSheet.qml
 PageHeader 1.0 PageHeader.qml
 PlaceholderPage 1.0 PlaceholderPage.qml

@@ -1,12 +1,49 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Groups made by hand, version 0.0.10
+
+### Checked on the computer, 3 October 2026
+
+The grouping rules in `qml/js/Library.js`, run under node with made-up names.
+
+| Check | Result |
+|---|---|
+| Two videos put into a group by hand show as that group, under its name; the groups by name around them are unchanged | Pass |
+| A video kept on its own leaves its group by name; the others stay grouped | Pass |
+| The only video of a group shows as a video | Pass |
+| A video pointing at a group that no longer exists falls back to grouping by name | Pass |
+
+### Checked over adb, 3 October 2026
+
+| Check | Result |
+|---|---|
+| New group "Codecs" from two selected videos: one entry, 2 videos, both thumbnails | Pass |
+| Adding a video to `series-episode`, a group that formed by name: 3 videos | Pass |
+| Renaming it to "My series" | Pass |
+| A group's menu: Play all, Mark all as played, Rename video group, Ungroup | Pass (layout) |
+| A video's menu inside a group has "Remove from video group"; on its own after ungrouping, "Regroup automatically" | Pass (layout) |
+| Removing a video from a group of three leaves the group open with two; removing another returns to the top, the group being gone | Pass. At first the page stayed on the emptied group; fixed |
+| Ungroup: the three videos stand alone and do not fall back into a group by name | Pass |
+| Regroup automatically: `series-episode` forms again | Pass |
+| The rename dialog, with its text selected, sits above the keyboard | Pass (layout) |
+| "Add to video group" from a selection lists "New group" and the groups there are | Pass (layout) |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Select two videos → folder button → New group → type a name → Create | Still to do |
+| Rename a group by typing; Cancel and a tap beside the dialog leave it unchanged | Still to do |
+| Add one video to an existing group from its menu | Still to do |
+| Ungroup, then Regroup automatically, from the menus | Still to do |
 
 ## Multiple selection, version 0.0.9
 

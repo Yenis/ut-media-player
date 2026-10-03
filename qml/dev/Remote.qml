@@ -89,6 +89,10 @@ Item {
         else if (name === "selaction") shell.videoLibrary.selectionAction(argument);
         else if (name === "tapaction") shell.videoLibrary.setTapAction(argument);
         else if (name === "tap") shell.videoLibrary.activate(shell.videoLibrary.shown[parseInt(argument)]);
+        else if (name === "newgroup") shell.videoLibrary.addToNewGroup(shell.videoLibrary.selectedVideos(), argument);
+        else if (name === "joingroup") shell.videoLibrary.addToExistingGroup(shell.videoLibrary.selectedVideos(), shell.videoLibrary.shown[parseInt(argument)].key);
+        else if (name === "renamegroup") shell.videoLibrary.renameGroup(shell.videoLibrary.shown[parseInt(argument.split(" ")[0])], argument.split(" ").slice(1).join(" "));
+        else if (name === "clearselection") shell.videoLibrary.clearSelection();
         else if (name === "favonly") shell.videoLibrary.setOnlyFavourites(argument === "1");
         else if (name === "filter") shell.videoLibrary.setFilter(argument);
         else if (name === "fav") shell.videoLibrary.toggleFavourite("file://" + argument);

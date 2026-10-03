@@ -5,8 +5,9 @@ Status: **Milestone 1 reached on 2 October 2026: a working video player**
 with VLC's five tabs is in (version 0.0.4), and the Video tab has its grid and
 list (version 0.0.5), its sorting, favourites and filter (version 0.0.6) and
 grouping by folder and by name (version 0.0.7), and the video queue with the
-item menu (version 0.0.8), and multiple selection (version 0.0.9). Manual
-groups and the media information screen are next. Target device is the
+item menu (version 0.0.8), multiple selection (version 0.0.9) and groups made
+by hand (version 0.0.10). The media information screen is next, then the
+Discuss items and the note on networking. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
 
@@ -388,7 +389,7 @@ Discuss items this phase reached, for a decision (D2):
 | Sleep timer and A-B repeat while the app is in the background | The app adding itself to the system's list of apps that are not frozen | An opt-in switch in Settings, Phase 4 |
 | Pop-up player | The platform has no floating windows | Drop |
 | Subtitle download | An account with an online subtitle service, and a file hash | After 0.1.0 |
-| Renaming a bookmark | A text field in a turned player; the system keyboard appears on the window's edge, not the content's | With playlists in Phase 4, which need naming too |
+| Renaming a bookmark | A text field in a turned player; the system keyboard appears on the window's edge, not the content's | With playlists in Phase 4, which need naming too. The name dialog exists since 0.0.10 (`NameDialog.qml`); what is left is using it in a turned player |
 
 ## Phase 2 - App shell and video library
 
@@ -397,6 +398,7 @@ How it is built:
 | Part | File | What it does |
 |---|---|---|
 | Shell | `qml/Gem/AppShell.qml`, `TabBar.qml` | The bar along the bottom and the page behind each tab. The players cover both |
+| Asking for a name | `qml/Gem/NameDialog.qml` | One line of text with Cancel and a confirming button, placed clear of the keyboard. For groups now, playlists and bookmarks later |
 | Order, filter, favourites, grouping | `qml/js/Library.js`, `qml/Gem/SearchField.qml`, `PlayerStore.qml`, `GroupThumb.qml` | What the list shows and in which order; folders and groups; the filter's text field; favourites in the app's database |
 | Queue | `qml/Gem/Playback.qml`, `PlayerControls.qml`, `VideoPlayerPage.qml` | The list of what plays after what, moved on by the app; previous, next and the queue's list in the player |
 | Video tab | `qml/Gem/VideoLibraryPage.qml`, `VideoThumb.qml` | The videos on the phone as a grid of cards or a list, after VLC's `video_grid_card.xml` and `video_list_card.xml`. The choice is remembered |
@@ -412,8 +414,11 @@ How it is built:
       the clone: names that begin with the same six characters, ignoring case
       and a leading "the", as remembered and still to be checked against the
       source. A folder or group opens in place, with a way back in the header.
-- [ ] Manual groups: add to group, rename, ungroup, regroup automatically.
-      They need the item menu, multiple selection and a name field.
+- [x] Manual groups (version 0.0.10), under "Group by name": add to a new or
+      an existing group, remove from a group, rename, ungroup, regroup
+      automatically. Kept in the app's database. A group that formed by name
+      becomes one kept by hand the moment it is renamed or added to. Ungrouped
+      videos stay on their own until "Regroup automatically", as in VLC.
 - [x] Sorting, "only favourites", filter within the list (version 0.0.6).
       Sorts: name, file name, length, recently added. VLC's "insertion date"
       is left out: the system's library does not record it. A video's menu
