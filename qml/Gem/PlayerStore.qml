@@ -85,6 +85,20 @@ QtObject {
         revision++;
     }
 
+    // "Mark as played" and "Mark as not played": either way the file starts
+    // from its beginning next time.
+    function setSeen(url, on, duration) {
+        if (!url)
+            return;
+        db().transaction(function(tx) {
+            tx.executeSql("INSERT OR IGNORE INTO media(url) VALUES(?)", [url]);
+            tx.executeSql("UPDATE media SET position = 0, seen = ?, "
+                          + "duration = CASE WHEN duration > 0 THEN duration ELSE ? END WHERE url = ?",
+                          [on ? 1 : 0, Math.round(duration || 0), url]);
+        });
+        revision++;
+    }
+
     // Played to the end: back to the start, and marked as seen.
     function finish(url, duration) {
         save(url, duration, duration);

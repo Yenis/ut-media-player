@@ -8,7 +8,8 @@ import "../js/Library.js" as Library
  * The Video tab: the videos on the phone, as a grid of cards or as a list,
  * sorted, filtered, narrowed to the favourites and grouped by folder or by
  * name as VLC's display settings allow. A folder or group opens in place,
- * with a way back in the header. The rest of the item menu goes here.
+ * with a way back in the header. Every entry has a menu behind its three
+ * dots; multiple selection goes here.
  */
 Item {
     id: page
@@ -45,9 +46,10 @@ Item {
     readonly property var openItem: openKey ? Library.findGroup(topLevel, openKey) : null
     readonly property var shown: openKey ? (openItem ? openItem.videos : []) : topLevel
 
-    property var menuVideo: null        // the video the item menu is open for
+    property var menuItem: null         // the video, folder or group the item menu is open for
 
-    signal mediaChosen(var media)
+    // Play `list` from its item `index`. options: { fromStart, asAudio }.
+    signal playRequested(var list, int index, var options)
 
     function reload() {
         videos = library ? library.videos() : [];
@@ -95,7 +97,51 @@ Item {
         if (item.videos)
             openKey = item.key;
         else
-            mediaChosen(item);
+            playRequested([item], 0, {});
+    }
+
+    // Every video on screen, the folders' and groups' included, in order.
+    function allShown() {
+        var list = [];
+        for (var i = 0; i < shown.length; i++) {
+            if (shown[i].videos)
+                list = list.concat(shown[i].videos);
+            else
+                list.push(shown[i]);
+        }
+        return list;
+    }
+
+    // One choice from an entry's menu.
+    function itemAction(item, key) {
+        if (!item)
+            return;
+        var videos = item.videos || [item];
+        if (key === "play") {
+            playRequested(videos, 0, {});
+        } else if (key === "fromStart") {
+            playRequested([item], 0, { fromStart: true });
+        } else if (key === "playAll") {
+            // From this video on through everything shown; a folder or group
+            // plays its own videos.
+            if (item.videos) {
+                playRequested(videos, 0, {});
+            } else {
+                var all = allShown();
+                var at = 0;
+                for (var i = 0; i < all.length; i++)
+                    if (all[i].url === item.url)
+                        at = i;
+                playRequested(all, at, {});
+            }
+        } else if (key === "asAudio") {
+            playRequested([item], 0, { asAudio: true });
+        } else if (key === "played" || key === "notPlayed") {
+            for (var k = 0; k < videos.length; k++)
+                store.setSeen(videos[k].url, key === "played", videos[k].duration);
+        } else if (key === "favourite") {
+            toggleFavourite(item.url);
+        }
     }
 
     function allSeen(videos) {
@@ -153,13 +199,13 @@ Item {
     }
 
     function openItemMenu(index) {
-        if (index >= 0 && index < shown.length && !shown[index].videos)
+        if (index >= 0 && index < shown.length)
             openMenuFor(shown[index]);
     }
 
-    function openMenuFor(video) {
+    function openMenuFor(item) {
         search.dismiss();
-        menuVideo = video;
+        menuItem = item;
         itemMenu.show();
     }
 
@@ -339,7 +385,6 @@ Item {
 
             // The item menu, on the thumbnail's corner as in VLC.
             IconButton {
-                visible: !card.isGroup
                 anchors { right: cardThumb.right; top: cardThumb.top }
                 implicitWidth: Theme.u(4.5)
                 implicitHeight: Theme.u(4.5)
@@ -424,7 +469,6 @@ Item {
 
             IconButton {
                 id: rowMore
-                visible: !row.isGroup
                 anchors { right: parent.right; rightMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
                 glyphSize: Theme.u(2.2)
                 glyph: "more"
@@ -481,26 +525,41 @@ Item {
         onChosen: page.setGrouping(key)
     }
 
-    // A video's own menu. VLC's has many more entries; they join it with the
-    // item menu step of Phase 2.
+    // An entry's own menu, in VLC's order (ContextSheet.kt). An entry appears
+    // only when it can do something: the queue entries wait for a player that
+    // keeps playing behind the library, playlists and groups for theirs.
     OptionSheet {
         id: itemMenu
         parent: page.overlay
         anchors.fill: parent
-        title: page.menuVideo ? page.menuVideo.title : ""
+        title: page.menuItem ? page.menuItem.title : ""
         options: {
-            var favourite = page.menuVideo ? !!page.favourites[page.menuVideo.url] : false;
-            return [
-                { key: "play", label: "Play", glyph: "play" },
-                { key: "favourite", glyph: "star", selected: favourite,
-                  label: favourite ? "Remove from favourites" : "Add to favourites" }
-            ];
+            var item = page.menuItem;
+            if (!item)
+                return [];
+            if (item.videos) {
+                var all = page.allSeen(item.videos);
+                return [
+                    { key: "playAll", label: "Play all", glyph: "playlist" },
+                    { key: all ? "notPlayed" : "played", glyph: "check",
+                      label: all ? "Mark all as not played" : "Mark all as played" }
+                ];
+            }
+            var entry = page.played[item.url] || null;
+            var seen = entry !== null && entry.seen > 0;
+            var favourite = !!page.favourites[item.url];
+            var rows = [{ key: "play", label: "Play", glyph: "play" }];
+            if (entry !== null && entry.position > 0)
+                rows.push({ key: "fromStart", label: "Play from start", glyph: "previous" });
+            if (page.allShown().length > 1)
+                rows.push({ key: "playAll", label: "Play all", glyph: "playlist" });
+            rows.push({ key: "asAudio", label: "Play as audio", glyph: "audio" });
+            rows.push({ key: seen ? "notPlayed" : "played", glyph: "check",
+                        label: seen ? "Mark as not played" : "Mark as played" });
+            rows.push({ key: "favourite", glyph: "star", selected: favourite,
+                        label: favourite ? "Remove from favourites" : "Add to favourites" });
+            return rows;
         }
-        onChosen: {
-            if (key === "play")
-                page.mediaChosen(page.menuVideo);
-            else if (key === "favourite")
-                page.toggleFavourite(page.menuVideo.url);
-        }
+        onChosen: page.itemAction(page.menuItem, key)
     }
 }

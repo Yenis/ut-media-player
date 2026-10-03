@@ -71,6 +71,9 @@ Item {
         if (name === "open") shell.openPath(argument);
         else if (name === "play") p.play();
         else if (name === "pause") p.pause();
+        else if (name === "next") p.next();
+        else if (name === "previous") p.previous();
+        else if (name === "queuejump") p.jumpTo(parseInt(argument));
         else if (name === "seek") p.seekTo(parseInt(argument));
         else if (name === "seekby") p.seekBy(parseInt(argument));
         else if (name === "audio") shell.toAudio();
@@ -89,6 +92,7 @@ Item {
         else if (name === "hidekeyboard") shell.videoLibrary.dismissKeyboard();
         else if (name === "display") shell.videoLibrary.openDisplaySheet();
         else if (name === "closesheets") shell.videoLibrary.closeSheets();
+        else if (name === "itemaction") shell.videoLibrary.itemAction(shell.videoLibrary.shown[parseInt(argument.split(" ")[0])], argument.split(" ")[1]);
         else if (name === "itemmenu") shell.videoLibrary.openItemMenu(parseInt(argument));
         else if (name === "diagnostics") shell.page = "diagnostics";
         else if (v && name === "controls") { if (argument === "1") v.showControls(); else v.controlsShown = false; }
@@ -115,7 +119,7 @@ Item {
         var p = shell.playback;
         var v = shell.videoPage;
         console.log("REMOTE STATE " + JSON.stringify({
-            page: shell.page, tab: shell.tab, grid: shell.videoLibrary.grid, shown: shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, playing: p.playing, position: p.position,
+            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, grid: shell.videoLibrary.grid, shown: shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, playing: p.playing, position: p.position,
             raw: p.player.position, duration: p.duration, audioMode: p.audioMode,
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
             error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd],

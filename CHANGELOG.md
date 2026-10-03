@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.0.8 - unreleased
+
+- A queue. "Play all" in a video's menu plays everything shown, from that
+  video on; in a folder's or group's menu it plays what is inside. Each video
+  follows the one before by itself.
+- In the player, with more than one video queued: previous and next beside
+  play, and a button at the top right that lists the queue. A tap on an entry
+  goes to it. Previous goes back to the start of a video that is more than
+  five seconds in, and to the video before otherwise, as in VLC.
+- A video's menu gained Play from start, Play all, Play as audio, and Mark as
+  played or not played. Folders and groups have a menu too: Play all, and
+  Mark all as played or not played.
+- Keyboard: N and P, and the media keys, for next and previous.
+- **Fixed:** subtitles were drawn on top of the player's menus.
+
 ## 0.0.7 - 3 October 2026
 
 - Videos can be grouped, from "Group videos" in the display settings: by

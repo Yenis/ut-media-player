@@ -211,6 +211,14 @@ Canvas {
             }
             fill(tips);
             break;
+        case "next":
+            fill([0.16, 0.18, 0.16, 0.82, 0.66, 0.5]);
+            ctx.fillRect(w * 0.72, w * 0.18, w * 0.12, w * 0.64);
+            break;
+        case "previous":
+            fill([0.84, 0.18, 0.84, 0.82, 0.34, 0.5]);
+            ctx.fillRect(w * 0.16, w * 0.18, w * 0.12, w * 0.64);
+            break;
         case "refresh":
             arc(0.5, 0.5, 0.38, 0.45, 1.95);
             fill([0.32, 0.84, 0.62, 0.78, 0.5, 1.0]);

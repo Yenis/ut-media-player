@@ -9,7 +9,9 @@ import "../js/Format.js" as Format
  *
  * The layout follows VLC for Android's player_hud.xml: time, seek bar and
  * length in one row; under it the orientation button on the left, play in the
- * middle, resize and "more" on the right.
+ * middle, resize and "more" on the right. With more than one item in the
+ * queue, previous and next sit beside play and the queue button joins the
+ * title bar.
  */
 Item {
     id: hud
@@ -22,9 +24,11 @@ Item {
     property var chips: []              // [{ key, label }]: what is switched on, VLC's "quick actions"
 
     readonly property bool dragging: seekBar.dragging
+    readonly property bool hasQueue: playback ? playback.queue.length > 1 : false
 
     signal back()
     signal menuRequested()
+    signal queueRequested()
     signal aspectTapped()
     signal aspectHeld()
     signal orientationTapped()
@@ -51,13 +55,24 @@ Item {
     }
 
     Text {
-        anchors { left: backButton.right; leftMargin: Theme.u(0.5); right: parent.right; rightMargin: Theme.u(2)
+        anchors { left: backButton.right; leftMargin: Theme.u(0.5)
+                  right: queueButton.visible ? queueButton.left : parent.right
+                  rightMargin: queueButton.visible ? Theme.u(0.5) : Theme.u(2)
                   verticalCenter: backButton.verticalCenter }
         text: hud.playback ? hud.playback.title : ""
         color: Theme.text
         font.pixelSize: Theme.fontM
         elide: Text.ElideRight
         maximumLineCount: 1
+    }
+
+    IconButton {
+        id: queueButton
+        visible: hud.hasQueue
+        anchors { right: parent.right; rightMargin: Theme.u(0.5); verticalCenter: backButton.verticalCenter }
+        glyph: "playlist"
+        color: Theme.text
+        onClicked: { hud.queueRequested(); hud.interacted(); }
     }
 
     Row {
@@ -123,6 +138,24 @@ Item {
         }
 
         IconButton {
+            visible: hud.hasQueue
+            anchors { right: playButton.left; verticalCenter: parent.verticalCenter }
+            glyph: "previous"
+            color: Theme.text
+            onClicked: { hud.playback.previous(); hud.interacted(); }
+        }
+
+        IconButton {
+            visible: hud.hasQueue
+            anchors { left: playButton.right; verticalCenter: parent.verticalCenter }
+            glyph: "next"
+            color: Theme.text
+            enabled: hud.playback ? hud.playback.hasNext : false
+            onClicked: { hud.playback.next(); hud.interacted(); }
+        }
+
+        IconButton {
+            id: playButton
             anchors.centerIn: parent
             implicitWidth: Theme.u(8)
             implicitHeight: Theme.u(7)

@@ -4,8 +4,9 @@ Status: **Milestone 1 reached on 2 October 2026: a working video player**
 (version 0.0.3). Phases 0 and 1 are done. Phase 2 is under way: the app shell
 with VLC's five tabs is in (version 0.0.4), and the Video tab has its grid and
 list (version 0.0.5), its sorting, favourites and filter (version 0.0.6) and
-grouping by folder and by name (version 0.0.7). Manual groups, the item menu
-and the video queue are next. Target device is the
+grouping by folder and by name (version 0.0.7), and the video queue with the
+item menu (version 0.0.8). Multiple selection, manual groups and the media
+information screen are next. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
 
@@ -375,6 +376,7 @@ What the platform limits, found while building:
 
 | Feature | Limit | Way out |
 |---|---|---|
+| Queue played as audio (found in Phase 2) | The app moves the queue on, and the app is frozen in the background. Behind the lock screen the current item plays to its end and the next starts only when the app is opened | Hand the list to media-hub, which advances it by itself **[device]** (the `Playlist` type). Planned with the audio queue in Phase 3 |
 | Sleep timer, A-B repeat | They run in the app, and Ubuntu Touch freezes an app a few seconds after it leaves the foreground or the screen goes off. For a video on screen they work. For audio behind the lock screen the timer fires late, when the app is next opened | The system exempts apps listed in the setting `lifecycle-exempt-appids`, which holds the stock Music app. An unconfined app can add itself. To discuss |
 | Seeking, A-B repeat, bookmarks, resume | A seek lands on the keyframe before its target, so all four start a little early | None on this backend |
 
@@ -396,6 +398,7 @@ How it is built:
 |---|---|---|
 | Shell | `qml/Gem/AppShell.qml`, `TabBar.qml` | The bar along the bottom and the page behind each tab. The players cover both |
 | Order, filter, favourites, grouping | `qml/js/Library.js`, `qml/Gem/SearchField.qml`, `PlayerStore.qml`, `GroupThumb.qml` | What the list shows and in which order; folders and groups; the filter's text field; favourites in the app's database |
+| Queue | `qml/Gem/Playback.qml`, `PlayerControls.qml`, `VideoPlayerPage.qml` | The list of what plays after what, moved on by the app; previous, next and the queue's list in the player |
 | Video tab | `qml/Gem/VideoLibraryPage.qml`, `VideoThumb.qml` | The videos on the phone as a grid of cards or a list, after VLC's `video_grid_card.xml` and `video_list_card.xml`. The choice is remembered |
 | Tabs still to be built | `qml/Gem/PlaceholderPage.qml` | Audio (Phase 3), Browse and Playlists (Phase 4) say what will be there |
 | More tab | `qml/Gem/MorePage.qml` | The version, and the way to the diagnostics page. Streams, history and settings join it in Phase 4 |
@@ -416,8 +419,18 @@ How it is built:
       is left out: the system's library does not record it. A video's menu
       has its first two entries, Play and the favourite switch, so that there
       are favourites to show; the rest comes with the item menu below.
-- [ ] Item menu and multiple selection; default action on tap.
-- [ ] Video queue: play a folder or group in order, queue shown over the video.
+- [x] Item menu (version 0.0.8), in VLC's order. A video: Play, Play from
+      start, Play all, Play as audio, Mark as played or not played, favourite.
+      A folder or group: Play all, Mark all as played or not played.
+- [x] Video queue (version 0.0.8): play a folder or group in order, or
+      everything shown from one video on; previous and next in the player;
+      queue shown over the video, a tap goes to that item.
+- [ ] Multiple selection; default action on tap.
+- [ ] Menu entries that wait for something else: "Insert next" and "Append"
+      for a player that keeps playing behind the library (the mini-player of
+      Phase 3), "Add to playlist" for Phase 4, "Add to group" for manual
+      groups, "Information" for its screen below. Delete, rename and share
+      are Discuss items (compiled code; sharing was not tried in the spike).
 - [ ] Media information screen.
 - [ ] Discuss, when reached: choosing library folders, film metadata.
 

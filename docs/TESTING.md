@@ -1,11 +1,40 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the video library (versions 0.0.5 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
+is the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Queue and item menu, version 0.0.8
+
+### Checked over adb, 3 October 2026
+
+| Check | Result |
+|---|---|
+| A video's menu: Play, Play from start (only with a resume point), Play all, Play as audio, Mark as played, Add to favourites | Pass (layout) |
+| A folder's menu: Play all, Mark all as played | Pass (layout) |
+| Play all from `series-episode-1`: the queue is all 12 videos, at 8 of 12 | Pass |
+| The next video starts by itself when one ends | Pass: `series-episode-2` followed after the 10 s clip |
+| Next; previous within 5 s goes to the video before; previous later restarts the video | Pass |
+| The queue's list over the video, the playing one marked; jumping to the last entry | Pass |
+| The last video ends: back to the library, queue empty | Pass |
+| Play as audio from the menu opens the audio page | Pass |
+| Play resumes (`long-35min` at 2:00); Play from start begins at 0, with the file still loaded and after another file | Pass. It failed at first: a file still loaded played on from where it was paused. Fixed by seeking to 0 once it has started |
+| Mark as played puts the tick on; Mark as not played takes it off | Pass |
+| Play all on a folder plays its videos | Pass |
+| Subtitles are no longer drawn over an open menu | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Previous, next and the queue button by touch; a tap in the queue's list | Still to do |
+| The three dots on a folder and a group | Still to do |
+| Play all, then turn the phone: the next video keeps the rotation and picture size | Still to do |
+| A queue played as audio with the screen off stops after the current video (the known limit) | Still to do |
 
 ## Video library, version 0.0.7
 

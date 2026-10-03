@@ -47,8 +47,8 @@ FocusScope {
     Playback {
         id: core
         store: playerStore
-        // Nothing follows yet; a queue comes with Phase 2.
-        onEnded: if (shell.page === "video" || shell.page === "audio") shell.page = "home"
+        onEnded: if (shell.page === "video" || shell.page === "audio") shell.closePlayer()
+        onMediaChanged: if (shell.page === "video") videoView.reset()
     }
 
     SleepTimer {
@@ -71,10 +71,21 @@ FocusScope {
     }
 
     function openMedia(media) {
-        core.open(media);
-        if (media.hasPicture)
+        playList([media], 0, {});
+    }
+
+    // Plays a list from its item `index`. options: { fromStart, asAudio }.
+    function playList(list, index, options) {
+        if (list.length === 0)
+            return;
+        var first = list[Math.max(0, Math.min(index, list.length - 1))];
+        core.openQueue(list, index, !!options.fromStart);
+        if (options.asAudio || !first.hasPicture) {
+            toAudio();
+        } else {
             videoView.reset();
-        page = media.hasPicture ? "video" : "audio";
+            page = "video";
+        }
     }
 
     // A file from outside the list: another app, or a path.
@@ -103,6 +114,7 @@ FocusScope {
     // Leaving a player: a video stops with its page.
     function closePlayer() {
         core.pause();
+        core.clearQueue();
         core.audioMode = false;
         page = "home";
     }
@@ -168,7 +180,7 @@ FocusScope {
                 library: shell.library
                 store: playerStore
                 overlay: home
-                onMediaChosen: shell.openMedia(media)
+                onPlayRequested: shell.playList(list, index, options)
             }
             PlaceholderPage {
                 anchors.fill: parent

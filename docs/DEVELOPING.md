@@ -72,17 +72,19 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 |---|---|
 | `open <path>` | Opens a file in the player |
 | `play`, `pause`, `seek <ms>`, `seekby <ms>` | Playback |
+| `next`, `previous`, `queuejump <index>` | The queue |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
 | `tab <video\|audio\|browse\|playlists\|more>` | Shows a tab |
 | `view <grid\|list>` | How the Video tab shows its videos |
 | `sort <name\|filename\|length\|modified> [desc]`, `favonly <0\|1>`, `filter <text>` | Order and narrowing of the Video tab |
 | `group <name\|folder\|none>`, `opengroup <index>` | How the Video tab groups, and opening the folder or group at that place in the list; `back` leaves it |
+| `itemaction <index> <play\|fromStart\|playAll\|asAudio\|played\|notPlayed\|favourite>` | One choice from the menu of the entry at that place in the list |
 | `fav <path>` | Switches a video's favourite mark |
 | `focusfilter`, `hidekeyboard` | Opens the filter with the keyboard, and puts the keyboard away. `state` reports the keyboard's height |
 | `display`, `itemmenu <index>`, `closesheets` | The Video tab's display settings, the menu of the video at that place in the list, and closing both |
 | `controls <0\|1>`, `lock <0\|1>`, `aspect <index>` | Player state |
 | `angle <0\|90\|270>`, `follow` | Force the content's rotation, or follow the sensor again |
-| `sheet <menu\|aspects\|subtitles\|bookmarks\|info\|jump\|sleep>` | Opens a sheet |
+| `sheet <menu\|aspects\|subtitles\|bookmarks\|info\|jump\|sleep\|queue>` | Opens a sheet |
 | `volume <delta>`, `brightness <delta>`, `subdelay <ms>` | What the swipes and keys do |
 | `bookmark`, `ab`, `screenshot`, `sleep <ms>`, `tapseek <back\|forward>` | Menu actions |
 | `info <text>`, `level <volume\|brightness>` | Shows an overlay for five seconds |
@@ -128,6 +130,7 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | Expect a seek to land early and late | It goes to the keyframe before the target and takes 0.4 to 1.5 s; a seek before playback has started is ignored |
 | Do not trust `hasAudio`, `metaData` or `volume` | Wrong, empty, and ignored |
 | Set your own time limit when opening a stream | A dead address raises no error |
+| A file that is still loaded plays on from where it was paused | Opening the same address again does not rewind it; "Play from start" has to seek to 0 once playback has started |
 | Pause a video yourself when the app is suspended | media-hub plays on behind the lock screen and other apps |
 | Nothing in the app runs while it is in the background | The app is frozen a few seconds after it leaves the foreground; playback continues without it |
 

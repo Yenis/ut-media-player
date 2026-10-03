@@ -20,6 +20,12 @@ import Gem 1.0
  *    never stops: it pauses;
  *  - hasAudio and metaData are unreliable, and `seekable` changes without a
  *    signal.
+ *
+ * The queue is kept here and moved on by this process, so it advances only
+ * while the app runs. A video is in front when it plays, so that holds; a
+ * queue played as audio behind the lock screen stops at the end of its
+ * current item until the app is opened. Phase 3's audio queue will hand the
+ * list to media-hub instead.
  */
 Item {
     id: playback
@@ -36,6 +42,16 @@ Item {
     property bool audioMode: false
 
     property string error: ""
+
+    // What plays after what. `queue` holds media as `open` takes them.
+    property var queue: []
+    property int queueIndex: -1
+    readonly property bool hasNext: queueIndex >= 0 && queueIndex < queue.length - 1
+    readonly property bool hasPrevious: queueIndex > 0
+
+    // VLC's rule for "previous": this long into a file it goes back to the
+    // file's start, earlier than that to the file before (PlaylistManager.kt).
+    readonly property int previousLimit: 5000
 
     // A-B repeat: -1 is unset. With both set, playback loops between them.
     property int abStart: -1
@@ -61,27 +77,71 @@ Item {
     readonly property int position: _seekTarget >= 0 ? _seekTarget
                                                      : Math.max(0, Math.min(mediaPlayer.position, duration > 0 ? duration : mediaPlayer.position))
 
+    // The queue ran out.
     signal ended()
+    // Another item of the queue was loaded.
+    signal mediaChanged()
 
     property int _seekTarget: -1
     property int _lastPosition: 0
     property int _pendingStart: 0       // where to seek once playback has started
     property bool _awaitingStart: false
+    property bool _fromStart: false     // go to 0 once started: the file may still be loaded, part-way
 
     // media: { url, title, duration (ms), hasPicture }
     function open(media) {
+        openQueue([media], 0, false);
+    }
+
+    // Plays `list` from its item `index`. `fromStart` ignores where that item
+    // was left.
+    function openQueue(list, index, fromStart) {
+        queue = list.slice();
+        queueIndex = Math.max(0, Math.min(index, queue.length - 1));
+        audioMode = false;
+        _load(queue[queueIndex], fromStart);
+    }
+
+    function next() {
+        if (hasNext)
+            jumpTo(queueIndex + 1);
+    }
+
+    function previous() {
+        if (hasPrevious && position < previousLimit)
+            jumpTo(queueIndex - 1);
+        else
+            seekTo(0);
+    }
+
+    // Another item of the queue. The mode stays: a queue played as audio goes
+    // on as audio.
+    function jumpTo(index) {
+        if (index < 0 || index >= queue.length || index === queueIndex)
+            return;
+        queueIndex = index;
+        _load(queue[index], false);
+        mediaChanged();
+    }
+
+    function clearQueue() {
+        queue = [];
+        queueIndex = -1;
+    }
+
+    function _load(media, fromStart) {
         saveNow();
         url = media.url.toString();
         title = media.title || "";
         libraryDuration = media.duration || 0;
         libraryHasPicture = !!media.hasPicture;
         playerDuration = 0;
-        audioMode = false;
         error = "";
         abStart = -1;
         abEnd = -1;
         _seekTarget = -1;
-        _pendingStart = store ? store.resumePoint(url) : 0;
+        _pendingStart = store && !fromStart ? store.resumePoint(url) : 0;
+        _fromStart = !!fromStart;
         _awaitingStart = true;
         if (mediaPlayer.source.toString() !== url)
             mediaPlayer.source = url;
@@ -163,7 +223,10 @@ Item {
                 playback._awaitingStart = false;
                 if (playback._pendingStart > 0)
                     playback.seekTo(playback._pendingStart);
+                else if (playback._fromStart && now > 1000)
+                    playback.seekTo(0);
                 playback._pendingStart = 0;
+                playback._fromStart = false;
                 return;
             }
 
@@ -182,9 +245,19 @@ Item {
             if (status === MediaPlayer.EndOfMedia) {
                 if (playback.store)
                     playback.store.finish(playback.url, playback.duration);
-                playback.ended();
+                if (playback.hasNext)
+                    advance.restart();
+                else
+                    playback.ended();
             }
         }
+    }
+
+    // The next item is loaded once the backend has finished ending this one.
+    Timer {
+        id: advance
+        interval: 50
+        onTriggered: playback.next()
     }
 
     // A seek that changes nothing visible (or never lands) must not leave the

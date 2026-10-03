@@ -105,7 +105,7 @@ Item {
     property string tapSeekSide: ""
 
     readonly property bool sheetOpen: menu.open || aspectSheet.open || subtitleSheet.open || bookmarkSheet.open
-                                      || infoSheet.open || jumpPicker.open || sleepPicker.open
+                                      || infoSheet.open || jumpPicker.open || sleepPicker.open || queueSheet.open
 
     function closeSheets() {
         menu.close();
@@ -115,6 +115,7 @@ Item {
         infoSheet.close();
         jumpPicker.close();
         sleepPicker.close();
+        queueSheet.close();
     }
 
     // A new file: unlocked, controls showing. Picture size and brightness stay
@@ -205,6 +206,12 @@ Item {
         case Qt.Key_S:
         case Qt.Key_MediaStop:
             closeRequested(); break;
+        case Qt.Key_N:
+        case Qt.Key_MediaNext:
+            playback.next(); break;
+        case Qt.Key_P:
+        case Qt.Key_MediaPrevious:
+            playback.previous(); break;
         case Qt.Key_T: showControls(); break;
         default:
             return false;
@@ -319,7 +326,7 @@ Item {
     // By name, for the development remote.
     function openSheet(name) {
         var sheets = { menu: menu, aspects: aspectSheet, subtitles: subtitleSheet, bookmarks: bookmarkSheet,
-                       info: infoSheet, jump: jumpPicker, sleep: sleepPicker };
+                       info: infoSheet, jump: jumpPicker, sleep: sleepPicker, queue: queueSheet };
         if (sheets[name])
             sheets[name].show();
     }
@@ -464,7 +471,8 @@ Item {
         // External subtitles, drawn here: white with a dark outline, at the
         // bottom of the picture, or above the controls while those show.
         Text {
-            visible: text !== ""
+            // Above the controls, but out of the way of a sheet.
+            visible: text !== "" && !page.sheetOpen
             z: 1
             anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom
                       bottomMargin: page.controlsShown && !page.locked ? Theme.u(13)
@@ -590,6 +598,7 @@ Item {
             onBack: page.back()
             onInteracted: page.showControls()
             onMenuRequested: page.openMenu()
+            onQueueRequested: queueSheet.show()
             onAspectTapped: page.nextAspect()
             onAspectHeld: page.openAspectList()
             onSubtitlesTapped: subtitleSheet.show()
@@ -713,6 +722,24 @@ Item {
                     page.takeScreenshot();
                 }
             }
+        }
+
+        // The queue, over the video. A tap goes to that item.
+        OptionSheet {
+            id: queueSheet
+            anchors.fill: parent
+            title: page.playback ? "Queue \u2013 " + (page.playback.queueIndex + 1) + " of " + page.playback.queue.length
+                                 : "Queue"
+            options: {
+                var list = [];
+                var queue = page.playback ? page.playback.queue : [];
+                for (var i = 0; i < queue.length; i++)
+                    list.push({ key: "" + i, label: queue[i].title, glyph: "video",
+                                selected: i === page.playback.queueIndex,
+                                value: Format.clock(queue[i].duration) });
+                return list;
+            }
+            onChosen: page.playback.jumpTo(parseInt(key))
         }
 
         OptionSheet {
