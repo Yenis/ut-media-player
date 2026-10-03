@@ -44,8 +44,11 @@ each. The core:
 
 ## Privacy
 
-GemPlayer has no accounts and no tracking. Nothing leaves the device except
-the addresses of network streams you choose to open.
+GemPlayer has no accounts and no tracking, and it does nothing over the
+network except play a stream whose address you give it. That address goes to
+the system's player, which fetches the stream; the app itself opens no
+connection. It has no network shares, no casting, no remote control, and
+looks nothing up online.
 
 The app runs unconfined, outside Ubuntu Touch's sandbox, because the system
 does not let a sandboxed third-party player open your music and videos. It

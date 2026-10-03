@@ -30,6 +30,7 @@ The goal is every VLC feature, where feasible. Each feature gets one verdict:
 | **Build** | Own QML over the system backend. Nothing known stands in the way |
 | **Spike Sn** | Buildable if spike row Sn in [PLAN.md](PLAN.md) passes on the Pixel 3a |
 | **Discuss** | The system backend does not offer it. Not dropped: when the work reaches it, we decide together whether another route is worth trying |
+| **Dropped** | Decided against. So far only by D13 in [PLAN.md](PLAN.md): nothing over the network except playing streams |
 | **N/A** | Tied to Android itself; has no counterpart on Ubuntu Touch |
 
 ---
@@ -44,8 +45,8 @@ The goal is every VLC feature, where feasible. Each feature gets one verdict:
 | `application/mediadb` | Room database: browser favourites, external subtitles, equalizer presets, widgets | Shape of the app's own data |
 | `medialibrary` | Java wrapper over VLC's native media library | Ignored; MediaScanner replaces it |
 | `application/television` | Android TV interface | Ignored |
-| `application/remote-access-server`, `remote-access-client` | Web remote control | Discuss, see [Other](#other) |
-| `application/moviepedia` | Film and series metadata lookup | Discuss |
+| `application/remote-access-server`, `remote-access-client` | Web remote control | Dropped (D13) |
+| `application/moviepedia` | Film and series metadata lookup | Dropped (D13) |
 | `application/donations`, `live-plot-graph`, `app` | Donations, the statistics graph, app entry point and tests | Ignored |
 
 Packages inside `src/`:
@@ -128,7 +129,7 @@ Source: `res/layout/player_hud.xml`, `player_hud_right.xml`,
 | Lock | Hides the controls and ignores touches until unlocked by a swipe | Build |
 | Orientation button | Locks to the current orientation; a setting chooses automatic, portrait, landscape, reverse landscape or last locked | Build, by rotating the player's own content. The system's rotation follows the user's rotation lock **[device]**, which a video player has to override |
 | Aspect button | Tap cycles the main modes, long press lists all twelve | Build |
-| Tracks button | Audio track, subtitle track, video track, pick a subtitle file, download subtitles | External subtitles: Spike S10. The rest: Discuss |
+| Tracks button | Audio track, subtitle track, video track, pick a subtitle file, download subtitles | External subtitles: Spike S10. Download: Dropped (D13). The rest: Discuss |
 | Queue button | Shows the play queue over the video | Build |
 | Quick-action chips | Appear when sleep timer, speed, a delay or orientation lock is active; tap to change | Build for sleep and orientation |
 | Brightness, volume and info overlays | Vertical bar with a percentage; short text for seek and aspect changes | Build |
@@ -178,7 +179,7 @@ audio player with a different set of entries.
 | Screenshot | Button or gesture; saves a frame | `src/gui/video/VideoPlayerScreenshotDelegate.kt` | Build. `grabToImage` returns the real picture **[device]** |
 | Keyboard | Space, arrows, media keys and letter shortcuts | `VideoPlayerActivity.kt` `onKeyDown` | Build |
 | Hardware acceleration, deblocking, frame skip, preferred resolution, fast seek | Decoder settings | `res/xml/preferences.xml`, `preferences_adv.xml` | Discuss (the backend decides these itself) |
-| Secondary display, cast to a renderer | Chromecast and presentation displays | `src/RendererDelegate.kt` | Discuss |
+| Secondary display, cast to a renderer | Chromecast and presentation displays | `src/RendererDelegate.kt` | Dropped (D13) |
 
 ### Subtitles
 
@@ -188,7 +189,7 @@ audio player with a different set of entries.
 | Embedded subtitle tracks | Listed and selectable | `src/gui/dialogs/VideoTracksDialog.kt` | Discuss. media-hub never draws them and does not list them **[device]** |
 | Styling | Size (seven steps), bold, colour, opacity, background, shadow, outline, and six presets | `res/xml/preferences_subtitles.xml` | Build, for subtitles we draw |
 | Text encoding, preferred language | Settings | same | Encoding: Build. Preferred language applies to embedded tracks: Discuss |
-| Download subtitles | Searches an online service by file | `src/gui/dialogs/SubtitleDownloaderDialogFragment.kt` | Discuss (needs a service account and a file hash) |
+| Download subtitles | Searches an online service by file | `src/gui/dialogs/SubtitleDownloaderDialogFragment.kt` | Dropped (D13) |
 
 ---
 
@@ -233,7 +234,7 @@ Source: `src/gui/video/VideoGridFragment.kt`,
 | Manual groups | Add to group, rename, ungroup, regroup automatically | Build |
 | Sorting | Name, file name, length, date, last modified, date added; ascending or descending | Build |
 | Only favourites | Filter | Build |
-| Item menu | Play, play from start, play all, play as audio, insert next, add to queue, add to playlist, add to group, mark as played or unplayed, information, share, delete, rename, go to folder, add or remove favourite, download subtitles | Build, except: delete and rename are Spike S2 (write access), share is Spike S12, download subtitles is Discuss |
+| Item menu | Play, play from start, play all, play as audio, insert next, add to queue, add to playlist, add to group, mark as played or unplayed, information, share, delete, rename, go to folder, add or remove favourite, download subtitles | Build, except: delete and rename are Spike S2 (write access), share is Spike S12, download subtitles is Dropped (D13) |
 | Multiple selection | Long press starts it; the same actions apply to the selection | Build |
 | Default action on tap | Per list: play, play all, add to queue or insert next | Build |
 
@@ -263,7 +264,7 @@ Source: `src/gui/audio/AudioBrowserFragment.kt`,
 | Incognito mode | Nothing is written to history or resume points | `PlaylistManager.kt` `savePosition` | Build |
 | Media information | Path, size, tracks, duration | `src/gui/InfoActivity.kt` | Build for what the metadata gives |
 | Library folders | Choose which folders are scanned; rescan on start | `res/xml/preferences.xml` | Discuss (MediaScanner scans fixed places; a folder model of our own is the fallback) |
-| Metadata lookup | Posters and summaries for films and series | `application/moviepedia` | Discuss |
+| Metadata lookup | Posters and summaries for films and series | `application/moviepedia` | Dropped (D13) |
 
 ### Browse
 
@@ -276,7 +277,7 @@ Source: `src/gui/browser/`.
 | Favourite folders | Pinned at the top of the tab | Build |
 | Show hidden files, folders first | Display options | Build |
 | Add folder to playlist | This folder, or with subfolders | Build |
-| Network shares | SMB, NFS, FTP, FTPS, SFTP, UPnP discovery; saved servers with login | Discuss |
+| Network shares | SMB, NFS, FTP, FTPS, SFTP, UPnP discovery; saved servers with login | Dropped (D13) |
 
 ### Streams
 
@@ -284,7 +285,7 @@ Source: `src/gui/network/MRLPanelFragment.kt`.
 
 | Feature | Behaviour in VLC | Verdict |
 |---|---|---|
-| Open a stream by address | Text field; plays on enter | Build. HLS and MP4 over `https` play **[device]**; a dead address gives no error, so the app sets its own time limit |
+| Open a stream by address | Text field; plays on enter | Build; the one use of the network D13 keeps. HLS and MP4 over `https` play **[device]**; a dead address gives no error, so the app sets its own time limit |
 | Stream history | Past addresses; play, rename, delete, copy, add to playlist | Build |
 | Open from other apps | Links and files handed over by the system | Build **[device]** |
 
@@ -313,7 +314,7 @@ behind them:
 
 | Feature | What it is | Verdict |
 |---|---|---|
-| Remote access | A web page served by the phone, to browse and control playback from another device | Discuss (needs a network server, which pure QML cannot provide) |
+| Remote access | A web page served by the phone, to browse and control playback from another device | Dropped (D13) |
 | Home-screen widgets | Three widget styles | N/A |
 | Android Auto | Car interface | N/A |
 | Android TV interface | Separate module | N/A |
@@ -332,10 +333,11 @@ None is decided; each is raised when the work reaches it.
 | What would unlock it | Features |
 |---|---|
 | A playback engine that exposes more than QtMultimedia 5 does (libVLC, or GStreamer driven from compiled code) | Playback speed and fast play, equalizer, audio delay, audio boost, audio and embedded-subtitle track selection, chapters, replay gain, passthrough, decoder settings, 360° video, live statistics |
-| A platform capability | Pop-up player and picture-in-picture, casting |
-| Network code beyond HTTP | Network shares, remote access |
-| An online service | Subtitle download, film metadata |
+| A platform capability | Pop-up player and picture-in-picture |
 | Our own scanner | Choosing library folders |
+
+Network shares, remote access, casting, subtitle download and film metadata
+were on this list until D13 dropped them.
 
 ---
 

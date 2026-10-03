@@ -43,6 +43,9 @@ whose library is filled through Content Hub: the user hands files over from
 the file manager, and the app plays the hard links Content Hub creates in the
 app's own folder. It would declare `audio`, `video`, `content_exchange`,
 `keep-display-on` and `networking`, all of which `click-review` accepts.
+Under D13 the aim is to leave `networking` out as well: streams are fetched
+by media-hub, not by the app. Whether they still play without the group is
+to be tried when a confined build is made.
 
 ## Listing
 
@@ -52,5 +55,6 @@ To be written. Constraints already known:
 - The text may say "modelled on VLC for Android" but must not use the VLC name
   as the app's own, nor the cone.
 - Licence GPL-3.0 or later, with a public source link.
-- Privacy statement: nothing leaves the device except the addresses of streams
-  the user opens.
+- Privacy statement: the app does nothing over the network except play a
+  stream the user gives it an address for (D13); the system's player fetches
+  it.

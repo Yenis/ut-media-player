@@ -7,8 +7,8 @@ list (version 0.0.5), its sorting, favourites and filter (version 0.0.6) and
 grouping by folder and by name (version 0.0.7), and the video queue with the
 item menu (version 0.0.8), multiple selection (version 0.0.9) and groups made
 by hand (version 0.0.10) and the media information screen (version 0.0.11).
-Everything to build in Phase 2 is built; what is left is to decide the
-Discuss items and the note on networking. Target device is the
+Everything to build in Phase 2 is built, and networking is decided (D13);
+one Discuss item, choosing library folders, is left. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
 
@@ -98,9 +98,29 @@ Facts are marked:
 | D11 | "Play as audio" | **Essential.** A playing video can be switched to audio-only and back; see [Play as audio](#play-as-audio) |
 | D12 | Confinement | **Unconfined** (decided 2 October 2026), for development and the battle test. A confined app cannot play files from `~/Videos` or `~/Music` nor read the media library: media-hub and mediascanner allow that by package name only **[source, device]**. File access is kept behind one module so that a confined build with a Content Hub import library stays possible; a fix is proposed upstream. Which form goes to the OpenStore is decided in Phase 6. See [Confinement](#confinement) |
 
+| D13 | Network | **Nothing over the network except playing streams** (decided by Yenis, 3 October 2026). The aim is an app that needs no network permission and cannot connect anywhere by itself. Dropped for good: network shares, casting, remote access, subtitle download, film metadata. Kept: opening a stream by address, stream history, and a link handed over by another app, since each is playing a stream. See [Network](#network) |
+
 ### Still open
 
 None. Discuss items become decisions as the work reaches them.
+
+### Network
+
+What D13 rests on, and what is still to be shown:
+
+| Point | State |
+|---|---|
+| A stream is fetched by media-hub, the system's playback service, not by the app. The app hands over an address and draws the picture | **[source]**, **[device]**: playback runs in media-hub (S5, S13) |
+| The app's own code opens no connection. QML's only way to is `XMLHttpRequest`; it is used twice, both times on a `file://` address: subtitles (`SubtitleTrack.qml`) and the development remote (`dev/Remote.qml`) | Checked by search, 3 October 2026. To be checked again before each release |
+| The diagnostics page plays three test streams from the internet when its automatic run is started | A development aid; leaves in Phase 5 |
+| No network permission | The package is unconfined today (D12), so the system enforces nothing: the rule is kept by what the code does. A confined build (Phase 6) would then be declared **without** the `networking` policy group, which makes it enforced. Whether streams still play in that build is **[verify]**: they should, media-hub doing the fetching |
+| Album art in Phase 3 | The system's thumbnailer may look covers up online for `image://albumart/` **[verify]**. If it does, the app shows only the art found in the files |
+
+Rules that follow, for every later phase:
+
+- No `XMLHttpRequest`, `Image` or any other loader on an `http(s)` address.
+  A network address goes to the player and nowhere else.
+- No feature that needs a server, an account or a lookup.
 
 ### Confinement
 
@@ -175,7 +195,8 @@ Touch, is in [VLC-FEATURES.md](VLC-FEATURES.md). In short:
 |---|---|
 | **Build** | Gestures, player controls and menu, lock, aspect modes, resume and seen marker, sleep timer, jump to time, A-B repeat, bookmarks, queue, repeat and shuffle, playlists, favourites, history, incognito mode, video grouping, sorting, multiple selection, stream history, subtitle styling, settings |
 | **Spike** | Everything that touches the system: playback itself, background audio, play as audio, library models and thumbnails, direct file access, external subtitles, system controls, orientation, keep-screen-on, opening from other apps, network streams |
-| **Discuss** | Playback speed, equalizer, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters, replay gain, decoder settings, 360° video, pop-up player, casting, real screen brightness, screenshots, network shares, remote access, subtitle download, film metadata, choosing library folders |
+| **Discuss** | Playback speed, equalizer, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters, replay gain, decoder settings, 360° video, pop-up player, choosing library folders |
+| **Dropped** (D13) | Network shares, casting, remote access, subtitle download, film metadata |
 | **N/A** | Android widgets, Android Auto, Android TV, ringtone, launcher shortcuts, permission onboarding |
 
 ### How Discuss items are handled
@@ -389,7 +410,7 @@ Discuss items this phase reached, for a decision (D2):
 | Playback speed and fast play, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters | A second playback engine, in compiled code | After 0.1.0, as one decision |
 | Sleep timer and A-B repeat while the app is in the background | The app adding itself to the system's list of apps that are not frozen | An opt-in switch in Settings, Phase 4 |
 | Pop-up player | The platform has no floating windows | Drop |
-| Subtitle download | An account with an online subtitle service, and a file hash | After 0.1.0 |
+| Subtitle download | An account with an online subtitle service, and a file hash | Dropped (D13) |
 | Renaming a bookmark | A text field in a turned player; the system keyboard appears on the window's edge, not the content's | With playlists in Phase 4, which need naming too. The name dialog exists since 0.0.10 (`NameDialog.qml`); what is left is using it in a turned player |
 
 ## Phase 2 - App shell and video library
@@ -450,12 +471,13 @@ How it is built:
       format, file, folder, date changed, how far it was played. VLC's list
       of tracks and codecs is left out: neither the library nor the playback
       service reports them (S16).
-- [ ] Discuss, when reached: choosing library folders, film metadata.
-- [ ] **Before closing this phase, raise with Yenis** (asked for on 3 October
-      2026): the app is to do nothing over the network except play streams.
-      Every other networking feature of VLC is to be dropped. To be turned
-      into a decision then, with the Discuss rows it settles: network shares,
-      casting, remote access, subtitle download, film metadata.
+- [x] Film metadata: dropped (D13).
+- [x] Networking, raised with Yenis at the end of the phase as asked: decided
+      as D13.
+- [ ] Discuss: choosing library folders. Suggested: drop for now. The
+      system's scanner decides what it scans, so a choice would take a
+      scanner of our own; "Group by folder" shows where the videos are, and
+      the Browse tab of Phase 4 reaches any folder.
 
 ## Phase 3 - Audio
 
@@ -489,7 +511,8 @@ How it is built:
 - [ ] Landscape and tablet layouts.
 - [ ] Empty, error and unsupported-format states.
 - [ ] Tips for the gestures; parental control.
-- [ ] Discuss, when reached: network shares, casting, remote access.
+- Network shares, casting and remote access are dropped (D13). The Browse
+  tab is local and removable storage only.
 
 ## Phase 5 - Release 0.1.0, self-installed
 
@@ -518,7 +541,7 @@ that nothing built later has to be undone.
 | Framework | Decides which Ubuntu Touch releases can install it; 20.04 devices stay untested unless a tester turns up |
 | Identity | `gemplayer.yenis` is permanent once published; the version only goes up |
 | Trademark | Listing text may say "inspired by VLC for Android" but not use the name as the app's own, nor the cone |
-| Privacy | Nothing leaves the device except stream URLs the user opens; said plainly in the README and the listing |
+| Privacy | Nothing leaves the device except the addresses of streams the user opens, and those go to the system's player, not through the app (D13); said plainly in the README and the listing |
 
 ### Documents kept from the first commit
 
