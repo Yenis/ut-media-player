@@ -9,7 +9,7 @@ import "../js/Library.js" as Library
  * sorted, filtered, narrowed to the favourites and grouped by folder or by
  * name as VLC's display settings allow. A folder or group opens in place,
  * with a way back in the header. Every entry has a menu behind its three
- * dots; multiple selection goes here.
+ * dots, and a long press starts a selection, as in VLC.
  */
 Item {
     id: page
@@ -46,6 +46,17 @@ Item {
     readonly property var openItem: openKey ? Library.findGroup(topLevel, openKey) : null
     readonly property var shown: openKey ? (openItem ? openItem.videos : []) : topLevel
 
+    // What a tap on a video does: "play", or "playAll" for everything shown
+    // from that video on. VLC's "Playback action"; its other two choices
+    // wait for a player that keeps playing behind the library.
+    property string tapAction: "play"
+
+    // Multiple selection: { key: true } for each selected entry, by a video's
+    // address or a folder's or group's key.
+    property var selection: ({})
+    readonly property int selectionCount: Object.keys(selection).length
+    readonly property bool selecting: selectionCount > 0
+
     property var menuItem: null         // the video, folder or group the item menu is open for
 
     // Play `list` from its item `index`. options: { fromStart, asAudio }.
@@ -78,26 +89,97 @@ Item {
         _keep("descending", desc);
     }
 
+    function setTapAction(action) {
+        tapAction = action === "playAll" ? "playAll" : "play";
+        _keep("tapAction", tapAction);
+    }
+
+    function keyOf(item) {
+        return item.videos ? item.key : item.url;
+    }
+
+    function toggleSelected(item) {
+        search.dismiss();
+        var next = {};
+        for (var key in selection)
+            next[key] = true;
+        if (next[keyOf(item)])
+            delete next[keyOf(item)];
+        else
+            next[keyOf(item)] = true;
+        selection = next;
+    }
+
+    function clearSelection() {
+        selection = ({});
+    }
+
+    // The selected videos, the folders' and groups' included, in the order shown.
+    function selectedVideos() {
+        var list = [];
+        for (var i = 0; i < shown.length; i++) {
+            if (!selection[keyOf(shown[i])])
+                continue;
+            if (shown[i].videos)
+                list = list.concat(shown[i].videos);
+            else
+                list.push(shown[i]);
+        }
+        return list;
+    }
+
+    function allSelectedFavourites() {
+        var videos = selectedVideos();
+        for (var i = 0; i < videos.length; i++)
+            if (!favourites[videos[i].url])
+                return false;
+        return videos.length > 0;
+    }
+
+    // What the selection bar's buttons do; each ends the selection, as in VLC.
+    function selectionAction(key) {
+        var videos = selectedVideos();
+        if (key === "favourite") {
+            var on = !allSelectedFavourites();
+            for (var i = 0; i < videos.length; i++)
+                store.setFavourite(videos[i].url, on);
+        }
+        clearSelection();
+        if (key === "play")
+            playRequested(videos, 0, {});
+        else if (key === "asAudio")
+            playRequested(videos, 0, { asAudio: true });
+    }
+
     function setGrouping(key) {
         grouping = Library.groupingInfo(key).key;
+        clearSelection();
         openKey = "";
         _keep("grouping", grouping);
     }
 
-    // Leaves the open folder or group; false if there was none.
+    // Ends a selection, or leaves the open folder or group; false if there
+    // was neither.
     function back() {
+        if (selecting) {
+            clearSelection();
+            return true;
+        }
         if (!openKey)
             return false;
         openKey = "";
         return true;
     }
 
+    // A tap on an entry.
     function activate(item) {
         search.dismiss();
-        if (item.videos)
+        if (selecting)
+            toggleSelected(item);
+        else if (item.videos)
             openKey = item.key;
         else
-            playRequested([item], 0, {});
+            itemAction(item, tapAction);
     }
 
     // Every video on screen, the folders' and groups' included, in order.
@@ -220,9 +302,15 @@ Item {
     }
 
     onLibraryChanged: reload()
+    onOpenKeyChanged: clearSelection()
 
-    // The keyboard goes when the page does: another tab, or a video.
-    onVisibleChanged: if (!visible) search.dismiss()
+    // The keyboard and a selection go when the page does: another tab, or a video.
+    onVisibleChanged: {
+        if (!visible) {
+            search.dismiss();
+            clearSelection();
+        }
+    }
 
     Settings {
         id: settings
@@ -235,6 +323,7 @@ Item {
         descending = _flag("descending", false);
         onlyFavourites = _flag("onlyFavourites", false);
         grouping = Library.groupingInfo(settings.value("grouping", "name")).key;
+        tapAction = settings.value("tapAction", "play") === "playAll" ? "playAll" : "play";
     }
 
     Connections {
@@ -271,6 +360,53 @@ Item {
                 color: page.onlyFavourites ? Theme.accent : Theme.textDim
                 onClicked: page.openDisplaySheet()
             }
+        }
+    }
+
+    // While entries are selected, this takes the header's place: a way out,
+    // how many, and what can be done with them.
+    Rectangle {
+        visible: page.selecting
+        anchors.fill: header
+        color: Theme.surface
+
+        IconButton {
+            id: selectionClose
+            anchors { left: parent.left; leftMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
+            glyph: "clear"
+            color: Theme.text
+            onClicked: page.clearSelection()
+        }
+        Text {
+            anchors { left: selectionClose.right; leftMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
+            text: page.selectionCount + " selected"
+            color: Theme.text
+            font.pixelSize: Theme.fontL
+            font.bold: true
+        }
+        Row {
+            anchors { right: parent.right; rightMargin: Theme.u(1); verticalCenter: parent.verticalCenter }
+
+            IconButton {
+                glyph: "play"
+                color: Theme.text
+                onClicked: page.selectionAction("play")
+            }
+            IconButton {
+                glyph: "audio"
+                color: Theme.text
+                onClicked: page.selectionAction("asAudio")
+            }
+            IconButton {
+                glyph: "star"
+                color: page.selecting && page.allSelectedFavourites() ? Theme.accent : Theme.text
+                onClicked: page.selectionAction("favourite")
+            }
+        }
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+            height: 1
+            color: Theme.line
         }
     }
 
@@ -335,6 +471,7 @@ Item {
             height: cards.cellHeight
 
             readonly property bool isGroup: !!modelData.videos
+            readonly property bool selected: !!page.selection[page.keyOf(modelData)]
             readonly property var entry: isGroup ? null : (page.played[modelData.url] || null)
 
             Rectangle {
@@ -377,14 +514,32 @@ Item {
                 font.pixelSize: Theme.fontXS
             }
 
+            Rectangle {
+                visible: card.selected
+                anchors.fill: cardThumb
+                radius: cardThumb.radius
+                color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
+                border.width: Math.max(2, Theme.u(0.3))
+                border.color: Theme.accent
+
+                Glyph {
+                    anchors { right: parent.right; top: parent.top; margins: Theme.u(1) }
+                    width: Theme.u(2.6)
+                    name: "check"
+                    color: "white"
+                }
+            }
+
             MouseArea {
                 id: cardMouse
                 anchors.fill: parent
                 onClicked: page.activate(modelData)
+                onPressAndHold: page.toggleSelected(modelData)
             }
 
             // The item menu, on the thumbnail's corner as in VLC.
             IconButton {
+                visible: !page.selecting
                 anchors { right: cardThumb.right; top: cardThumb.top }
                 implicitWidth: Theme.u(4.5)
                 implicitHeight: Theme.u(4.5)
@@ -410,13 +565,14 @@ Item {
             height: Theme.u(8.25)
 
             readonly property bool isGroup: !!modelData.videos
+            readonly property bool selected: !!page.selection[page.keyOf(modelData)]
             readonly property var entry: isGroup ? null : (page.played[modelData.url] || null)
             readonly property string resolution: isGroup ? "" : Format.resolutionClass(modelData.width, modelData.height)
 
             Rectangle {
                 anchors.fill: parent
-                color: Theme.text
-                opacity: rowMouse.pressed ? 0.06 : 0
+                color: row.selected ? Theme.accent : Theme.text
+                opacity: row.selected ? 0.18 : (rowMouse.pressed ? 0.06 : 0)
             }
 
             GroupThumb {
@@ -465,10 +621,21 @@ Item {
                 id: rowMouse
                 anchors.fill: parent
                 onClicked: page.activate(modelData)
+                onPressAndHold: page.toggleSelected(modelData)
+            }
+
+            Glyph {
+                visible: row.selected
+                anchors.centerIn: rowMore
+                width: Theme.u(2.6)
+                name: "check"
+                color: Theme.accent
             }
 
             IconButton {
                 id: rowMore
+                opacity: page.selecting ? 0 : 1
+                enabled: !page.selecting
                 anchors { right: parent.right; rightMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
                 glyphSize: Theme.u(2.2)
                 glyph: "more"
@@ -492,6 +659,8 @@ Item {
                   selected: page.onlyFavourites, value: page.onlyFavourites ? "on" : "off", stay: true },
                 { key: "grouping", label: "Group videos", glyph: "folder",
                   value: Library.groupingInfo(page.grouping).short },
+                { key: "tapAction", label: "Playback action", glyph: "play", stay: true,
+                  value: page.tapAction === "playAll" ? "Play all" : "Play" },
                 { label: "Sort by…" }
             ];
             for (var i = 0; i < Library.SORTS.length; i++) {
@@ -509,6 +678,8 @@ Item {
                 page.setOnlyFavourites(!page.onlyFavourites);
             else if (key === "grouping")
                 groupingSheet.show();
+            else if (key === "tapAction")
+                page.setTapAction(page.tapAction === "playAll" ? "play" : "playAll");
             else if (key.indexOf("sort:") === 0)
                 page.setSort(key.substring(5), key.substring(5) === page.sort ? !page.descending : false);
         }

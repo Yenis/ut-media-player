@@ -5,8 +5,8 @@ Status: **Milestone 1 reached on 2 October 2026: a working video player**
 with VLC's five tabs is in (version 0.0.4), and the Video tab has its grid and
 list (version 0.0.5), its sorting, favourites and filter (version 0.0.6) and
 grouping by folder and by name (version 0.0.7), and the video queue with the
-item menu (version 0.0.8). Multiple selection, manual groups and the media
-information screen are next. Target device is the
+item menu (version 0.0.8), and multiple selection (version 0.0.9). Manual
+groups and the media information screen are next. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
 
@@ -425,7 +425,13 @@ How it is built:
 - [x] Video queue (version 0.0.8): play a folder or group in order, or
       everything shown from one video on; previous and next in the player;
       queue shown over the video, a tap goes to that item.
-- [ ] Multiple selection; default action on tap.
+- [x] Multiple selection (version 0.0.9): a long press starts it, taps add
+      and remove, and a bar in the header's place plays the selection, plays
+      it as audio, or switches its favourite marks. Where VLC hides both
+      favourite actions for a mixed selection, the one button here adds.
+- [x] Default action on tap (version 0.0.9), VLC's "Playback action": Play,
+      or Play all. "Add to queue" and "Insert next" join it with the menu
+      entries below.
 - [ ] Menu entries that wait for something else: "Insert next" and "Append"
       for a player that keeps playing behind the library (the mini-player of
       Phase 3), "Add to playlist" for Phase 4, "Add to group" for manual
@@ -433,6 +439,11 @@ How it is built:
       are Discuss items (compiled code; sharing was not tried in the spike).
 - [ ] Media information screen.
 - [ ] Discuss, when reached: choosing library folders, film metadata.
+- [ ] **Before closing this phase, raise with Yenis** (asked for on 3 October
+      2026): the app is to do nothing over the network except play streams.
+      Every other networking feature of VLC is to be dropped. To be turned
+      into a decision then, with the Discuss rows it settles: network shares,
+      casting, remote access, subtitle download, film metadata.
 
 ## Phase 3 - Audio
 

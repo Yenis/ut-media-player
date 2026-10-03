@@ -1,12 +1,37 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Multiple selection, version 0.0.9
+
+### Checked over adb, 3 October 2026
+
+Selecting was driven through the function a long press calls.
+
+| Check | Result |
+|---|---|
+| Two videos and a group selected: "3 selected" in the header's place, each marked, in grid and list; the three dots are gone | Pass |
+| A tap on a selected entry takes it out | Pass |
+| The star adds the selection to the favourites, the group's two videos included; with all of them favourites it removes them | Pass |
+| Play: the queue is the four selected videos, in the order shown | Pass |
+| Play as audio: the audio page, with a queue of the selection | Pass |
+| Back ends a selection | Pass |
+| Playback action "Play all": a tap on a video plays everything shown from it on; back on "Play", a tap plays that one | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| A long press selects, and does not also open the video | Still to do |
+| The cross, the three buttons of the bar, and the back gesture | Still to do |
+| A long press while the list is being scrolled does nothing | Still to do |
+| Display settings → Playback action switches between Play and Play all | Still to do |
 
 ## Queue and item menu, version 0.0.8
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.9 - unreleased
+
+- Several videos at once: a long press on a video, folder or group selects
+  it, and taps add more or take them out again. A bar at the top then plays
+  the selection in order, plays it as audio, or adds it to the favourites or
+  removes it from them. The cross and the back key end the selection.
+- "Playback action" in the display settings: a tap on a video plays it, or
+  plays everything shown from that video on.
+
 ## 0.0.8 - 3 October 2026
 
 - A queue. "Play all" in a video's menu plays everything shown, from that
