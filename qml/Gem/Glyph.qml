@@ -183,6 +183,21 @@ Canvas {
         case "forward":
             stroke([0.36, 0.16, 0.70, 0.5, 0.36, 0.84]);
             break;
+        case "grid":
+            ctx.strokeRect(w * 0.14, w * 0.14, w * 0.28, w * 0.28);
+            ctx.strokeRect(w * 0.58, w * 0.14, w * 0.28, w * 0.28);
+            ctx.strokeRect(w * 0.14, w * 0.58, w * 0.28, w * 0.28);
+            ctx.strokeRect(w * 0.58, w * 0.58, w * 0.28, w * 0.28);
+            break;
+        case "list":
+            for (var r = 0; r < 3; r++) {
+                dot(0.16, 0.24 + 0.26 * r, 0.06);
+                stroke([0.34, 0.24 + 0.26 * r, 0.88, 0.24 + 0.26 * r]);
+            }
+            break;
+        case "check":
+            stroke([0.16, 0.54, 0.4, 0.78, 0.86, 0.24]);
+            break;
         case "refresh":
             arc(0.5, 0.5, 0.38, 0.45, 1.95);
             fill([0.32, 0.84, 0.62, 0.78, 0.5, 1.0]);

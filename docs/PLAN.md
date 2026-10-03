@@ -2,7 +2,8 @@
 
 Status: **Milestone 1 reached on 2 October 2026: a working video player**
 (version 0.0.3). Phases 0 and 1 are done. Phase 2 is under way: the app shell
-with VLC's five tabs is in (version 0.0.4), the video library is next. Target device is the
+with VLC's five tabs is in (version 0.0.4), and the Video tab has its grid and
+list (version 0.0.5). Grouping and sorting are next. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
 
@@ -392,13 +393,14 @@ How it is built:
 | Part | File | What it does |
 |---|---|---|
 | Shell | `qml/Gem/AppShell.qml`, `TabBar.qml` | The bar along the bottom and the page behind each tab. The players cover both |
-| Video tab | `qml/Gem/VideoLibraryPage.qml` | The videos on the phone |
+| Video tab | `qml/Gem/VideoLibraryPage.qml`, `VideoThumb.qml` | The videos on the phone as a grid of cards or a list, after VLC's `video_grid_card.xml` and `video_list_card.xml`. The choice is remembered |
 | Tabs still to be built | `qml/Gem/PlaceholderPage.qml` | Audio (Phase 3), Browse and Playlists (Phase 4) say what will be there |
 | More tab | `qml/Gem/MorePage.qml` | The version, and the way to the diagnostics page. Streams, history and settings join it in Phase 4 |
 
 - [x] The five tabs: Video, Audio, Browse, Playlists, More (version 0.0.4).
-- [ ] Grid and list views with thumbnail, duration, resolution, progress and
-      seen marker.
+- [x] Grid and list views with thumbnail, duration, resolution, progress and
+      seen marker (version 0.0.5). Resolution is VLC's class ("1080p", "SD"),
+      not the pixel size.
 - [ ] Grouping: none, by folder, by name; manual groups.
 - [ ] Sorting, "only favourites", filter within the list.
 - [ ] Item menu and multiple selection; default action on tap.

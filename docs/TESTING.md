@@ -1,11 +1,36 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
+is the video library (version 0.0.5), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Video library, version 0.0.5
+
+### Checked over adb, 3 October 2026
+
+| Check | Result |
+|---|---|
+| Grid: two columns upright, each card with thumbnail, title and length | Pass |
+| Resolution labels: 4K, 1080p, 720p and SD on the right files; the portrait file reads 1080p | Pass |
+| Tick on files watched to the end; bar on files left part-way (`sidecar`, `long-35min`) | Pass |
+| List: small thumbnail, title, "length • resolution", the same tick and bar | Pass |
+| The choice of grid or list is kept across a restart | Pass |
+| A card updates when its video was just played | Pass: `hevc-1080p` gained its tick on returning from the player |
+
+A 20 s file never shows a bar: the store counts the first 10 s as not started
+and the last 10 s as finished. That is Phase 1's rule, not the library's.
+
+### By hand
+
+| Check | Result |
+|---|---|
+| The button at the top right switches between grid and list | Still to do |
+| Tapping a card and a row opens the video | Still to do |
+| Scrolling both views | Still to do |
+| The grid with the phone on its side (expected: four columns, if the system rotates the app) | Still to do |
 
 ## App shell, version 0.0.4
 

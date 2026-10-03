@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.5 - unreleased
+
+- The Video tab shows the videos as a grid of cards, two across on a phone
+  held upright. The button at the top right switches to a list and back, and
+  the choice is remembered.
+- Each thumbnail carries the video's resolution as VLC labels it (4K, 1080p,
+  720p, SD), a tick when it was watched to the end, and a bar for how far it
+  was played.
+
 ## 0.0.4 - 3 October 2026
 
 - A bar along the bottom with VLC's five tabs: Video, Audio, Browse,

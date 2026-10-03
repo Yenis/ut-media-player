@@ -25,4 +25,5 @@ TextButton 1.0 TextButton.qml
 TimePicker 1.0 TimePicker.qml
 Toggle 1.0 Toggle.qml
 VideoLibraryPage 1.0 VideoLibraryPage.qml
+VideoThumb 1.0 VideoThumb.qml
 VideoPlayerPage 1.0 VideoPlayerPage.qml

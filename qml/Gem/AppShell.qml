@@ -32,6 +32,7 @@ FocusScope {
 
     readonly property alias playback: core
     readonly property alias videoPage: videoView
+    readonly property alias videoLibrary: videoTab
     readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
 
@@ -149,6 +150,7 @@ FocusScope {
             anchors { left: parent.left; right: parent.right; top: parent.top; bottom: tabBar.top }
 
             VideoLibraryPage {
+                id: videoTab
                 anchors.fill: parent
                 visible: shell.tab === "video"
                 library: shell.library

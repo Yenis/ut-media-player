@@ -50,6 +50,19 @@ QtObject {
         return found;
     }
 
+    // Every played file at once, as { url: { position, duration, seen } }, for
+    // lists that show progress.
+    function entries() {
+        var all = {};
+        db().readTransaction(function(tx) {
+            var rows = tx.executeSql("SELECT url, position, duration, seen FROM media").rows;
+            for (var i = 0; i < rows.length; i++)
+                all[rows.item(i).url] = { position: rows.item(i).position, duration: rows.item(i).duration,
+                                          seen: rows.item(i).seen };
+        });
+        return all;
+    }
+
     // Where to start a file: 0 unless it was left somewhere in the middle.
     function resumePoint(url) {
         var e = entry(url);

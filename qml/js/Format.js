@@ -17,6 +17,21 @@ function signedClock(ms) {
     return (ms >= 0 ? "+" : "-") + clock(Math.abs(ms));
 }
 
+// "1080p", "SD" and so on, as VLC labels a video's size
+// (generateResolutionClass in Kextensions.kt). Empty when the size is unknown.
+// The library reports coded sizes, 1920x1088 for 1080p; the steps absorb that.
+function resolutionClass(width, height) {
+    if (!(width > 0) || !(height > 0))
+        return "";
+    var shortSide = Math.min(width, height);
+    var longSide = Math.max(width, height);
+    var steps = [[4320, "8K"], [2160, "4K"], [1440, "1440p"], [1080, "1080p"], [720, "720p"]];
+    for (var i = 0; i < steps.length; i++)
+        if (shortSide >= steps[i][0] || longSide >= steps[i][0] * 16 / 9)
+            return steps[i][1];
+    return "SD";
+}
+
 // The last part of a path or URL, without the extension, for files that have
 // no title of their own.
 function baseName(path) {
