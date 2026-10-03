@@ -1,14 +1,11 @@
 # GemPlayer - a VLC-style media player for Ubuntu Touch - plan
 
-Status: **Milestone 1 reached on 2 October 2026: a working video player**
-(version 0.0.3). Phases 0 and 1 are done. Phase 2 is under way: the app shell
-with VLC's five tabs is in (version 0.0.4), and the Video tab has its grid and
-list (version 0.0.5), its sorting, favourites and filter (version 0.0.6) and
-grouping by folder and by name (version 0.0.7), and the video queue with the
-item menu (version 0.0.8), multiple selection (version 0.0.9) and groups made
-by hand (version 0.0.10) and the media information screen (version 0.0.11).
-Everything to build in Phase 2 is built, and networking is decided (D13);
-one Discuss item, choosing library folders, is left. Target device is the
+Status: **Phase 2 closed on 3 October 2026: the video side of the app is
+whole** (version 0.0.11). Phases 0, 1 and 2 are done: a video player, and
+around it the app shell with VLC's five tabs and a video library with grid
+and list, sorting, filter, favourites, grouping, groups made by hand, a
+queue, an item menu, multiple selection and an information page. Next is
+Phase 3, audio. Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
 
@@ -21,7 +18,7 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **To pick up next** | Phase 2. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes |
+| **To pick up next** | Phase 3, audio. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
 
 What the first day established, in the order it was found:
 
@@ -112,7 +109,8 @@ What D13 rests on, and what is still to be shown:
 |---|---|
 | A stream is fetched by media-hub, the system's playback service, not by the app. The app hands over an address and draws the picture | **[source]**, **[device]**: playback runs in media-hub (S5, S13) |
 | The app's own code opens no connection. QML's only way to is `XMLHttpRequest`; it is used twice, both times on a `file://` address: subtitles (`SubtitleTrack.qml`) and the development remote (`dev/Remote.qml`) | Checked by search, 3 October 2026. To be checked again before each release |
-| The diagnostics page plays three test streams from the internet when its automatic run is started | A development aid; leaves in Phase 5 |
+| The diagnostics page played three test streams from the internet in its automatic run | Taken out on 3 October 2026 (version 0.0.11), its question being answered. No network address is left in the app's code |
+| Until streams are built (Phase 4, "open by address") | Nothing in the app touches the network at all, and nothing is to be added that does (Yenis, 3 October 2026) |
 | No network permission | The package is unconfined today (D12), so the system enforces nothing: the rule is kept by what the code does. A confined build (Phase 6) would then be declared **without** the `networking` policy group, which makes it enforced. Whether streams still play in that build is **[verify]**: they should, media-hub doing the fetching |
 | Album art in Phase 3 | The system's thumbnailer may look covers up online for `image://albumart/` **[verify]**. If it does, the app shows only the art found in the files |
 
@@ -195,8 +193,8 @@ Touch, is in [VLC-FEATURES.md](VLC-FEATURES.md). In short:
 |---|---|
 | **Build** | Gestures, player controls and menu, lock, aspect modes, resume and seen marker, sleep timer, jump to time, A-B repeat, bookmarks, queue, repeat and shuffle, playlists, favourites, history, incognito mode, video grouping, sorting, multiple selection, stream history, subtitle styling, settings |
 | **Spike** | Everything that touches the system: playback itself, background audio, play as audio, library models and thumbnails, direct file access, external subtitles, system controls, orientation, keep-screen-on, opening from other apps, network streams |
-| **Discuss** | Playback speed, equalizer, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters, replay gain, decoder settings, 360° video, pop-up player, choosing library folders |
-| **Dropped** (D13) | Network shares, casting, remote access, subtitle download, film metadata |
+| **Discuss** | Playback speed, equalizer, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters, replay gain, decoder settings, 360° video, pop-up player |
+| **Dropped** | By D13: network shares, casting, remote access, subtitle download, film metadata. Not needed: choosing library folders |
 | **N/A** | Android widgets, Android Auto, Android TV, ringtone, launcher shortcuts, permission onboarding |
 
 ### How Discuss items are handled
@@ -460,11 +458,11 @@ How it is built:
 - [x] Default action on tap (version 0.0.9), VLC's "Playback action": Play,
       or Play all. "Add to queue" and "Insert next" join it with the menu
       entries below.
-- [ ] Menu entries that wait for something else: "Insert next" and "Append"
-      for a player that keeps playing behind the library (the mini-player of
-      Phase 3), "Add to playlist" for Phase 4, "Add to group" for manual
-      groups, "Information" for its screen below. Delete, rename and share
-      are Discuss items (compiled code; sharing was not tried in the spike).
+- Carried over to later phases: "Insert next" and "Append", in the item
+  menu, the selection bar and the playback action, for a player that keeps
+  playing behind the library (the mini-player of Phase 3); "Add to playlist"
+  (Phase 4). Delete, rename and share are Discuss items (compiled code;
+  sharing was not tried in the spike).
 - [x] Media information screen (version 0.0.11), from "Information" in a
       video's menu or in the selection bar with one video selected: picture,
       name, a Play or Resume button, length, file size, resolution class,
@@ -474,7 +472,7 @@ How it is built:
 - [x] Film metadata: dropped (D13).
 - [x] Networking, raised with Yenis at the end of the phase as asked: decided
       as D13.
-- [ ] Discuss: choosing library folders. Suggested: drop for now. The
+- [x] Choosing library folders: dropped (Yenis, 3 October 2026). The
       system's scanner decides what it scans, so a choice would take a
       scanner of our own; "Group by folder" shows where the videos are, and
       the Browse tab of Phase 4 reaches any folder.
@@ -492,6 +490,12 @@ How it is built:
 - [ ] Playback under other apps and with the screen locked (D10), and system
       controls and headset behaviour as far as S11 allows.
 - [ ] "Play as video" in the player menu for files that have a picture.
+- [ ] Carried over from Phase 2: hand the queue to media-hub so that it moves
+      on while the app is frozen; "Insert next" and "Append" in the video
+      library's item menu, selection bar and playback action, once the
+      mini-player keeps something playing behind the library.
+- [ ] Album art: check whether the system's thumbnailer looks covers up
+      online; if it does, show only the art found in the files (D13).
 - [ ] Discuss, when reached: equalizer, replay gain, passthrough.
 
 ## Phase 4 - Browse, playlists, streams and settings
@@ -499,7 +503,8 @@ How it is built:
 - [ ] Browse tab: local and removable storage with a path bar, favourite
       folders, play a folder.
 - [ ] Playlists tab: create, rename, delete, reorder; save the queue as a
-      playlist; add from any list.
+      playlist; add from any list, the video library's item menu and
+      selection bar included (carried over from Phase 2).
 - [ ] More tab: streams (open by address, history), playback history, settings,
       about.
 - [ ] Library search across videos, artists, albums, tracks, genres and

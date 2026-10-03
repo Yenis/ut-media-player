@@ -325,6 +325,10 @@ They live on the phone in `~/Videos/gemplayer-test/` and
 
 ### Automatic part
 
+From version 0.0.11 the automatic run no longer includes S13, the network
+streams: the question was answered in run 2, and the app is to hold no
+network address of its own (D13 in [PLAN.md](PLAN.md)).
+
 1. Unlock the phone and keep the screen on.
 2. Launch **GemPlayer**. After two seconds it starts the automatic run, which
    takes about two minutes and plays short stretches of every file. The header

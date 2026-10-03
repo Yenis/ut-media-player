@@ -370,7 +370,7 @@ FocusScope {
             ["srt", stepSrt], ["library", stepLibrary], ["thumbnails", stepThumbnails],
             ["formats", stepFormats], ["seek", stepSeek], ["rate", stepRate],
             ["metadata", stepMetadata], ["roles", stepRoles], ["queue", stepQueue],
-            ["streams", stepStreams], ["fullscreen", stepFullscreen]
+            ["fullscreen", stepFullscreen]
         ];
     }
 
@@ -765,28 +765,9 @@ FocusScope {
         });
     }
 
-    // S13: network streams.
-    function stepStreams() {
-        var list = [
-            ["https mp4", "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"],
-            // A missing file: what does the backend report for a 404?
-            ["https 404", "https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"],
-            ["HLS", "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"]
-        ];
-        var i = 0;
-        function one() {
-            if (i >= list.length) {
-                next();
-                return;
-            }
-            var entry = list[i++];
-            playOne(entry[1], 4, function(r) {
-                result("S13", entry[0] + ": " + r.text);
-                one();
-            });
-        }
-        one();
-    }
+    // S13, network streams, was answered on 2 October 2026 (docs/TESTING.md,
+    // run 2) and its step taken out on 3 October: the app holds no network
+    // address of its own (docs/PLAN.md, D13).
 
     // S8: fullscreen over the panel.
     function stepFullscreen() {

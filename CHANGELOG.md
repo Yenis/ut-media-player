@@ -7,6 +7,8 @@
   format, file and folder, when it was last changed, and how far it was
   played. With one video selected, the bar at the top has a button for it
   too.
+- The diagnostics page no longer plays test streams from the internet.
+  Nothing in the app touches the network now.
 - A video's menu is now in VLC's order: Information and the favourite switch
   come before the group entries, and "Mark as played" is last.
 

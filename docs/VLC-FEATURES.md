@@ -30,7 +30,7 @@ The goal is every VLC feature, where feasible. Each feature gets one verdict:
 | **Build** | Own QML over the system backend. Nothing known stands in the way |
 | **Spike Sn** | Buildable if spike row Sn in [PLAN.md](PLAN.md) passes on the Pixel 3a |
 | **Discuss** | The system backend does not offer it. Not dropped: when the work reaches it, we decide together whether another route is worth trying |
-| **Dropped** | Decided against. So far only by D13 in [PLAN.md](PLAN.md): nothing over the network except playing streams |
+| **Dropped** | Decided against: by D13 in [PLAN.md](PLAN.md) (nothing over the network except playing streams), or as not needed |
 | **N/A** | Tied to Android itself; has no counterpart on Ubuntu Touch |
 
 ---
@@ -263,7 +263,7 @@ Source: `src/gui/audio/AudioBrowserFragment.kt`,
 | History | Recently played, newest first; play, add to queue, clear. Can be switched off | `src/gui/HistoryFragment.kt` | Build |
 | Incognito mode | Nothing is written to history or resume points | `PlaylistManager.kt` `savePosition` | Build |
 | Media information | Path, size, tracks, duration | `src/gui/InfoActivity.kt` | Build for what the metadata gives |
-| Library folders | Choose which folders are scanned; rescan on start | `res/xml/preferences.xml` | Discuss (MediaScanner scans fixed places; a folder model of our own is the fallback) |
+| Library folders | Choose which folders are scanned; rescan on start | `res/xml/preferences.xml` | Dropped (3 October 2026): MediaScanner scans fixed places, and a choice would take a scanner of our own. Grouping by folder and the Browse tab cover the need |
 | Metadata lookup | Posters and summaries for films and series | `application/moviepedia` | Dropped (D13) |
 
 ### Browse
@@ -334,10 +334,10 @@ None is decided; each is raised when the work reaches it.
 |---|---|
 | A playback engine that exposes more than QtMultimedia 5 does (libVLC, or GStreamer driven from compiled code) | Playback speed and fast play, equalizer, audio delay, audio boost, audio and embedded-subtitle track selection, chapters, replay gain, passthrough, decoder settings, 360° video, live statistics |
 | A platform capability | Pop-up player and picture-in-picture |
-| Our own scanner | Choosing library folders |
 
 Network shares, remote access, casting, subtitle download and film metadata
-were on this list until D13 dropped them.
+were on this list until D13 dropped them; choosing library folders until it
+was dropped as not needed.
 
 ---
 
