@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.0.13 - unreleased
+
+- A queue played as audio now moves on by itself with the screen off or
+  another app in front. Before, it stopped at the end of the current item
+  until GemPlayer was opened again.
+- "Insert next" and "Add to play queue" in the menu of a video, folder or
+  group, behind a new button in the selection bar, and as two more choices
+  for "Playback action". They add to what plays as audio behind the lists;
+  with nothing playing, they play.
+- Switching a queue of several videos to audio, or back to the picture, now
+  makes a break of about a second. One video on its own still switches
+  without a break.
+- The install instructions used a command that Ubuntu Touch 20.04 and later
+  do not have.
+
 ## 0.0.12 - 7 October 2026
 
 - An audio player. Music, and a video played as audio, show on a page with

@@ -79,9 +79,9 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `view <grid\|list>` | How the Video tab shows its videos |
 | `sort <name\|filename\|length\|modified> [desc]`, `favonly <0\|1>`, `filter <text>` | Order and narrowing of the Video tab |
 | `group <name\|folder\|none>`, `opengroup <index>` | How the Video tab groups, and opening the folder or group at that place in the list; `back` leaves it |
-| `itemaction <index> <play\|fromStart\|playAll\|asAudio\|played\|notPlayed\|favourite\|info\|addToGroup\|removeFromGroup\|regroup\|rename\|ungroup>` | One choice from the menu of the entry at that place in the list |
-| `tap <index>`, `tapaction <play\|playAll>` | A tap on the entry at that place in the list, and what a tap on a video does |
-| `select <index>`, `selaction <play\|asAudio\|favourite\|group\|info>` | Adds an entry to the selection or takes it out, and the selection bar's buttons; `back` ends a selection |
+| `itemaction <index> <play\|fromStart\|playAll\|asAudio\|insertNext\|append\|played\|notPlayed\|favourite\|info\|addToGroup\|removeFromGroup\|regroup\|rename\|ungroup>` | One choice from the menu of the entry at that place in the list |
+| `tap <index>`, `tapaction <play\|playAll\|append\|insertNext>` | A tap on the entry at that place in the list, and what a tap on a video does |
+| `select <index>`, `selaction <play\|asAudio\|insertNext\|append\|favourite\|group\|info>` | Adds an entry to the selection or takes it out, and the selection bar's buttons; `back` ends a selection |
 | `newgroup <name>`, `joingroup <index>` | Puts the selection into a new group, or into the group at that place in the list |
 | `renamegroup <index> <name>`, `clearselection` | Renames the group at that place; ends a selection without acting on it |
 | `fav <path>` | Switches a video's favourite mark |
@@ -137,6 +137,10 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | Set your own time limit when opening a stream | A dead address raises no error |
 | A file that is still loaded plays on from where it was paused | Opening the same address again does not rewind it; "Play from start" has to seek to 0 once playback has started |
 | Pause a video yourself when the app is suspended | media-hub plays on behind the lock screen and other apps |
+| A `Playlist` is for audio only | Played from a list, a video's picture stays black or stale. Audio in a list is moved on by media-hub itself, also while the app is frozen |
+| Wait for the list before choosing its item; expect stray index changes | `addItems` arrives later, and the list reports index -1 and 0 on the way to the item asked for |
+| Add to a list with `addItems` at the end and `insertItem` before an existing item | `insertItems` is not implemented, and `insertItem` at the end is refused |
+| Ignore "Failed to open uri  because it can't be found" | Giving the player its list empties its address for a moment |
 | Nothing in the app runs while it is in the background | The app is frozen a few seconds after it leaves the foreground; playback continues without it |
 
 ## Reaching the system from QML

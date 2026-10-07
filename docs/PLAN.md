@@ -5,7 +5,8 @@ whole** (version 0.0.11). Phases 0, 1 and 2 are done: a video player, and
 around it the app shell with VLC's five tabs and a video library with grid
 and list, sorting, filter, favourites, grouping, groups made by hand, a
 queue, an item menu, multiple selection and an information page. Phase 3,
-audio, is under way: version 0.0.12 has the audio player and the mini-player.
+audio, is under way: version 0.0.12 has the audio player and the mini-player,
+and 0.0.13 a queue that moves on in the background and can be added to.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -398,7 +399,7 @@ What the platform limits, found while building:
 
 | Feature | Limit | Way out |
 |---|---|---|
-| Queue played as audio (found in Phase 2) | The app moves the queue on, and the app is frozen in the background. Behind the lock screen the current item plays to its end and the next starts only when the app is opened | Hand the list to media-hub, which advances it by itself **[device]** (the `Playlist` type). Planned with the audio queue in Phase 3 |
+| Queue played as audio (found in Phase 2) | The app moves the queue on, and the app is frozen in the background. Behind the lock screen the current item plays to its end and the next starts only when the app is opened | Solved in 0.0.13: audio is handed to media-hub as a list, which it moves through by itself **[device]** (the `Playlist` type). See [Phase 3](#phase-3---audio) |
 | Sleep timer, A-B repeat | They run in the app, and Ubuntu Touch freezes an app a few seconds after it leaves the foreground or the screen goes off. For a video on screen they work. For audio behind the lock screen the timer fires late, when the app is next opened | The system exempts apps listed in the setting `lifecycle-exempt-appids`, which holds the stock Music app. An unconfined app can add itself. To discuss |
 | Seeking, A-B repeat, bookmarks, resume | A seek lands on the keyframe before its target, so all four start a little early | None on this backend |
 
@@ -486,6 +487,7 @@ How it is built:
 |---|---|---|
 | Full player | `qml/Gem/AudioPlayerPage.qml` | Cover, title, artist, timeline, buttons, the queue's list; the seek gestures on the cover. For music and for a video played as audio |
 | Mini-player | `qml/Gem/MiniPlayer.qml` | The bar above the tabs while something plays as audio and the full player is not open |
+| Two ways of playing | `qml/Gem/Playback.qml` | A video on screen is one address at a time, moved on by the app; audio is a list given to media-hub, which moves through it also while the app is frozen. Switching between the two loads the item again |
 | Where audio lives | `qml/Gem/AppShell.qml` | Going back from the full player leaves it playing; only the mini-player's cross or the end of the queue ends it |
 
 - [ ] Library tabs: artists, albums, tracks, genres, playlists; album and
@@ -519,10 +521,22 @@ How it is built:
 - [x] "Play as video" for files that have a picture: a button in the full
       player's header (version 0.0.12). It moves into the player menu when
       that is built.
-- [ ] Carried over from Phase 2: hand the queue to media-hub so that it moves
-      on while the app is frozen; "Insert next" and "Append" in the video
-      library's item menu, selection bar and playback action, once the
-      mini-player keeps something playing behind the library.
+- [x] Carried over from Phase 2 (version 0.0.13): the queue is handed to
+      media-hub when it plays as audio, and moves on while the app is frozen.
+      A video on screen cannot be played that way: from a list its picture
+      stays black or shows a stale frame, and attaching the surface again
+      does not help **[device]**. So the app keeps two ways of playing, and
+      "play as audio" and back load the item again and seek to where it was,
+      a break of about a second. One video on its own is spared that: it has
+      nothing to move on to, and stays as it is.
+- [x] Carried over from Phase 2 (version 0.0.13): "Insert next" and "Add to
+      play queue" (VLC's wording for append) in the video library's item
+      menu, behind a queue button in the selection bar, and as playback
+      actions. They add to what plays as audio; with nothing playing they
+      play the video. What the backend allows **[device]**: adding a list at
+      the end, and inserting one item before an existing one. Inserting
+      several at once is "not yet implemented" there, and inserting at the
+      very end is refused.
 - [ ] Album art: check whether the system's thumbnailer looks covers up
       online; if it does, show only the art found in the files (D13). Until
       that is known, the safe half is in place (version 0.0.12): the library

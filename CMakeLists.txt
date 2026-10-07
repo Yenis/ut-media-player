@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 # The click is QML-only: qmlscene runs qml/Main.qml, so nothing is compiled and
 # the package is architecture-independent.
 project(gemplayer
-    VERSION 0.0.12
+    VERSION 0.0.13
     DESCRIPTION "A VLC-style media player for Ubuntu Touch"
     LANGUAGES NONE)
 

@@ -20,8 +20,13 @@ then, with the phone connected:
 
 ```bash
 adb push gemplayer.yenis_0.0.12_all.click /home/phablet/
-adb shell "pkcon install-local --allow-untrusted /home/phablet/gemplayer.yenis_0.0.12_all.click"
+adb shell "gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install /home/phablet/gemplayer.yenis_0.0.12_all.click"
 ```
+
+The second command asks the system's click service to install the file, as
+Clickable does; it prints `()` when it has. Ubuntu Touch 20.04 and later have
+no `pkcon`, which older instructions use (checked on the Pixel 3a, 7 October
+2026).
 
 The file name ends in `_all.click`: it contains no compiled code and fits
 every device.
@@ -42,7 +47,7 @@ allowed`. It is expected; see [STORE.md](STORE.md).
 ## Remove it
 
 ```bash
-adb shell "pkcon remove gemplayer.yenis"
+adb shell "gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Remove gemplayer.yenis"
 ```
 
 The app's own data is in `~/.config/gemplayer.yenis/`,

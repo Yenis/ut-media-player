@@ -1,12 +1,44 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Queue in the background, version 0.0.13
+
+### Checked over adb, 7 October 2026
+
+"In the background" here is the calculator brought to the front; the app's
+log shows it inactive from then on, and what plays is read from media-hub's
+MPRIS interface.
+
+| Check | Result |
+|---|---|
+| Everything played from a `Playlist`, videos included | **Fail, and the reason for two ways of playing.** A video's picture was black on the first file and on some later ones, and once showed a frame of the file before. The surface was set up with the size of the previous item, or 0 x 0. Attaching the `VideoOutput` again changed nothing |
+| A queue of three played as audio, calculator in front for a minute | Pass: media-hub went from track 3 to 4 to 5 by itself. Back in the app, the title and "6 of 12" were right |
+| Music with two items added while it played, calculator in front | Pass: tracks 0, 1, 2, then "Stopped". Back in the app the mini-player was gone |
+| The queue ends with the app in front | Pass: playback stops and the mini-player goes |
+| A video queue on screen moves on, with its picture | Pass |
+| One video to audio and back to its picture | Pass, without loading again |
+| A queue of several to audio at 5:02 of `long-35min` | Pass: carries on at 5:03 after loading again; `next` moves on; back to video shows the picture |
+| Resume point, "Play from start", a file opened again after it ended | Pass |
+| `insertItems` on the list | Fail: "Not yet implemented" in the backend, and the hub's list stays as it was |
+| `insertItem` at the end of the list | Fail: "index is out of valid range". `addItems` is used there |
+| "Add to play queue", then "Insert next" for two selected videos, on one video playing as audio | Pass: the queue reads current, the two, the one added; media-hub plays them in that order. A message above the mini-player says what was added |
+| The item menu has "Insert next" and "Add to play queue" after "Play as audio"; the selection bar has a queue button | Pass (layout) |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| A queue played as audio moves on with the screen off, cable unplugged | Still to do |
+| "Insert next" and "Add to play queue" by touch, from the menu and from a selection | Still to do |
+| "Playback action" steps through its four choices, and a tap then adds to the queue | Still to do |
+| The break when a queue of several goes to audio and back: how long, and is it acceptable | Still to do |
 
 ## Audio player and mini-player, version 0.0.12
 

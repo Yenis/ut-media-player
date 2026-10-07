@@ -84,13 +84,31 @@ FocusScope {
         if (list.length === 0)
             return;
         var first = list[Math.max(0, Math.min(index, list.length - 1))];
-        core.openQueue(list, index, !!options.fromStart);
-        if (options.asAudio || !first.hasPicture) {
-            toAudio();
+        var asAudio = !!options.asAudio || !first.hasPicture;
+        core.openQueue(list, index, !!options.fromStart, asAudio);
+        if (asAudio) {
+            page = "audio";
         } else {
             videoView.reset();
             page = "video";
         }
+    }
+
+    // "Insert next" and "Add to play queue". They add to what plays as audio
+    // behind the lists; with nothing playing there, the list is played.
+    function addToQueue(list, next) {
+        if (list.length === 0)
+            return;
+        if (!audioActive || core.queueIndex < 0) {
+            playList(list, 0, {});
+            return;
+        }
+        if (next)
+            core.insertNext(list);
+        else
+            core.append(list);
+        var what = list.length === 1 ? "\u201c" + list[0].title + "\u201d" : list.length + " videos";
+        notice.show(what + (next ? " will play next" : " added to the play queue"));
     }
 
     // A file from outside the list: another app, or a path.
@@ -107,12 +125,12 @@ FocusScope {
 
     // "Play as audio" and back: the picture goes, the playback stays.
     function toAudio() {
-        core.audioMode = true;
+        core.setAudioMode(true);
         page = "audio";
     }
 
     function toVideo() {
-        core.audioMode = false;
+        core.setAudioMode(false);
         page = "video";
         core.play();
     }
@@ -122,7 +140,7 @@ FocusScope {
     function closePlayer() {
         core.pause();
         core.clearQueue();
-        core.audioMode = false;
+        core.setAudioMode(false);
         if (page === "video" || page === "audio")
             page = "home";
     }
@@ -191,6 +209,7 @@ FocusScope {
                 store: playerStore
                 overlay: home
                 onPlayRequested: shell.playList(list, index, options)
+                onQueueRequested: shell.addToQueue(list, next)
             }
             PlaceholderPage {
                 anchors.fill: parent
@@ -217,6 +236,42 @@ FocusScope {
                 anchors.fill: parent
                 visible: shell.tab === "more"
                 onDiagnosticsRequested: shell.page = "diagnostics"
+            }
+        }
+
+        // What was just done to the queue, for a moment, above the mini-player.
+        Rectangle {
+            id: notice
+            property alias text: noticeLabel.text
+            function show(message) {
+                text = message;
+                opacity = 1;
+                noticeHide.restart();
+            }
+            z: 1
+            opacity: 0
+            visible: opacity > 0
+            anchors { horizontalCenter: parent.horizontalCenter; bottom: miniPlayer.top; bottomMargin: Theme.u(1.5) }
+            width: Math.min(parent.width - Theme.u(4), noticeLabel.implicitWidth + Theme.u(4))
+            height: noticeLabel.implicitHeight + Theme.u(2)
+            radius: Theme.u(1)
+            color: Theme.surfaceAlt
+            border.width: 1
+            border.color: Theme.line
+            Behavior on opacity { NumberAnimation { duration: 150 } }
+
+            Text {
+                id: noticeLabel
+                anchors.centerIn: parent
+                width: Math.min(implicitWidth, notice.parent.width - Theme.u(8))
+                elide: Text.ElideMiddle
+                color: Theme.text
+                font.pixelSize: Theme.fontS
+            }
+            Timer {
+                id: noticeHide
+                interval: 2500
+                onTriggered: notice.opacity = 0
             }
         }
 

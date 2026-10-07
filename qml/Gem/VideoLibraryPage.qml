@@ -50,10 +50,16 @@ Item {
     readonly property var openItem: openKey ? Library.findGroup(topLevel, openKey) : null
     readonly property var shown: openKey ? (openItem ? openItem.videos : []) : topLevel
 
-    // What a tap on a video does: "play", or "playAll" for everything shown
-    // from that video on. VLC's "Playback action"; its other two choices
-    // wait for a player that keeps playing behind the library.
+    // What a tap on a video does, VLC's "Playback action": "play", "playAll"
+    // for everything shown from that video on, "append" to add it to the
+    // play queue, or "insertNext".
     property string tapAction: "play"
+    readonly property var tapActions: [
+        { key: "play", label: "Play" },
+        { key: "playAll", label: "Play all" },
+        { key: "append", label: "Add to play queue" },
+        { key: "insertNext", label: "Insert next" }
+    ]
 
     // Multiple selection: { key: true } for each selected entry, by a video's
     // address or a folder's or group's key.
@@ -70,6 +76,9 @@ Item {
 
     // Play `list` from its item `index`. options: { fromStart, asAudio }.
     signal playRequested(var list, int index, var options)
+    // Add `list` to what plays as audio: after the current item if `next`,
+    // otherwise at the end. With nothing playing, it is played.
+    signal queueRequested(var list, bool next)
 
     function reload() {
         videos = library ? library.videos() : [];
@@ -98,8 +107,15 @@ Item {
         _keep("descending", desc);
     }
 
+    function tapActionIndex(action) {
+        for (var i = 0; i < tapActions.length; i++)
+            if (tapActions[i].key === action)
+                return i;
+        return 0;
+    }
+
     function setTapAction(action) {
-        tapAction = action === "playAll" ? "playAll" : "play";
+        tapAction = tapActions[tapActionIndex(action)].key;
         _keep("tapAction", tapAction);
     }
 
@@ -222,6 +238,8 @@ Item {
             playRequested(videos, 0, {});
         else if (key === "asAudio")
             playRequested(videos, 0, { asAudio: true });
+        else if (key === "append" || key === "insertNext")
+            queueRequested(videos, key === "insertNext");
     }
 
     function setGrouping(key) {
@@ -295,6 +313,8 @@ Item {
             }
         } else if (key === "asAudio") {
             playRequested([item], 0, { asAudio: true });
+        } else if (key === "append" || key === "insertNext") {
+            queueRequested(videos, key === "insertNext");
         } else if (key === "played" || key === "notPlayed") {
             for (var k = 0; k < videos.length; k++)
                 store.setSeen(videos[k].url, key === "played", videos[k].duration);
@@ -370,6 +390,7 @@ Item {
         displaySheet.close();
         groupingSheet.close();
         itemMenu.close();
+        queueSheet.close();
         groupPicker.close();
         newGroupDialog.close();
         renameDialog.close();
@@ -419,7 +440,7 @@ Item {
         descending = _flag("descending", false);
         onlyFavourites = _flag("onlyFavourites", false);
         grouping = Library.groupingInfo(settings.value("grouping", "name")).key;
-        tapAction = settings.value("tapAction", "play") === "playAll" ? "playAll" : "play";
+        tapAction = tapActions[tapActionIndex(settings.value("tapAction", "play"))].key;
     }
 
     Connections {
@@ -499,6 +520,11 @@ Item {
                 glyph: "audio"
                 color: Theme.text
                 onClicked: page.selectionAction("asAudio")
+            }
+            IconButton {
+                glyph: "playlist"
+                color: Theme.text
+                onClicked: queueSheet.show()
             }
             IconButton {
                 glyph: "star"
@@ -769,7 +795,7 @@ Item {
                 { key: "grouping", label: "Group videos", glyph: "folder",
                   value: Library.groupingInfo(page.grouping).short },
                 { key: "tapAction", label: "Playback action", glyph: "play", stay: true,
-                  value: page.tapAction === "playAll" ? "Play all" : "Play" },
+                  value: page.tapActions[page.tapActionIndex(page.tapAction)].label },
                 { label: "Sort by…" }
             ];
             for (var i = 0; i < Library.SORTS.length; i++) {
@@ -788,7 +814,7 @@ Item {
             else if (key === "grouping")
                 groupingSheet.show();
             else if (key === "tapAction")
-                page.setTapAction(page.tapAction === "playAll" ? "play" : "playAll");
+                page.setTapAction(page.tapActions[(page.tapActionIndex(page.tapAction) + 1) % page.tapActions.length].key);
             else if (key.indexOf("sort:") === 0)
                 page.setSort(key.substring(5), key.substring(5) === page.sort ? !page.descending : false);
         }
@@ -819,7 +845,9 @@ Item {
                 return [];
             if (item.videos) {
                 var all = page.allSeen(item.videos);
-                var groupRows = [{ key: "playAll", label: "Play all", glyph: "playlist" }];
+                var groupRows = [{ key: "playAll", label: "Play all", glyph: "playlist" },
+                                 { key: "insertNext", label: "Insert next", glyph: "next" },
+                                 { key: "append", label: "Add to play queue", glyph: "add" }];
                 if (item.kind === "group") {
                     groupRows.push({ key: "rename", label: "Rename video group", glyph: "subtitles" });
                     groupRows.push({ key: "ungroup", label: "Ungroup", glyph: "clear" });
@@ -837,6 +865,8 @@ Item {
             if (page.allShown().length > 1)
                 rows.push({ key: "playAll", label: "Play all", glyph: "playlist" });
             rows.push({ key: "asAudio", label: "Play as audio", glyph: "audio" });
+            rows.push({ key: "insertNext", label: "Insert next", glyph: "next" });
+            rows.push({ key: "append", label: "Add to play queue", glyph: "add" });
             rows.push({ key: "info", label: "Information", glyph: "info" });
             rows.push({ key: "favourite", glyph: "star", selected: favourite,
                         label: favourite ? "Remove from favourites" : "Add to favourites" });
@@ -853,6 +883,18 @@ Item {
         }
         onChosen: page.itemAction(page.menuItem, key)
     }
+    // The selection bar's queue button.
+    OptionSheet {
+        id: queueSheet
+        parent: page.overlay
+        anchors.fill: parent
+        options: [
+            { key: "insertNext", label: "Insert next", glyph: "next" },
+            { key: "append", label: "Add to play queue", glyph: "add" }
+        ]
+        onChosen: page.selectionAction(key)
+    }
+
     MediaInfoPage {
         parent: page.overlay
         anchors.fill: parent

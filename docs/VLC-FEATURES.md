@@ -211,7 +211,7 @@ Source: `src/gui/audio/AudioPlayer.kt`, `res/layout/audio_player.xml`,
 | Sleep timer, jump to time, A-B repeat, bookmarks, save playlist | Shared with the video player | Build |
 | Playback speed, equalizer, chapters | Shared with the video player | Discuss |
 | Resume last queue | Queue and position restored on launch; a card offers to resume | Build |
-| Background playback | Continues with the screen off and under other apps | Build **[device]**. media-hub runs the queue while the app is suspended |
+| Background playback | Continues with the screen off and under other apps | Build **[device]**. media-hub runs the queue while the app is suspended, for audio only: a video's picture does not survive being played from a list |
 | System controls | Notification, lock screen with cover, headset and Bluetooth buttons | Build for what the system gives: play, previous and next in the sound indicator, under the name "Media Player" **[device]**. Our own name, icon and cover there: Discuss (compiled MPRIS service) |
 | Headset | Pause when unplugged, optional resume when plugged in | Spike S11 |
 | Pause for calls, lower volume for notifications | Audio focus | Spike S5 (media-hub may do this for us) |
