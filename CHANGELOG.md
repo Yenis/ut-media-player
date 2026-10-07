@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.16 - unreleased
+## 0.0.16 - 7 October 2026
 
 - The audio player has a menu, behind the three dots at the top: Sleep
   timer, Jump to time, Bookmarks and A-B repeat, as in the video player.
