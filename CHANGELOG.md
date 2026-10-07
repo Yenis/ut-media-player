@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.14 - unreleased
+## 0.0.14 - 7 October 2026
 
 - The Audio tab lists the music on the phone under Artists, Albums, Tracks,
   Genres and Files. An artist, album or genre opens to its tracks; an
