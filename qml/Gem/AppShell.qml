@@ -331,6 +331,8 @@ FocusScope {
         sourceComponent: Component {
             AudioPlayerPage {
                 playback: core
+                store: playerStore
+                sleep: sleeper
                 onCollapseRequested: shell.page = "home"
                 onStopRequested: shell.closePlayer()
                 onVideoRequested: shell.toVideo()

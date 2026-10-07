@@ -1,12 +1,35 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the audio player's menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Audio player's menu, version 0.0.16
+
+### Checked over adb, 7 October 2026
+
+| Check | Result |
+|---|---|
+| The menu: Sleep timer, Jump to time, Bookmarks, A-B repeat; "Play as video" is not offered for music | Pass (layout) |
+| A video played as audio: "Play as video" is the menu's third entry, and `video` returns to the picture | Pass |
+| `bookmark` at 0:07 adds "Bookmark at 0:07", listed under Bookmarks and marked on the timeline | Pass |
+| `ab` at 0:09 and again at 0:15: both ends marked on the timeline, playback stays between them | Pass: at 0:14 nine seconds after the second mark |
+| `sleep 600000`: "Sleep 9:58" under the title bar beside "A-B repeat"; the picker opens with "Remove current" | Pass |
+| `ab` a third time and `sleep 0` clear both | Pass |
+| No QML warnings in the log | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| The menu by touch; Jump to time with the number pad | Still to do |
+| A bookmark: add, tap to go there, hold to remove | Still to do |
+| "Play as video" in the menu for a video played as audio | Still to do |
+| The sleep timer pauses music while the app is in front | Still to do |
 
 ## Shuffle and repeat, version 0.0.15
 

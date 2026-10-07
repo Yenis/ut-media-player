@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.16 - unreleased
+
+- The audio player has a menu, behind the three dots at the top: Sleep
+  timer, Jump to time, Bookmarks and A-B repeat, as in the video player.
+  "Play as video" has moved into it from the top of the page.
+- Bookmarks and the two ends of an A-B repeat are marked on the audio
+  player's timeline. A running sleep timer and an A-B repeat show under the
+  title bar; a tap on either goes to its setting.
+
 ## 0.0.15 - 7 October 2026
 
 - Fixed: after music had played, or a queue played as audio, the next video

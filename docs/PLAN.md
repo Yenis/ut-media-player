@@ -7,7 +7,8 @@ and list, sorting, filter, favourites, grouping, groups made by hand, a
 queue, an item menu, multiple selection and an information page. Phase 3,
 audio, is under way: version 0.0.12 has the audio player and the mini-player,
 0.0.13 a queue that moves on in the background and can be added to,
-0.0.14 the music library, and 0.0.15 shuffle and repeat.
+0.0.14 the music library, 0.0.15 shuffle and repeat, and 0.0.16 the audio
+player's menu.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -542,13 +543,19 @@ How it is built:
 - [ ] Queue with search, reorder and remove, "stop after this track", queue
       restored on launch. Reorder and remove are limited by the same rule:
       only behind the playing item.
-- [ ] Sleep timer, jump to time, A-B repeat and bookmarks shared with the video
-      player.
+- [x] Sleep timer, jump to time, A-B repeat and bookmarks in the audio player
+      (version 0.0.16), behind a menu button in its header. The timer, the
+      store and the pickers are the video player's; the menu and its sheets
+      are written out a second time in `AudioPlayerPage.qml`, the video
+      page's being bound up with its turned stage. The limits are the video
+      player's too: the sleep timer and A-B repeat act only while the app is
+      awake, so behind the lock screen the timer fires late and the loop is
+      not kept (see [Phase 1](#phase-1---video-player)).
 - [ ] Playback under other apps and with the screen locked (D10), and system
       controls and headset behaviour as far as S11 allows.
 - [x] "Play as video" for files that have a picture: a button in the full
-      player's header (version 0.0.12). It moves into the player menu when
-      that is built.
+      player's header (version 0.0.12), an entry of the player menu since
+      0.0.16.
 - [x] Carried over from Phase 2 (version 0.0.13): the queue is handed to
       media-hub when it plays as audio, and moves on while the app is frozen.
       A video on screen cannot be played that way: from a list its picture

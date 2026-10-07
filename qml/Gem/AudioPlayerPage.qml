@@ -21,6 +21,8 @@ Item {
     id: page
 
     property var playback: null
+    property var store: null                // PlayerStore: bookmarks
+    property var sleep: null                // SleepTimer
 
     signal collapseRequested()
     signal stopRequested()
@@ -32,17 +34,73 @@ Item {
     property int tapSeekTotal: 0
     property string tapSeekSide: ""
 
+    readonly property bool sheetOpen: menu.open || queueSheet.open || bookmarkSheet.open
+                                      || jumpPicker.open || sleepPicker.open
+
+    function closeSheets() {
+        menu.close();
+        queueSheet.close();
+        bookmarkSheet.close();
+        jumpPicker.close();
+        sleepPicker.close();
+    }
+
     function back() {
-        if (queueSheet.open)
-            queueSheet.close();
+        if (sheetOpen)
+            closeSheets();
         else
             collapseRequested();
     }
 
     // By name, for the development remote.
     function openSheet(name) {
-        if (name === "queue")
-            queueSheet.show();
+        var sheets = { menu: menu, queue: queueSheet, bookmarks: bookmarkSheet, jump: jumpPicker, sleep: sleepPicker };
+        if (sheets[name])
+            sheets[name].show();
+    }
+
+    // ---- bookmarks and A-B repeat, as in the video player ---------------------------
+
+    readonly property var bookmarks: store && playback && playback.url !== "" && store.bookmarkRevision >= 0
+                                     ? store.bookmarks(playback.url) : []
+
+    readonly property var timelineMarkers: {
+        var list = [];
+        for (var i = 0; i < bookmarks.length; i++)
+            list.push({ position: bookmarks[i].position, color: Theme.diamond });
+        if (playback && playback.abStart >= 0)
+            list.push({ position: playback.abStart, color: Theme.emerald });
+        if (playback && playback.abEnd >= 0)
+            list.push({ position: playback.abEnd, color: Theme.ruby });
+        return list;
+    }
+
+    // What is switched on, shown under the header; a tap goes to its setting.
+    readonly property var chips: {
+        var list = [];
+        if (sleep && sleep.active)
+            list.push({ key: "sleep", label: "Sleep " + Format.clock(sleep.remaining) });
+        if (playback && playback.abStart >= 0)
+            list.push({ key: "ab", label: playback.abEnd >= 0 ? "A-B repeat" : "A-B: set the end" });
+        return list;
+    }
+
+    function addBookmark() {
+        store.addBookmark(playback.url, playback.position, "Bookmark at " + Format.clock(playback.position));
+        showInfo("Bookmark added", 1000);
+    }
+
+    function markAB() {
+        var before = playback.abStart;
+        playback.markAB();
+        if (playback.abEnd >= 0)
+            showInfo("Repeating " + Format.clock(playback.abStart) + " \u2013 " + Format.clock(playback.abEnd), 1500);
+        else if (playback.abStart >= 0 && before < 0)
+            showInfo("A-B repeat: start set. Choose it again at the end.", 2000);
+        else if (playback.abStart >= 0)
+            showInfo("The end must be after the start", 1500);
+        else
+            showInfo("A-B repeat off", 1000);
     }
 
     function showInfo(text, ms) {
@@ -116,16 +174,51 @@ Item {
 
         trailing: Row {
             IconButton {
-                visible: page.playback ? page.playback.hasPicture : false
-                glyph: "video"
-                color: Theme.text
-                onClicked: page.videoRequested()
-            }
-            IconButton {
                 visible: page.hasQueue
                 glyph: "playlist"
                 color: Theme.text
                 onClicked: queueSheet.show()
+            }
+            IconButton {
+                glyph: "more"
+                color: Theme.text
+                onClicked: menu.show()
+            }
+        }
+    }
+
+    Row {
+        z: 1
+        anchors { left: parent.left; leftMargin: Theme.u(2); top: header.bottom; topMargin: Theme.u(1) }
+        spacing: Theme.u(1)
+
+        Repeater {
+            model: page.chips
+            delegate: Rectangle {
+                width: chipLabel.implicitWidth + Theme.u(2.4)
+                height: Theme.u(3.6)
+                radius: height / 2
+                color: Theme.surface
+                border.width: 1
+                border.color: Theme.accent
+
+                Text {
+                    id: chipLabel
+                    anchors.centerIn: parent
+                    text: modelData.label
+                    color: Theme.accent
+                    font.pixelSize: Theme.fontXS
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -Theme.u(0.8)
+                    onClicked: {
+                        if (modelData.key === "sleep")
+                            sleepPicker.show();
+                        else
+                            page.markAB();
+                    }
+                }
             }
         }
     }
@@ -334,6 +427,7 @@ Item {
                 position: page.playback ? page.playback.position : 0
                 duration: page.playback ? page.playback.duration : 0
                 enabled: page.playback ? page.playback.seekable : false
+                markers: page.timelineMarkers
                 onSeekRequested: page.playback.seekTo(position)
             }
         }
@@ -409,5 +503,96 @@ Item {
             return list;
         }
         onChosen: page.playback.jumpTo(parseInt(key))
+    }
+
+    // The player menu: the video player's entries that mean something
+    // without a picture, in the same order.
+    OptionSheet {
+        id: menu
+        anchors.fill: parent
+        options: {
+            var p = page.playback;
+            var list = [
+                { key: "sleep", label: "Sleep timer", glyph: "clock",
+                  selected: page.sleep ? page.sleep.active : false,
+                  value: page.sleep && page.sleep.active ? "on" : "" },
+                { key: "jump", label: "Jump to time", glyph: "jump" }
+            ];
+            if (p && p.hasPicture)
+                list.push({ key: "video", label: "Play as video", glyph: "video" });
+            list.push({ key: "bookmarks", label: "Bookmarks", glyph: "bookmark",
+                        value: page.bookmarks.length > 0 ? "" + page.bookmarks.length : "" });
+            list.push({ key: "ab", label: "A-B repeat", glyph: "repeat", selected: p && p.abStart >= 0,
+                        value: !p || p.abStart < 0 ? "" : p.abEnd < 0 ? "set the end" : "on" });
+            return list;
+        }
+        onChosen: {
+            if (key === "sleep")
+                sleepPicker.show();
+            else if (key === "jump")
+                jumpPicker.show();
+            else if (key === "video")
+                page.videoRequested();
+            else if (key === "bookmarks")
+                bookmarkSheet.show();
+            else if (key === "ab")
+                page.markAB();
+        }
+    }
+
+    // Tap a bookmark to go there; hold it to remove it.
+    OptionSheet {
+        id: bookmarkSheet
+        anchors.fill: parent
+        title: page.bookmarks.length > 0 ? "Bookmarks \u2013 hold one to remove it" : "Bookmarks"
+        options: {
+            var list = [{ key: "add", label: "Add bookmark", glyph: "add", stay: true }];
+            for (var i = 0; i < page.bookmarks.length; i++)
+                list.push({ key: "" + page.bookmarks[i].position, label: page.bookmarks[i].title, glyph: "bookmark" });
+            return list;
+        }
+        onChosen: {
+            if (key === "add")
+                page.addBookmark();
+            else
+                page.playback.seekTo(parseInt(key));
+        }
+        onHeld: {
+            if (key === "add")
+                return;
+            page.store.removeBookmark(page.playback.url, parseInt(key));
+            page.showInfo("Bookmark removed", 1000);
+        }
+    }
+
+    TimePicker {
+        id: jumpPicker
+        anchors.fill: parent
+        title: "Jump to time"
+        onAccepted: page.playback.seekTo(ms)
+    }
+
+    TimePicker {
+        id: sleepPicker
+        anchors.fill: parent
+        title: "Sleep in"
+        withSeconds: false
+        sleepOptions: true
+        canRemove: page.sleep ? page.sleep.active : false
+        onOpenChanged: {
+            if (open && page.sleep) {
+                waitForEnd = page.sleep.waitForEnd;
+                resetOnInteraction = page.sleep.resetOnInteraction;
+            }
+        }
+        onAccepted: {
+            page.sleep.start(ms, waitForEnd, resetOnInteraction);
+            if (ms > 0)
+                page.showInfo("Sleep in " + Format.clock(ms), 1500);
+        }
+        onRemoved: {
+            page.sleep.cancel();
+            page.showInfo("Sleep timer off", 1000);
+        }
     }
 }
