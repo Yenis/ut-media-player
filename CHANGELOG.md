@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.17 - unreleased
+## 0.0.17 - 7 October 2026
 
 - Volume and brightness by swipe in the audio player, as in the video
   player: swipe up or down on the right side of the cover for the volume, on
