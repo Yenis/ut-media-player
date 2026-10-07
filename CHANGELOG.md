@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.15 - unreleased
+## 0.0.15 - 7 October 2026
 
 - Fixed: after music had played, or a queue played as audio, the next video
   could appear upside down and show the length of the last track. In 0.0.13
