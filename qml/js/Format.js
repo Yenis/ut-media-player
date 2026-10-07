@@ -51,3 +51,9 @@ function baseName(path) {
     var dot = name.lastIndexOf(".");
     return dot > 0 ? name.substring(0, dot) : name;
 }
+
+// Whether a file is music, going by its name: for files the library does not
+// know, which could otherwise only be assumed to have a picture.
+function isAudioName(path) {
+    return /\.(mp3|flac|ogg|oga|opus|m4a|aac|wav|wma|mka|ape|aiff?)$/i.test(path.toString());
+}

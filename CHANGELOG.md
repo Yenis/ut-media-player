@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.0.12 - unreleased
+
+- An audio player. Music, and a video played as audio, show on a page with
+  the cover, title and artist, the timeline, and buttons for previous,
+  10 seconds back, play, 10 seconds forward and next. Holding the back or
+  forward button goes 20 seconds.
+- The video player's seek gestures work on the cover: a double tap on the
+  left or right side goes 10 seconds back or forward, a double tap in the
+  middle pauses, and a swipe to the side seeks further. VLC does not have
+  these for audio.
+- What plays as audio carries on when you go back to the lists, in a bar
+  above the tabs. A tap on the bar opens the player; a swipe to the left goes
+  to the next item, to the right to the previous. Holding the play button, on
+  the bar or in the player, stops playback.
+- A music file opened from another app now opens in the audio player, not in
+  the video player with an empty picture.
+
 ## 0.0.11 - 3 October 2026
 
 - "Information" in a video's menu opens a page about it: its picture and

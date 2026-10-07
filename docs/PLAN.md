@@ -4,8 +4,9 @@ Status: **Phase 2 closed on 3 October 2026: the video side of the app is
 whole** (version 0.0.11). Phases 0, 1 and 2 are done: a video player, and
 around it the app shell with VLC's five tabs and a video library with grid
 and list, sorting, filter, favourites, grouping, groups made by hand, a
-queue, an item menu, multiple selection and an information page. Next is
-Phase 3, audio. Target device is the
+queue, an item menu, multiple selection and an information page. Phase 3,
+audio, is under way: version 0.0.12 has the audio player and the mini-player.
+Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
 
@@ -351,7 +352,7 @@ How it is built:
 | Subtitles | `qml/Gem/SubtitleTrack.qml`, `qml/js/Srt.js` | Finds and reads the `.srt` beside a video; the page draws the current line |
 | Menu features | `qml/Gem/TimePicker.qml`, `SleepTimer.qml`, `PlayerStore.qml` | Keypad for jump and sleep, the timer, bookmarks |
 | Controls | `qml/Gem/PlayerControls.qml`, `SeekBar.qml`, `OptionSheet.qml`, `Glyph.qml` | Title bar, timeline, buttons, menu, icons |
-| Audio mode | `qml/Gem/AudioModePage.qml` | What shows while a video plays as audio |
+| Audio mode | `qml/Gem/AudioPlayerPage.qml` (since 0.0.12; `AudioModePage.qml` before) | What shows while a video plays as audio |
 | Way in | `qml/Gem/VideoLibraryPage.qml`, `qml/platform/MediaLibrary.qml`, `qml/platform/ContentImport.qml` | A plain list of videos until Phase 2 builds the library; files from other apps |
 | Development aid | `qml/dev/Remote.qml` | Drives and photographs the app over adb. Off unless a marker file exists; removed in Phase 5 |
 
@@ -479,30 +480,51 @@ How it is built:
 
 ## Phase 3 - Audio
 
+How it is built:
+
+| Part | File | What it does |
+|---|---|---|
+| Full player | `qml/Gem/AudioPlayerPage.qml` | Cover, title, artist, timeline, buttons, the queue's list; the seek gestures on the cover. For music and for a video played as audio |
+| Mini-player | `qml/Gem/MiniPlayer.qml` | The bar above the tabs while something plays as audio and the full player is not open |
+| Where audio lives | `qml/Gem/AppShell.qml` | Going back from the full player leaves it playing; only "stop" (holding play) or the end of the queue ends it |
+
 - [ ] Library tabs: artists, albums, tracks, genres, playlists; album and
       artist pages.
-- [ ] Mini-player bar on every page, with swipe for previous and next.
-- [ ] Full player: cover, blurred background, seek bar, rewind and forward.
-- [ ] Seek gestures in the full audio player, as in the video player: a
-      double tap on a side seeks 10 s back or forward, and a horizontal swipe
-      seeks (asked for by Yenis, 7 October 2026). **Our own addition**: VLC
-      for Android has neither for audio. The gesture layer of Phase 1
-      (`qml/Gem/GestureLayer.qml`, `qml/js/Gestures.js`) is reused. To settle
-      when built: the mini-player's sideways swipe stays previous and next,
-      so the two must not be confused in the full player.
+- [x] Mini-player bar on every main page (version 0.0.12): cover, title,
+      artist, progress, play and pause; a tap opens the full player, a swipe
+      to the left is next and to the right previous, holding play stops.
+- [x] Full player (version 0.0.12): cover, title, artist, seek bar, previous
+      and next, rewind and forward by 10 s (20 s when held), holding play
+      stops, the queue's list, "Play as video".
+- [ ] Full player: blurred cover as the background.
+- [x] Seek gestures in the full audio player (version 0.0.12), as in the
+      video player: a double tap on a side seeks 10 s back or forward, one in
+      the middle pauses, and a horizontal swipe seeks (asked for by Yenis,
+      7 October 2026). **Our own addition**: VLC for Android has neither for
+      audio. The gesture layer of Phase 1 (`qml/Gem/GestureLayer.qml`,
+      `qml/js/Gestures.js`) is reused, with its volume, brightness and pinch
+      switched off. Settled: in the full player a sideways swipe seeks, and
+      previous and next are buttons; on the mini-player it is previous and
+      next.
 - [ ] Queue with search, reorder and remove, shuffle, repeat modes, "stop after
       this track", queue restored on launch.
 - [ ] Sleep timer, jump to time, A-B repeat and bookmarks shared with the video
       player.
 - [ ] Playback under other apps and with the screen locked (D10), and system
       controls and headset behaviour as far as S11 allows.
-- [ ] "Play as video" in the player menu for files that have a picture.
+- [x] "Play as video" for files that have a picture: a button in the full
+      player's header (version 0.0.12). It moves into the player menu when
+      that is built.
 - [ ] Carried over from Phase 2: hand the queue to media-hub so that it moves
       on while the app is frozen; "Insert next" and "Append" in the video
       library's item menu, selection bar and playback action, once the
       mini-player keeps something playing behind the library.
 - [ ] Album art: check whether the system's thumbnailer looks covers up
-      online; if it does, show only the art found in the files (D13).
+      online; if it does, show only the art found in the files (D13). Until
+      that is known, the safe half is in place (version 0.0.12): the library
+      gives `image://albumart/artist=...&album=...` for a track with no cover
+      of its own **[device]**, and `qml/platform/MediaLibrary.qml` does not
+      pass that on; only a cover inside the file is shown.
 - [ ] Discuss, when reached: equalizer, replay gain, passthrough.
 
 ## Phase 4 - Browse, playlists, streams and settings

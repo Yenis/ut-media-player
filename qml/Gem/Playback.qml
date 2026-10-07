@@ -35,6 +35,8 @@ Item {
     // What is loaded.
     property string url: ""
     property string title: ""
+    property string artist: ""
+    property string art: ""             // address of a cover or thumbnail; empty for none
     property int libraryDuration: 0     // ms, from the media library, until the backend knows
     property bool libraryHasPicture: false
 
@@ -88,7 +90,7 @@ Item {
     property bool _awaitingStart: false
     property bool _fromStart: false     // go to 0 once started: the file may still be loaded, part-way
 
-    // media: { url, title, duration (ms), hasPicture }
+    // media: { url, title, artist, art, duration (ms), hasPicture }
     function open(media) {
         openQueue([media], 0, false);
     }
@@ -133,6 +135,8 @@ Item {
         saveNow();
         url = media.url.toString();
         title = media.title || "";
+        artist = media.artist || "";
+        art = media.art ? media.art.toString() : "";
         libraryDuration = media.duration || 0;
         libraryHasPicture = !!media.hasPicture;
         playerDuration = 0;

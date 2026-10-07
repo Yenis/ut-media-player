@@ -80,6 +80,11 @@ Item {
         else if (name === "video") shell.toVideo();
         else if (name === "back") shell.back();
         else if (name === "home") shell.page = "home";
+        else if (name === "expand") shell.page = "audio";
+        else if (name === "stop") shell.closePlayer();
+        else if (shell.audioPage && name === "sheet") shell.audioPage.openSheet(argument);
+        else if (shell.audioPage && name === "tapseek") shell.audioPage.tapSeek(argument);
+        else if (shell.audioPage && name === "info") shell.audioPage.showInfo(argument, 5000);
         else if (name === "tab") { shell.page = "home"; shell.tab = argument; }
         else if (name === "view") shell.videoLibrary.setGrid(argument === "grid");
         else if (name === "sort") shell.videoLibrary.setSort(argument.split(" ")[0], argument.split(" ")[1] === "desc");
@@ -127,7 +132,7 @@ Item {
         var p = shell.playback;
         var v = shell.videoPage;
         console.log("REMOTE STATE " + JSON.stringify({
-            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, grid: shell.videoLibrary.grid, selected: shell.videoLibrary.selectionCount, shown: shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, playing: p.playing, position: p.position,
+            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, grid: shell.videoLibrary.grid, selected: shell.videoLibrary.selectionCount, shown: shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, artist: p.artist, art: p.art, mini: shell.audioActive, playing: p.playing, position: p.position,
             raw: p.player.position, duration: p.duration, audioMode: p.audioMode,
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
             error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd],

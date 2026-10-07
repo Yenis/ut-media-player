@@ -3,12 +3,13 @@ module Gem
 singleton Theme 1.0 Theme.qml
 
 AppShell 1.0 AppShell.qml
-AudioModePage 1.0 AudioModePage.qml
+AudioPlayerPage 1.0 AudioPlayerPage.qml
 GestureLayer 1.0 GestureLayer.qml
 Glyph 1.0 Glyph.qml
 GroupThumb 1.0 GroupThumb.qml
 IconButton 1.0 IconButton.qml
 MediaInfoPage 1.0 MediaInfoPage.qml
+MiniPlayer 1.0 MiniPlayer.qml
 MorePage 1.0 MorePage.qml
 NameDialog 1.0 NameDialog.qml
 OptionSheet 1.0 OptionSheet.qml

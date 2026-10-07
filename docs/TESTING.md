@@ -1,12 +1,39 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Audio player and mini-player, version 0.0.12
+
+### Checked over adb, 7 October 2026
+
+| Check | Result |
+|---|---|
+| `open` on `~/Music/gemplayer-test/test-1.mp3` opens the audio player, not the video player: title "MP3 440 Hz", artist "GemPlayer", the headphones in place of a cover | Pass. The library offers `image://albumart/...` for this file, which is not used (D13) |
+| `tapseek forward` moves 10 s on and shows "+10 s" on the right of the cover | Pass |
+| `back` leaves it playing, with the bar above the tabs: cover, title, artist, pause, progress along the top | Pass |
+| "Play all" on a video, then `audio`: the video's picture as the cover, the video and queue buttons in the header, the queue's list | Pass |
+| The queue moves on by itself behind the library, and `next` does; the bar shows the new title and picture | Pass |
+| `expand` opens the full player; `video` returns to the picture | Pass |
+| `stop` ends playback, empties the queue and takes the bar away | Pass |
+| No QML warnings in the log | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Double tap on the left and right quarter of the cover area: 10 s back and forward, adding up; in the middle: pause and play | Still to do |
+| Swipe sideways on the cover: the overlay shows the jump and the target, the seek happens on release | Still to do |
+| Rewind and forward buttons: 10 s on a tap, 20 s when held | Still to do |
+| Mini-player: a tap opens the player; swipe left is next, swipe right previous (or back to the start, 5 s in); the bar follows the finger | Still to do |
+| Holding play stops, on the bar and in the player | Still to do |
+| A music file opened from the file manager | Still to do |
+| Audio carries on with the screen off and under another app, from the mini-player state | Still to do |
 
 ## Information page, version 0.0.11
 

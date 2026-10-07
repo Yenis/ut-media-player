@@ -8,8 +8,9 @@ import "../js/Format.js" as Format
  * Created by Main.qml only after the app identity is set.
  *
  * Behind the tab bar are the five main pages, as in VLC; the players and the
- * diagnostics page cover them. The sleep timer lives here because it outlasts
- * any one page.
+ * diagnostics page cover them. What plays as audio carries on behind the main
+ * pages, with the mini-player above the tabs. The sleep timer lives here
+ * because it outlasts any one page.
  */
 FocusScope {
     id: shell
@@ -32,12 +33,16 @@ FocusScope {
 
     readonly property alias playback: core
     readonly property alias videoPage: videoView
+    readonly property var audioPage: audioLoader.item
     readonly property alias videoLibrary: videoTab
     readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
 
     // Height of the on-screen keyboard, so content can sit above it. Lomiri's
     // MainView would do this for us; a plain Window has to do it itself.
+    // Something plays as audio, or waits paused: the mini-player shows it.
+    readonly property bool audioActive: core.audioMode && core.loaded
+
     readonly property real keyboardHeight: Qt.inputMethod.visible
         ? Qt.inputMethod.keyboardRectangle.height / Screen.devicePixelRatio
         : 0
@@ -47,7 +52,7 @@ FocusScope {
     Playback {
         id: core
         store: playerStore
-        onEnded: if (shell.page === "video" || shell.page === "audio") shell.closePlayer()
+        onEnded: if (shell.page === "video" || core.audioMode) shell.closePlayer()
         onMediaChanged: if (shell.page === "video") videoView.reset()
     }
 
@@ -92,7 +97,8 @@ FocusScope {
     function openUrl(url) {
         var path = decodeURIComponent(url.toString().replace("file://", ""));
         var known = library ? library.lookup(path) : null;
-        openMedia(known || { url: url.toString(), title: Format.baseName(url), duration: 0, hasPicture: true });
+        openMedia(known || { url: url.toString(), title: Format.baseName(url), duration: 0,
+                             hasPicture: !Format.isAudioName(url) });
     }
 
     function openPath(path) {
@@ -111,20 +117,22 @@ FocusScope {
         core.play();
     }
 
-    // Leaving a player: a video stops with its page.
+    // Stops what plays. A video stops with its page; audio only when asked
+    // to, or at the end of its queue.
     function closePlayer() {
         core.pause();
         core.clearQueue();
         core.audioMode = false;
-        page = "home";
+        if (page === "video" || page === "audio")
+            page = "home";
     }
 
     // One step back; false when there is nowhere to go back to.
     function back() {
         if (page === "video" && videoPage)
             videoPage.back();
-        else if (page === "audio")
-            closePlayer();
+        else if (page === "audio" && audioPage)
+            audioPage.back();
         else if (page === "diagnostics")
             page = "home";
         else if (page === "home" && tab === "video")
@@ -162,6 +170,8 @@ FocusScope {
     Keys.onPressed: {
         if (page === "video" && videoView.handleKey(event))
             event.accepted = true;
+        else if (page === "audio" && audioPage && audioPage.handleKey(event))
+            event.accepted = true;
     }
 
     Item {
@@ -171,7 +181,7 @@ FocusScope {
         visible: shell.page === "home"
 
         Item {
-            anchors { left: parent.left; right: parent.right; top: parent.top; bottom: tabBar.top }
+            anchors { left: parent.left; right: parent.right; top: parent.top; bottom: miniPlayer.top }
 
             VideoLibraryPage {
                 id: videoTab
@@ -210,6 +220,17 @@ FocusScope {
             }
         }
 
+        MiniPlayer {
+            id: miniPlayer
+            anchors { left: parent.left; right: parent.right; bottom: tabBar.top }
+            // Out of the way while something is being typed.
+            visible: shell.audioActive && shell.keyboardHeight === 0
+            height: visible ? implicitHeight : 0
+            playback: core
+            onExpandRequested: shell.page = "audio"
+            onStopRequested: shell.closePlayer()
+        }
+
         TabBar {
             id: tabBar
             anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
@@ -240,12 +261,14 @@ FocusScope {
     }
 
     Loader {
+        id: audioLoader
         anchors.fill: parent
         active: shell.page === "audio"
         sourceComponent: Component {
-            AudioModePage {
+            AudioPlayerPage {
                 playback: core
-                onCloseRequested: shell.closePlayer()
+                onCollapseRequested: shell.page = "home"
+                onStopRequested: shell.closePlayer()
                 onVideoRequested: shell.toVideo()
             }
         }
