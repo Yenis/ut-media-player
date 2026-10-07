@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.18 - unreleased
+## 0.0.18 - 7 October 2026
 
 - What was playing as audio is there again when the app is opened: the queue
   and the track, paused in the mini-player at the place it was left.

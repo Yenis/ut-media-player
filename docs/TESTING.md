@@ -37,10 +37,10 @@ MPRIS interface beside the app's own state.
 
 | Check | Result |
 |---|---|
-| Play music, close the app from the app switcher: the music stops | Still to do. This is the one check of the pause on closing; adb cannot close a window |
-| Open the app again: the mini-player has the track, and play carries on | Still to do |
-| Hold an item in the queue: "Remove from queue", "Stop after this track" | Still to do |
-| Screen off across a track change or two, then unlock and open the app: the track carries on, with at most a short break | Still to do |
+| Play music, close the app from the app switcher: the music stops | Pass (Yenis, 7 October 2026: "it works", said of the layer as a whole) |
+| Open the app again: the mini-player has the track, and play carries on | Pass (Yenis, likewise) |
+| Hold an item in the queue: "Remove from queue", "Stop after this track" | Pass (Yenis, likewise) |
+| Screen off across a track change or two, then unlock and open the app: the track carries on, with at most a short break | Pass (Yenis, likewise) |
 
 ## Volume and brightness in the audio player, version 0.0.17
 
