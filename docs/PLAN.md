@@ -6,8 +6,8 @@ around it the app shell with VLC's five tabs and a video library with grid
 and list, sorting, filter, favourites, grouping, groups made by hand, a
 queue, an item menu, multiple selection and an information page. Phase 3,
 audio, is under way: version 0.0.12 has the audio player and the mini-player,
-0.0.13 a queue that moves on in the background and can be added to, and
-0.0.14 the music library.
+0.0.13 a queue that moves on in the background and can be added to,
+0.0.14 the music library, and 0.0.15 shuffle and repeat.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -489,7 +489,7 @@ How it is built:
 | Audio tab | `qml/Gem/AudioLibraryPage.qml`, `qml/js/AudioLibrary.js` | Artists, albums, tracks and genres, each worked out from the scanner's one list of tracks; an artist, album or genre opens in place |
 | Full player | `qml/Gem/AudioPlayerPage.qml` | Cover, title, artist, timeline, buttons, the queue's list; the seek gestures on the cover. For music and for a video played as audio |
 | Mini-player | `qml/Gem/MiniPlayer.qml` | The bar above the tabs while something plays as audio and the full player is not open |
-| Two ways of playing | `qml/Gem/Playback.qml` | A video on screen is one address at a time, moved on by the app; audio is a list given to media-hub, which moves through it also while the app is frozen. Switching between the two loads the item again |
+| Two ways of playing | `qml/Gem/Playback.qml` | A video on screen is one address at a time, moved on by the app; audio is a list given to media-hub, which moves through it also while the app is frozen. Switching between the two loads the item again, and the list is emptied before an address plays (0.0.15): left full, it turns the next video upside down |
 | Where audio lives | `qml/Gem/AppShell.qml` | Going back from the full player leaves it playing; only the mini-player's cross or the end of the queue ends it |
 
 - [x] Library tabs (version 0.0.14): artists, albums, tracks, genres. An
@@ -528,8 +528,20 @@ How it is built:
       switched off. Settled: in the full player a sideways swipe seeks, and
       previous and next are buttons; on the mini-player it is previous and
       next.
-- [ ] Queue with search, reorder and remove, shuffle, repeat modes, "stop after
-      this track", queue restored on launch.
+- [x] Shuffle and repeat modes (version 0.0.15), for audio and for a video
+      queue. None of it is the hub list's own doing except "repeat one"
+      **[device]**: its "loop" skips the first item at every turn (Qt's
+      player answers the end of the list with a `next()` of its own, on top
+      of the hub's), and its "random" plays items twice before others once.
+      So the app shuffles the queue itself and gives the hub the result, and
+      "repeat all" is the queue laid out again behind itself, about 200
+      items deep, topped up while the app is awake. The list can only be
+      changed behind the playing item: taking out or inserting before it
+      leaves the list's index pointing at the wrong item. That is why
+      shuffle mixes only what follows.
+- [ ] Queue with search, reorder and remove, "stop after this track", queue
+      restored on launch. Reorder and remove are limited by the same rule:
+      only behind the playing item.
 - [ ] Sleep timer, jump to time, A-B repeat and bookmarks shared with the video
       player.
 - [ ] Playback under other apps and with the screen locked (D10), and system

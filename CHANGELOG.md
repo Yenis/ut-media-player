@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.0.15 - unreleased
+
+- Fixed: after music had played, or a queue played as audio, the next video
+  could appear upside down and show the length of the last track. In 0.0.13
+  and 0.0.14.
+- Shuffle and repeat. In the audio player, a shuffle button on the left of
+  the title and a repeat button on the right, which steps through off, all
+  and one. In the video player they are in the menu. Both stay as they are
+  set.
+- Shuffle mixes what follows the current item and leaves what has played
+  where it is; switching it off puts what is still to come back in order.
+  A list started while shuffle is on begins with the item you tapped.
+- Repeat all and repeat one keep going with the screen off and under other
+  apps.
+- Music starts at its beginning when it is tapped. Only videos carry on
+  where they were left.
+
 ## 0.0.14 - 7 October 2026
 
 - The Audio tab lists the music on the phone under Artists, Albums, Tracks,

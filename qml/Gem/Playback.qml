@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtMultimedia 5.12
+import Qt.labs.settings 1.0
 import Gem 1.0
 
 /*
@@ -30,6 +31,11 @@ import Gem 1.0
  * A video cannot be played from a list: its picture stays black or stale.
  * So "play as audio" and back may have to load the item again, which makes a
  * break of about a second; see `setAudioMode`.
+ *
+ * Repeat and shuffle are done here, by what is put into the queue and the
+ * list, not by the list's own modes: its "loop" skips the first item at each
+ * turn, and its "random" plays items twice before others once. Only "repeat
+ * one" is the list's own. See `_syncTail`.
  */
 Item {
     id: playback
@@ -52,8 +58,16 @@ Item {
     // What plays after what. `queue` holds media as `open` takes them.
     property var queue: []
     property int queueIndex: -1
-    readonly property bool hasNext: queueIndex >= 0 && queueIndex < queue.length - 1
+    readonly property bool hasNext: queueIndex >= 0 && queue.length > 1
+                                    && (queueIndex < queue.length - 1 || repeat === "all")
     readonly property bool hasPrevious: queueIndex > 0
+
+    // Repeat: "none", "all" (the queue starts again at its end) or "one".
+    // Shuffle: what follows the current item is in random order. Both stay
+    // as they are set, from one queue to the next and one launch to the next.
+    property string repeat: "none"
+    property bool shuffle: false
+    readonly property var repeatModes: ["none", "all", "one"]
 
     // VLC's rule for "previous": this long into a file it goes back to the
     // file's start, earlier than that to the file before (PlaylistManager.kt).
@@ -69,6 +83,9 @@ Item {
     readonly property alias player: mediaPlayer
     readonly property bool loaded: url !== ""
     readonly property bool playing: mediaPlayer.playbackState === MediaPlayer.PlayingState
+    // Played out, or never started. The state follows the status by a moment.
+    readonly property bool _stopped: mediaPlayer.playbackState === MediaPlayer.StoppedState
+                                     || mediaPlayer.status === MediaPlayer.EndOfMedia
     readonly property bool hasPicture: libraryHasPicture || mediaPlayer.hasVideo
     // The backend never announces that a file became seekable, so a binding
     // on its flag stays false. A known length is the practical test; the flag
@@ -92,6 +109,9 @@ Item {
     property int _lastPosition: 0
     property int _pendingStart: 0       // where to seek once playback has started
     property bool _awaitingStart: false
+    property var _ordered: []           // the queue as it was given, for when shuffle is switched off
+    property int _lapStart: 0           // the hub's index of the queue's first item, in the lap that plays
+    property int _hubCount: 0           // how many items the hub's list has been given
     property bool _listMode: false      // the hub's list is playing, not a single address
     property int _pendingIndex: -1      // the item to start with, until the hub has the list
     property int _askedIndex: -1        // the item asked of the hub, until it says so itself
@@ -106,10 +126,65 @@ Item {
     // was left; `asAudio` plays without the picture.
     function openQueue(list, index, fromStart, asAudio) {
         saveNow();
-        queue = list.slice();
-        queueIndex = Math.max(0, Math.min(index, queue.length - 1));
+        var at = Math.max(0, Math.min(index, list.length - 1));
+        _ordered = list.slice();
+        if (shuffle && list.length > 1) {
+            // The item chosen plays first; the others follow in random order.
+            queue = [list[at]].concat(_shuffled(list.slice(0, at).concat(list.slice(at + 1))));
+            queueIndex = 0;
+        } else {
+            queue = list.slice();
+            queueIndex = at;
+        }
         audioMode = !!asAudio;
         _start(fromStart, -1);
+    }
+
+    function setRepeat(mode) {
+        var before = repeat;
+        repeat = repeatModes.indexOf(mode) >= 0 ? mode : "none";
+        settings.setValue("repeat", repeat);
+        settings.sync();
+        if (_listMode && queueIndex >= 0 && (before === "all") !== (repeat === "all"))
+            _syncTail();
+    }
+
+    function cycleRepeat() {
+        setRepeat(repeatModes[(repeatModes.indexOf(repeat) + 1) % repeatModes.length]);
+    }
+
+    // Shuffling leaves what has played, and the current item, where they are
+    // and mixes what follows. Switching it off puts what is still to come
+    // back into its first order.
+    function setShuffle(on) {
+        if (shuffle === on)
+            return;
+        shuffle = on;
+        settings.setValue("shuffle", on);
+        settings.sync();
+        if (queueIndex < 0)
+            return;
+        var played = queue.slice(0, queueIndex + 1);
+        var rest;
+        if (on) {
+            rest = _shuffled(queue.slice(queueIndex + 1));
+        } else {
+            rest = _ordered.filter(function(item) { return played.indexOf(item) < 0; });
+        }
+        queue = played.concat(rest);
+        if (_listMode)
+            _syncTail();
+    }
+
+    function _shuffled(list) {
+        var mixed = list.slice();
+        for (var i = mixed.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var held = mixed[i];
+            mixed[i] = mixed[j];
+            mixed[j] = held;
+        }
+        return mixed;
     }
 
     // "Play as audio" and back. Where the way of playing has to change with
@@ -146,6 +221,16 @@ Item {
         _askedIndex = -1;
         _listMode = _wantsList();
         if (!_listMode) {
+            // The list has to be emptied before an address is played
+            // again: with tracks left in it, the next video shows upside
+            // down and with the length of the last track [device].
+            if (mediaPlayer.playlist)
+                hubList.clear();
+            // An address that has played out plays again only when it is set
+            // again, and setting the same one is no setting at all: giving
+            // the player its (empty) list in between makes it one.
+            if (mediaPlayer.source.toString() === url && _stopped)
+                mediaPlayer.playlist = hubList;
             if (mediaPlayer.source.toString() !== url)
                 mediaPlayer.source = url;
             mediaPlayer.play();
@@ -154,21 +239,56 @@ Item {
         // Set before the list is touched: emptying and filling it reports
         // index changes at once, which must not be read as the hub moving on.
         _pendingIndex = queueIndex;
-        mediaPlayer.pause();
+        if (playing)
+            mediaPlayer.pause();
         if (mediaPlayer.playlist !== hubList)
             mediaPlayer.playlist = hubList;
         hubList.clear();
-        var urls = [];
-        for (var i = 0; i < queue.length; i++)
-            urls.push(queue[i].url.toString());
+        _lapStart = 0;
+        var urls = _urls(queue).concat(_laps());
+        _hubCount = urls.length;
         hubList.addItems(urls);
         _settle();
+    }
+
+    function _urls(list) {
+        var urls = [];
+        for (var i = 0; i < list.length; i++)
+            urls.push(list[i].url.toString());
+        return urls;
+    }
+
+    // "Repeat all" for the hub's list: the queue laid out again behind
+    // itself, often enough to last hours while the app is frozen and cannot
+    // add more. A queue of one is repeated by the list's own "repeat one".
+    function _laps() {
+        var urls = [];
+        if (repeat !== "all" || queue.length < 2)
+            return urls;
+        var once = _urls(queue);
+        for (var lap = Math.max(1, Math.ceil(200 / queue.length)); lap > 0; lap--)
+            urls = urls.concat(once);
+        return urls;
+    }
+
+    // Makes the hub's list match the queue from the current item on: what
+    // follows it is taken out and put in afresh. Only what follows: taking
+    // out or inserting before the playing item leaves the list's index
+    // pointing at the wrong one [device]. About 3 ms per item taken out.
+    function _syncTail() {
+        var at = _lapStart + queueIndex;
+        if (_hubCount > at + 1)
+            hubList.removeItems(at + 1, _hubCount - 1);
+        var urls = _urls(queue.slice(queueIndex + 1)).concat(_laps());
+        if (urls.length > 0)
+            hubList.addItems(urls);
+        _hubCount = at + 1 + urls.length;
     }
 
     // The hub takes the list in its own time; playback starts once the list
     // is there.
     function _settle() {
-        if (_pendingIndex < 0 || hubList.itemCount < queue.length)
+        if (_pendingIndex < 0 || hubList.itemCount < _hubCount)
             return;
         var index = _pendingIndex;
         _pendingIndex = -1;
@@ -179,9 +299,9 @@ Item {
     // changes may come first (the list being emptied, its first item being
     // loaded): until the answer, they are not the hub moving on.
     function _goTo(index) {
-        _askedIndex = index;
+        _askedIndex = _lapStart + index;
         askedLimit.restart();
-        hubList.currentIndex = index;
+        hubList.currentIndex = _lapStart + index;
         mediaPlayer.play();
     }
 
@@ -190,21 +310,22 @@ Item {
         if (queueIndex < 0 || list.length === 0)
             return;
         queue = queue.slice(0, at).concat(list, queue.slice(at));
-        if (_listMode) {
+        _ordered = _ordered.concat(list);
+        if (!_listMode) {
+            if (_wantsList())
+                _restart();
+        } else if (repeat === "all") {
+            _syncTail();
+        } else if (at >= queue.length - list.length) {
             // The backend adds a list at the end, but inserts only one item
-            // at a time, and only before an item that is there
-            // [device]. So several go in last first, each at the same place.
-            if (at >= queue.length - list.length) {
-                var urls = [];
-                for (var i = 0; i < list.length; i++)
-                    urls.push(list[i].url.toString());
-                hubList.addItems(urls);
-            } else {
-                for (var k = list.length - 1; k >= 0; k--)
-                    hubList.insertItem(at, list[k].url.toString());
-            }
-        } else if (_wantsList()) {
-            _restart();
+            // at a time, and only before an item that is there [device]. So
+            // several go in last first, each at the same place.
+            hubList.addItems(_urls(list));
+            _hubCount += list.length;
+        } else {
+            for (var k = list.length - 1; k >= 0; k--)
+                hubList.insertItem(_lapStart + at, list[k].url.toString());
+            _hubCount += list.length;
         }
     }
 
@@ -212,8 +333,33 @@ Item {
     function append(list) { _insert(queue.length, list); }
 
     function next() {
-        if (hasNext)
+        if (!hasNext)
+            return;
+        if (queueIndex < queue.length - 1) {
             jumpTo(queueIndex + 1);
+            return;
+        }
+        // Repeat all: round to the start, which for the hub is the next lap.
+        saveNow();
+        queueIndex = 0;
+        if (_listMode) {
+            _lapStart += queue.length;
+            _adopt(queue[0], false);
+            _goTo(0);
+            _topUp();
+        } else {
+            _start(false, -1);
+        }
+        mediaChanged();
+    }
+
+    // Keeps a lap in hand while "repeat all" runs and the app is awake.
+    function _topUp() {
+        if (repeat !== "all" || queue.length < 2 || _hubCount - (_lapStart + queue.length) >= queue.length)
+            return;
+        var urls = _laps();
+        hubList.addItems(urls);
+        _hubCount += urls.length;
     }
 
     function previous() {
@@ -241,6 +387,7 @@ Item {
 
     function clearQueue() {
         queue = [];
+        _ordered = [];
         queueIndex = -1;
     }
 
@@ -257,7 +404,9 @@ Item {
         abStart = -1;
         abEnd = -1;
         _seekTarget = -1;
-        _pendingStart = store && !fromStart ? store.resumePoint(url) : 0;
+        // A video carries on where it was left. Music starts at its start, as
+        // in VLC: a song tapped again is not wanted from its middle.
+        _pendingStart = store && !fromStart && media.hasPicture ? store.resumePoint(url) : 0;
         _fromStart = !!fromStart;
         _awaitingStart = true;
         startLimit.restart();
@@ -281,12 +430,20 @@ Item {
     }
 
     function play() {
-        if (loaded)
+        if (!loaded)
+            return;
+        // What has played out has to be loaded again to play again.
+        if (_stopped && queueIndex >= 0)
+            _start(true, -1);
+        else
             mediaPlayer.play();
     }
 
+    // Never pauses a player that has stopped at the end of its media: the
+    // hub then loads the file again to pause it, and with its track list
+    // emptied (see `_start`) that makes media-hub itself abort [device].
     function pause() {
-        if (!loaded)
+        if (!loaded || _stopped)
             return;
         mediaPlayer.pause();
         saveNow();
@@ -317,8 +474,26 @@ Item {
             store.save(url, position, duration);
     }
 
+    Settings {
+        id: settings
+        category: "playback"
+    }
+
+    Component.onCompleted: {
+        var mode = settings.value("repeat", "none");
+        repeat = repeatModes.indexOf(mode) >= 0 ? mode : "none";
+        // Settings hands a stored true back as the text "true".
+        var mixed = settings.value("shuffle", false);
+        shuffle = mixed === true || mixed === "true";
+    }
+
     Playlist {
         id: hubList
+
+        // The one mode of the list that is used: it plays an item again
+        // without a gap, and without the app.
+        playbackMode: playback.repeat === "one" || (playback.repeat === "all" && playback.queue.length === 1)
+                      ? Playlist.CurrentItemInLoop : Playlist.Sequential
 
         onItemInserted: playback._settle()
 
@@ -330,16 +505,26 @@ Item {
                     playback._askedIndex = -1;
                 return;
             }
-            if (playback._pendingIndex >= 0 || currentIndex < 0 || currentIndex >= playback.queue.length
-                    || currentIndex === playback.queueIndex)
+            if (playback._pendingIndex >= 0 || currentIndex < 0 || currentIndex >= playback._hubCount)
+                return;
+            // Which lap the hub is in, and which item of the queue that is.
+            var count = playback.queue.length;
+            while (currentIndex >= playback._lapStart + count)
+                playback._lapStart += count;
+            while (currentIndex < playback._lapStart)
+                playback._lapStart -= count;
+            var index = currentIndex - playback._lapStart;
+            // "Repeat one" reports the same item again.
+            if (index === playback.queueIndex)
                 return;
             // The hub moved on by itself: the item before has played out.
             // After the app was frozen, every move made meanwhile arrives
             // here, one after the other.
-            if (playback.store && currentIndex === playback.queueIndex + 1)
+            if (playback.store)
                 playback.store.finish(playback.url, playback.duration);
-            playback.queueIndex = currentIndex;
-            playback._adopt(playback.queue[currentIndex], false);
+            playback.queueIndex = index;
+            playback._adopt(playback.queue[index], false);
+            playback._topUp();
             playback.mediaChanged();
         }
     }
@@ -388,16 +573,33 @@ Item {
         onStatusChanged: {
             if (status !== MediaPlayer.EndOfMedia || playback.queueIndex < 0)
                 return;
-            // In a list the hub goes to the next item, and says so.
-            if (playback._listMode && playback.hasNext)
-                return;
             if (playback.store)
                 playback.store.finish(playback.url, playback.duration);
-            if (playback.hasNext)
+            if (playback._listMode) {
+                // The hub's list has run out. With "repeat all" that takes
+                // the app being frozen for longer than the laps lasted.
+                if (playback.repeat === "all" && playback.queue.length > 1) {
+                    playback.queueIndex = 0;
+                    playback._start(true, -1);
+                    playback.mediaChanged();
+                } else {
+                    playback.ended();
+                }
+            } else if (playback.repeat === "one") {
+                again.restart();
+            } else if (playback.hasNext) {
                 advance.restart();
-            else
+            } else {
                 playback.ended();
+            }
         }
+    }
+
+    // "Repeat one" for a video on screen, likewise once the end is over.
+    Timer {
+        id: again
+        interval: 50
+        onTriggered: if (playback.queueIndex >= 0) playback._start(true, -1)
     }
 
     // The next item is loaded once the backend has finished ending this one.

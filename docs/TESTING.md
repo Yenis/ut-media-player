@@ -1,12 +1,55 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Shuffle and repeat, version 0.0.15
+
+### Checked over adb, 7 October 2026
+
+What plays was read from media-hub's MPRIS interface beside the app's own
+state. The album is the six 30 s test tracks.
+
+| Check | Result |
+|---|---|
+| The list's own `Loop` mode at the end of the album | **Fail:** the hub wraps to the first track, then Qt calls `next()` on top, and the second track plays. Not used |
+| The list's own `Random` mode | **Fail:** of seven moves, two tracks came twice before the sixth came once; the mode reads back as `Loop`. Not used |
+| The list's own `CurrentItemInLoop` | Pass: the track starts again, the list reports its index again. Used for "repeat one" |
+| `removeItems` behind the playing item, `addItems` after | Pass, playback undisturbed: 178 removed in 0.5 s, 150 added in 23 ms |
+| `removeItems` and `insertItem` before the playing item | **Fail:** `currentIndex` then names another file than the one playing. Never done |
+| Repeat all: the last track ends, the first follows, the app shows "1 of 6" | Pass |
+| Repeat all: `next` six times goes round once | Pass |
+| Repeat all with the calculator in front for 50 s over the album's end | Pass: the hub went round to the second track; back in the app, "2 of 7" and the right title |
+| "Insert next" while repeat all is on, then `next` | Pass: the inserted item plays |
+| Repeat one: the track starts again at its end | Pass, music and a video on screen. The video failed at first: the restart came before the player had settled into "stopped". It now waits 50 ms |
+| Shuffle on: the items behind the current one are mixed, the hub plays them in that order | Pass |
+| Shuffle off: what is still to come is back in album order | Pass |
+| Repeat off: the queue ends at its end, the mini-player goes | Pass |
+| The buttons: shuffle left of the title, repeat right, a "1" in it for repeat one; Repeat and Shuffle in the video menu | Pass (layout) |
+
+### A video after audio: upside down. Found and fixed, 7 October 2026
+
+| Check | Result |
+|---|---|
+| Music, stopped with the cross or played to its end, then a video | **Fail, and so in 0.0.13 and 0.0.14:** the video is drawn upside down and its length reads 0:30, the last track's. Every video after it too, until the app is restarted. A queue switched to audio and back to the same video did not show it, the file being the same; that is why it went unseen |
+| The same with the hub's list emptied before the address is set | Pass: right way up, right length. Checked after the cross, after the end of the music, over playing music, and for a video queue switched to audio, moved on, and switched back |
+| Then: a video played to its end, and `back` | **Fail: media-hub aborted** ("munmap_chunk(): invalid pointer") when the stopped player was paused, its list being empty. Every app's playback goes with it; systemd starts it again |
+| The same with no pause sent to a stopped player | Pass. Seven runs across ends of videos and music, among them a video opened again after its end, opened and left at once, a video queue going round, and a session with video only: no abort |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| A video after music is the right way up | Still to do |
+| Shuffle and repeat by touch in the audio player; the message on the cover | Still to do |
+| Repeat and Shuffle in the video player's menu | Still to do |
+| Repeat all on an album with the screen off, across its end | Still to do |
+| A tapped song starts at its beginning | Still to do |
 
 ## Music library, version 0.0.14
 

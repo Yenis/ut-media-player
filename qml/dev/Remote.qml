@@ -84,6 +84,8 @@ Item {
         else if (name === "atap") shell.audioLibrary.activate(shell.audioLibrary.shown[parseInt(argument)]);
         else if (name === "aaction") shell.audioLibrary.itemAction(shell.audioLibrary.shown[parseInt(argument.split(" ")[0])], argument.split(" ")[1]);
         else if (name === "amenu") shell.audioLibrary.openItemMenu(parseInt(argument));
+        else if (name === "repeat") p.setRepeat(argument);
+        else if (name === "shuffle") p.setShuffle(argument === "1");
         else if (name === "expand") shell.page = "audio";
         else if (name === "stop") shell.closePlayer();
         else if (shell.audioPage && name === "sheet") shell.audioPage.openSheet(argument);
@@ -136,7 +138,7 @@ Item {
         var p = shell.playback;
         var v = shell.videoPage;
         console.log("REMOTE STATE " + JSON.stringify({
-            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, grid: shell.videoLibrary.grid, selected: shell.videoLibrary.selectionCount, shown: shell.tab === "audio" ? shell.audioLibrary.shownTitles() : shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, artist: p.artist, art: p.art, mini: shell.audioActive, playing: p.playing, position: p.position,
+            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, repeat: p.repeat, shuffle: p.shuffle, upcoming: p.queue.slice(p.queueIndex + 1, p.queueIndex + 6).map(function(m) { return m.title; }), grid: shell.videoLibrary.grid, selected: shell.videoLibrary.selectionCount, shown: shell.tab === "audio" ? shell.audioLibrary.shownTitles() : shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, artist: p.artist, art: p.art, mini: shell.audioActive, playing: p.playing, position: p.position,
             raw: p.player.position, duration: p.duration, audioMode: p.audioMode,
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
             error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd],

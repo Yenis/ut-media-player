@@ -207,7 +207,7 @@ Source: `src/gui/audio/AudioPlayer.kt`, `res/layout/audio_player.xml`,
 | Hold play to stop | Long press on play stops playback | Dropped (Yenis, 7 October 2026). A cross on the mini-player stops instead |
 | Queue | Shown inside the player; search within it, drag to reorder, swipe to remove; elapsed or remaining time for the whole queue | Build |
 | Stop after this track | From a queue item's menu | Build |
-| Shuffle and repeat | As in the video player; "always shuffle" setting | Build |
+| Shuffle and repeat | As in the video player; "always shuffle" setting | Build. Shuffle mixes what follows the playing item only: the system's list cannot be changed before it **[device]** |
 | Sleep timer, jump to time, A-B repeat, bookmarks, save playlist | Shared with the video player | Build |
 | Playback speed, equalizer, chapters | Shared with the video player | Discuss |
 | Resume last queue | Queue and position restored on launch; a card offers to resume | Build |

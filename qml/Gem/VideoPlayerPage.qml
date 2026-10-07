@@ -699,6 +699,13 @@ Item {
                 ];
                 if (page.picturesFolder !== "")
                     list.push({ key: "screenshot", label: "Screenshot", glyph: "camera" });
+                if (p) {
+                    list.push({ key: "repeat", label: "Repeat", glyph: "repeat", stay: true, selected: p.repeat !== "none",
+                                value: p.repeat === "all" ? "all" : p.repeat === "one" ? "one" : "off" });
+                    if (p.queue.length > 1)
+                        list.push({ key: "shuffle", label: "Shuffle", glyph: "shuffle", stay: true, selected: p.shuffle,
+                                    value: p.shuffle ? "on" : "off" });
+                }
                 return list;
             }
             onChosen: {
@@ -720,6 +727,10 @@ Item {
                     page.markAB();
                 } else if (key === "screenshot") {
                     page.takeScreenshot();
+                } else if (key === "repeat") {
+                    page.playback.cycleRepeat();
+                } else if (key === "shuffle") {
+                    page.playback.setShuffle(!page.playback.shuffle);
                 }
             }
         }

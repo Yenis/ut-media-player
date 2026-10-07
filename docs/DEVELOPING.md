@@ -75,6 +75,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `next`, `previous`, `queuejump <index>` | The queue |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
 | `atab <artists\|albums\|tracks\|genres\|files>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
+| `repeat <none\|all\|one>`, `shuffle <0\|1>` | Repeat and shuffle. `state` reports both, and the next five titles of the queue |
 | `expand`, `stop` | Opens the full audio player from the mini-player; stops what plays. In the audio player, `tapseek`, `info` and `sheet queue` act on it |
 | `tab <video\|audio\|browse\|playlists\|more>` | Shows a tab |
 | `view <grid\|list>` | How the Video tab shows its videos |
@@ -142,6 +143,11 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | Wait for the list before choosing its item; expect stray index changes | The list reports index -1 and 0 on the way to the item asked for, sometimes at once, inside `clear()` and `addItems()`, sometimes later. Whatever tells them from the hub moving on has to be set before the list is touched |
 | Add to a list with `addItems` at the end and `insertItem` before an existing item | `insertItems` is not implemented, and `insertItem` at the end is refused |
 | Ignore "Failed to open uri  because it can't be found" | Giving the player its list empties its address for a moment |
+| Empty the list before playing an address again | With tracks left in the list, the next video is drawn upside down and reports the last track's length |
+| Never `pause()` a player that has stopped at the end of its media | The hub loads the file again in order to pause it; with its list emptied it then frees a bad pointer and media-hub aborts, taking every app's playback with it |
+| To play again an address that has played out, give the player its empty list and then the address | `play()` alone does nothing, and setting the same address is ignored |
+| Change a list only behind the playing item | `removeItems` and `insertItem` before it leave `currentIndex` pointing at another item. Behind it both work while it plays: about 3 ms per item removed, 150 added in 23 ms |
+| Use no playback mode of the list but `CurrentItemInLoop` | `Loop` skips the first item at every turn: at the end of the list Qt calls `next()` although the hub has wrapped already. `Random` repeats items, and reads back as `Loop` |
 | Nothing in the app runs while it is in the background | The app is frozen a few seconds after it leaves the foreground; playback continues without it |
 
 ## Reaching the system from QML

@@ -242,25 +242,71 @@ Item {
                   leftMargin: Theme.u(2); rightMargin: Theme.u(2); bottomMargin: Theme.u(2) }
         spacing: Theme.u(1)
 
-        Text {
+        // Title and artist, between shuffle and repeat. Repeat steps through
+        // off, all and one, as VLC's button does.
+        Item {
             width: parent.width
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight
-            maximumLineCount: 1
-            text: page.playback ? page.playback.title : ""
-            color: Theme.text
-            font.pixelSize: Theme.fontL
-        }
+            height: names.height
 
-        Text {
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight
-            maximumLineCount: 1
-            // Keeps its line when empty, so the buttons do not move between tracks.
-            text: page.playback ? page.playback.artist : ""
-            color: Theme.textDim
-            font.pixelSize: Theme.fontM
+            IconButton {
+                id: shuffleButton
+                anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+                glyph: "shuffle"
+                color: page.playback && page.playback.shuffle ? Theme.accent : Theme.textDim
+                onClicked: {
+                    page.playback.setShuffle(!page.playback.shuffle);
+                    page.showInfo(page.playback.shuffle ? "Shuffle on" : "Shuffle off", 1000);
+                }
+            }
+
+            IconButton {
+                id: repeatButton
+                anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                glyph: "repeat"
+                color: page.playback && page.playback.repeat !== "none" ? Theme.accent : Theme.textDim
+                onClicked: {
+                    page.playback.cycleRepeat();
+                    var mode = page.playback.repeat;
+                    page.showInfo(mode === "all" ? "Repeat all" : mode === "one" ? "Repeat one" : "Repeat off", 1000);
+                }
+
+                Text {
+                    visible: page.playback ? page.playback.repeat === "one" : false
+                    anchors.centerIn: parent
+                    text: "1"
+                    color: Theme.accent
+                    font.pixelSize: Theme.fontXS
+                    font.bold: true
+                }
+            }
+
+            Column {
+                id: names
+                anchors { left: shuffleButton.right; right: repeatButton.left; verticalCenter: parent.verticalCenter
+                          leftMargin: Theme.u(0.5); rightMargin: Theme.u(0.5) }
+                spacing: Theme.u(1)
+
+                Text {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideRight
+                    maximumLineCount: 1
+                    text: page.playback ? page.playback.title : ""
+                    color: Theme.text
+                    font.pixelSize: Theme.fontL
+                }
+
+                Text {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideRight
+                    maximumLineCount: 1
+                    // Keeps its line when empty, so the buttons do not move between tracks.
+                    text: page.playback ? page.playback.artist : ""
+                    color: Theme.textDim
+                    font.pixelSize: Theme.fontM
+                }
+            }
         }
 
         Item {
