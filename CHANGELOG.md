@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.13 - unreleased
+## 0.0.13 - 7 October 2026
 
 - A queue played as audio now moves on by itself with the screen off or
   another app in front. Before, it stopped at the end of the current item
