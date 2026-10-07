@@ -34,7 +34,8 @@ Diagnostics.
 | Holding play stops, on the bar and in the player | Fail: holding did nothing. The hold was removed; a cross on the mini-player stops instead |
 | The cross on the mini-player stops playback and takes the bar away | Still to do |
 | A music file opened from the file manager | Still to do |
-| Audio carries on with the screen off and under another app, from the mini-player state | Still to do |
+| Audio carries on with the screen off, from the mini-player state | Pass (Yenis, 7 October 2026) |
+| Audio carries on under another app, from the mini-player state | Still to do |
 
 ## Information page, version 0.0.11
 

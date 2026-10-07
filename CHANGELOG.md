@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.12 - unreleased
+## 0.0.12 - 7 October 2026
 
 - An audio player. Music, and a video played as audio, show on a page with
   the cover, title and artist, the timeline, and buttons for previous,
