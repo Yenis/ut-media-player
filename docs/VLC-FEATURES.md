@@ -203,8 +203,8 @@ Source: `src/gui/audio/AudioPlayer.kt`, `res/layout/audio_player.xml`,
 | Mini player | Bar on every screen with title, progress, play and pause; swipe sideways for previous and next; expands to full screen | Build |
 | Full player | Cover, title, artist, seek bar, time and length, previous, play, next, shuffle, repeat | Build |
 | Blurred cover background | On by default | Build |
-| Rewind and forward | 10 s on tap, 20 s on long press, adjustable | Build |
-| Hold play to stop | Long press on play stops playback | Build |
+| Rewind and forward | 10 s on tap, 20 s on long press, adjustable | Build, 10 s on tap only. The long press is dropped (Yenis, 7 October 2026) |
+| Hold play to stop | Long press on play stops playback | Dropped (Yenis, 7 October 2026). A cross on the mini-player stops instead |
 | Queue | Shown inside the player; search within it, drag to reorder, swipe to remove; elapsed or remaining time for the whole queue | Build |
 | Stop after this track | From a queue item's menu | Build |
 | Shuffle and repeat | As in the video player; "always shuffle" setting | Build |

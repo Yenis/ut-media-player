@@ -486,16 +486,20 @@ How it is built:
 |---|---|---|
 | Full player | `qml/Gem/AudioPlayerPage.qml` | Cover, title, artist, timeline, buttons, the queue's list; the seek gestures on the cover. For music and for a video played as audio |
 | Mini-player | `qml/Gem/MiniPlayer.qml` | The bar above the tabs while something plays as audio and the full player is not open |
-| Where audio lives | `qml/Gem/AppShell.qml` | Going back from the full player leaves it playing; only "stop" (holding play) or the end of the queue ends it |
+| Where audio lives | `qml/Gem/AppShell.qml` | Going back from the full player leaves it playing; only the mini-player's cross or the end of the queue ends it |
 
 - [ ] Library tabs: artists, albums, tracks, genres, playlists; album and
       artist pages.
 - [x] Mini-player bar on every main page (version 0.0.12): cover, title,
       artist, progress, play and pause; a tap opens the full player, a swipe
-      to the left is next and to the right previous, holding play stops.
+      to the left is next and to the right previous, and a cross stops
+      playback. VLC's "hold play to stop" was tried and dropped (Yenis,
+      7 October 2026).
 - [x] Full player (version 0.0.12): cover, title, artist, seek bar, previous
-      and next, rewind and forward by 10 s (20 s when held), holding play
-      stops, the queue's list, "Play as video".
+      and next, rewind and forward by 10 s, the queue's list, "Play as
+      video". VLC's 20 s on a long press was tried and dropped (Yenis,
+      7 October 2026): not needed, and a seek lands too unevenly on this
+      backend for 20 s to be told from 10.
 - [ ] Full player: blurred cover as the background.
 - [x] Seek gestures in the full audio player (version 0.0.12), as in the
       video player: a double tap on a side seeks 10 s back or forward, one in

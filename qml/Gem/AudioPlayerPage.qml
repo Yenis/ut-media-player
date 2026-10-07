@@ -10,7 +10,7 @@ import "../js/Gestures.js" as Gestures
  *
  * The page does not own playback; it shows and steers the app's one Playback
  * object. Going back leaves it playing, with the mini-player in the page's
- * place; holding the play button stops it, as in VLC.
+ * place; the mini-player has the button that stops it.
  *
  * Our own addition, which VLC does not have for audio: the video player's
  * seek gestures work on the cover. A double tap on a side seeks 10 s, a
@@ -292,8 +292,7 @@ Item {
             }
         }
 
-        // Previous, rewind, play, forward, next. Rewind and forward go 10 s
-        // on a tap and 20 s when held; holding play stops.
+        // Previous, rewind, play, forward, next. Rewind and forward go 10 s.
         Item {
             width: parent.width
             height: Theme.u(10)
@@ -307,7 +306,6 @@ Item {
                 glyph: page.playback && page.playback.playing ? "pause" : "play"
                 color: Theme.text
                 onClicked: page.playback.toggle()
-                onPressAndHold: page.stopRequested()
             }
             IconButton {
                 id: rewindButton
@@ -318,7 +316,6 @@ Item {
                 color: Theme.text
                 enabled: page.playback ? page.playback.seekable : false
                 onClicked: page.playback.seekBy(-10000)
-                onPressAndHold: page.playback.seekBy(-20000)
             }
             IconButton {
                 id: forwardButton
@@ -329,7 +326,6 @@ Item {
                 color: Theme.text
                 enabled: page.playback ? page.playback.seekable : false
                 onClicked: page.playback.seekBy(10000)
-                onPressAndHold: page.playback.seekBy(20000)
             }
             IconButton {
                 anchors { right: rewindButton.left; rightMargin: Theme.u(1); verticalCenter: parent.verticalCenter }

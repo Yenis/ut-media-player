@@ -4,9 +4,10 @@ import Gem 1.0
 /*
  * What plays as audio, as a bar above the tabs: cover, title, play and pause,
  * and how far it is along the top edge. After VLC for Android's mini player
- * (docs/VLC-FEATURES.md, "Audio player"): a tap opens the full player, a
+ * (docs/VLC-FEATURES.md, "Audio player"): a tap opens the full player, and a
  * swipe to the left goes to the next item and one to the right to the
- * previous, and holding the play button stops.
+ * previous. The cross stops playback and takes the bar away; VLC holds the
+ * play button for that, which we do not.
  */
 Rectangle {
     id: bar
@@ -89,7 +90,7 @@ Rectangle {
         }
 
         Column {
-            anchors { left: cover.right; leftMargin: Theme.u(1.2); right: parent.right; rightMargin: Theme.u(7)
+            anchors { left: cover.right; leftMargin: Theme.u(1.2); right: parent.right; rightMargin: Theme.u(11.5)
                       verticalCenter: parent.verticalCenter }
 
             Text {
@@ -113,11 +114,17 @@ Rectangle {
     }
 
     IconButton {
-        anchors { right: parent.right; rightMargin: Theme.u(1); verticalCenter: parent.verticalCenter }
+        id: stopButton
+        anchors { right: parent.right; rightMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
+        glyph: "clear"
+        onClicked: bar.stopRequested()
+    }
+
+    IconButton {
+        anchors { right: stopButton.left; verticalCenter: parent.verticalCenter }
         glyph: bar.playback && bar.playback.playing ? "pause" : "play"
         color: Theme.text
         onClicked: bar.playback.toggle()
-        onPressAndHold: bar.stopRequested()
     }
 
     Rectangle {

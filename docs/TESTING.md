@@ -27,11 +27,12 @@ Diagnostics.
 
 | Check | Result |
 |---|---|
-| Double tap on the left and right quarter of the cover area: 10 s back and forward, adding up; in the middle: pause and play | Still to do |
-| Swipe sideways on the cover: the overlay shows the jump and the target, the seek happens on release | Still to do |
-| Rewind and forward buttons: 10 s on a tap, 20 s when held | Still to do |
-| Mini-player: a tap opens the player; swipe left is next, swipe right previous (or back to the start, 5 s in); the bar follows the finger | Still to do |
-| Holding play stops, on the bar and in the player | Still to do |
+| Double tap on the left and right quarter of the cover area: 10 s back and forward, adding up; in the middle: pause and play | Pass (Yenis, 7 October 2026) |
+| Swipe sideways on the cover: the overlay shows the jump and the target, the seek happens on release | Pass (Yenis) |
+| Rewind and forward buttons: 10 s on a tap, 20 s when held | The tap works. Held, it moved about 15 s and felt uneven: the hold was removed |
+| Mini-player: a tap opens the player; swipe left is next, swipe right previous (or back to the start, 5 s in); the bar follows the finger | Pass (Yenis) |
+| Holding play stops, on the bar and in the player | Fail: holding did nothing. The hold was removed; a cross on the mini-player stops instead |
+| The cross on the mini-player stops playback and takes the bar away | Still to do |
 | A music file opened from the file manager | Still to do |
 | Audio carries on with the screen off and under another app, from the mini-player state | Still to do |
 
