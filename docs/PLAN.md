@@ -483,6 +483,13 @@ How it is built:
       artist pages.
 - [ ] Mini-player bar on every page, with swipe for previous and next.
 - [ ] Full player: cover, blurred background, seek bar, rewind and forward.
+- [ ] Seek gestures in the full audio player, as in the video player: a
+      double tap on a side seeks 10 s back or forward, and a horizontal swipe
+      seeks (asked for by Yenis, 7 October 2026). **Our own addition**: VLC
+      for Android has neither for audio. The gesture layer of Phase 1
+      (`qml/Gem/GestureLayer.qml`, `qml/js/Gestures.js`) is reused. To settle
+      when built: the mini-player's sideways swipe stays previous and next,
+      so the two must not be confused in the full player.
 - [ ] Queue with search, reorder and remove, shuffle, repeat modes, "stop after
       this track", queue restored on launch.
 - [ ] Sleep timer, jump to time, A-B repeat and bookmarks shared with the video
@@ -571,6 +578,16 @@ that nothing built later has to be undone.
 - [ ] Icon at the sizes the store asks for.
 - [ ] `clickable review` clean on the release build.
 - [ ] Submit; answer the reviewer from `docs/STORE.md` if manual review applies.
+
+## After the app is finished - ideas, not commitments
+
+- Seek gestures for audio in VLC for Android itself: the double tap and the
+  horizontal swipe that GemPlayer adds to its audio player in
+  [Phase 3](#phase-3---audio), offered to VideoLAN as a merge request
+  (Yenis, 7 October 2026). To be considered only once GemPlayer is done. It
+  would be Kotlin work in the `vlc-android` clone, around
+  `src/gui/audio/AudioPlayer.kt`, and has nothing in common with this app's
+  QML but the behaviour.
 
 ---
 
