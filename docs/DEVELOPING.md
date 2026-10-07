@@ -75,6 +75,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `next`, `previous`, `queuejump <index>` | The queue |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
 | `atab <artists\|albums\|tracks\|genres\|files>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
+| `queueremove <index>`, `stopafter <index>` | Takes an item still to come out of the queue; sets or lifts "stop after this track" on an item |
 | `repeat <none\|all\|one>`, `shuffle <0\|1>` | Repeat and shuffle. `state` reports both, and the next five titles of the queue |
 | `expand`, `stop` | Opens the full audio player from the mini-player; stops what plays. In the audio player, `tapseek`, `info`, `level`, `volume`, `brightness`, `bookmark`, `ab` and `sheet <menu\|queue\|bookmarks\|jump\|sleep>` act on it |
 | `tab <video\|audio\|browse\|playlists\|more>` | Shows a tab |
@@ -148,6 +149,9 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | To play again an address that has played out, give the player its empty list and then the address | `play()` alone does nothing, and setting the same address is ignored |
 | Change a list only behind the playing item | `removeItems` and `insertItem` before it leave `currentIndex` pointing at another item. Behind it both work while it plays: about 3 ms per item removed, 150 added in 23 ms |
 | Use no playback mode of the list but `CurrentItemInLoop` | `Loop` skips the first item at every turn: at the end of the list Qt calls `next()` although the hub has wrapped already. `Random` repeats items, and reads back as `Loop` |
+| After a freeze, expect the playing item to be started again, and seek back | Qt's player answers every index change of the list with `setMedia` and `play`. The changes made while the app was frozen all arrive on waking |
+| Pause when the window closes | media-hub plays on after the app's process has gone |
+| Never store an empty text in the database | LocalStorage binds `""` as NULL |
 | Nothing in the app runs while it is in the background | The app is frozen a few seconds after it leaves the foreground; playback continues without it |
 
 ## Reaching the system from QML

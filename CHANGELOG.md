@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.18 - unreleased
+
+- What was playing as audio is there again when the app is opened: the queue
+  and the track, paused in the mini-player at the place it was left.
+- In the audio player's queue, holding an item opens a menu with "Remove
+  from queue" and "Stop after this track". Stopping after a track works with
+  the screen off too. Only items still to come can be removed.
+- Fixed: after the queue had moved on with the screen off or another app in
+  front, opening GemPlayer started the current track again from its
+  beginning. It now carries on where it was. In 0.0.13 to 0.0.17.
+- Closing the app stops what it plays. Before, the music could play on with
+  the app gone.
+
 ## 0.0.17 - 7 October 2026
 
 - Volume and brightness by swipe in the audio player, as in the video

@@ -55,6 +55,13 @@ Window {
         source: "platform/UbuntuUnits.qml"
     }
 
+    // Closing the app stops what it plays. Left to itself media-hub plays on
+    // after the app has gone, with nothing left to stop it [device].
+    onClosing: {
+        if (shell.item)
+            shell.item.playback.pause();
+    }
+
     Loader {
         id: shell
         anchors.fill: parent

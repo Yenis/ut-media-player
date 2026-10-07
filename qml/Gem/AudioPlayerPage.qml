@@ -37,12 +37,13 @@ Item {
     property int tapSeekTotal: 0
     property string tapSeekSide: ""
 
-    readonly property bool sheetOpen: menu.open || queueSheet.open || bookmarkSheet.open
+    readonly property bool sheetOpen: menu.open || queueSheet.open || queueItemMenu.open || bookmarkSheet.open
                                       || jumpPicker.open || sleepPicker.open
 
     function closeSheets() {
         menu.close();
         queueSheet.close();
+        queueItemMenu.close();
         bookmarkSheet.close();
         jumpPicker.close();
         sleepPicker.close();
@@ -599,11 +600,13 @@ Item {
         }
     }
 
-    // The queue. A tap goes to that item.
+    // The queue. A tap goes to that item; holding one that plays or is
+    // still to come opens its menu.
     OptionSheet {
         id: queueSheet
         anchors.fill: parent
         title: page.playback ? "Queue – " + (page.playback.queueIndex + 1) + " of " + page.playback.queue.length
+                               + " – hold an item for more"
                              : "Queue"
         options: {
             var list = [];
@@ -611,10 +614,47 @@ Item {
             for (var i = 0; i < queue.length; i++)
                 list.push({ key: "" + i, label: queue[i].title, glyph: queue[i].hasPicture ? "video" : "audio",
                             selected: i === page.playback.queueIndex,
-                            value: Format.clock(queue[i].duration) });
+                            value: (i === page.playback.stopAfter ? "stops after  •  " : "")
+                                   + Format.clock(queue[i].duration) });
             return list;
         }
         onChosen: page.playback.jumpTo(parseInt(key))
+        onHeld: {
+            var index = parseInt(key);
+            if (index < page.playback.queueIndex)
+                return;
+            page.queueMenuIndex = index;
+            queueItemMenu.show();
+        }
+    }
+
+    property int queueMenuIndex: -1
+
+    // One item of the queue: VLC's "Remove from queue" and "Stop after this
+    // track". What plays cannot be removed.
+    OptionSheet {
+        id: queueItemMenu
+        anchors.fill: parent
+        title: page.playback && page.queueMenuIndex >= 0 && page.queueMenuIndex < page.playback.queue.length
+               ? page.playback.queue[page.queueMenuIndex].title : ""
+        options: {
+            var p = page.playback;
+            var list = [];
+            if (!p)
+                return list;
+            if (page.queueMenuIndex > p.queueIndex)
+                list.push({ key: "remove", label: "Remove from queue", glyph: "clear" });
+            list.push({ key: "stopAfter", label: "Stop after this track", glyph: "pause",
+                        selected: p.stopAfter === page.queueMenuIndex,
+                        value: p.stopAfter === page.queueMenuIndex ? "on" : "" });
+            return list;
+        }
+        onChosen: {
+            if (key === "remove")
+                page.playback.removeAt(page.queueMenuIndex);
+            else if (key === "stopAfter")
+                page.playback.setStopAfter(page.queueMenuIndex);
+        }
     }
 
     // The player menu: the video player's entries that mean something

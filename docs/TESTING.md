@@ -1,12 +1,46 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Kept queue, remove and stop after, version 0.0.18
+
+### Checked over adb, 7 October 2026
+
+The album is the six 30 s test tracks; what plays was read from media-hub's
+MPRIS interface beside the app's own state.
+
+| Check | Result |
+|---|---|
+| Second of six playing at 0:16, the app restarted: the mini-player shows the track, "2 of 6", paused at 0:13 | Pass |
+| `play` then: it carries on from 0:13, and the queue behind it is the same | Pass |
+| `queueremove 4`: "2 of 5", the item gone from what is to come | Pass |
+| "Stop after" on the playing track: at its end playback stops and the mini-player goes | Pass, after a fix: emptying the kept queue stored an empty text, which the database refused, and the error left the mini-player standing |
+| "Stop after" on the next track, the calculator in front: media-hub reads "Stopped" at that track's end; back in the app the queue is closed | Pass |
+| Restart after a queue was stopped: nothing is brought back | Pass |
+
+### Coming back after a freeze: the track started again. Found and fixed
+
+| Check | Result |
+|---|---|
+| A track change with the calculator in front, then back to the app | **Fail, and so since 0.0.13:** media-hub read 0:29 in the second track while the app was frozen and 0:03 four seconds after it woke. The log shows `setMedia` and `play` from Qt's player for each index change that arrived on waking |
+| The same with the catching up: 0:14 while frozen, 0:19 five seconds after waking | Pass |
+| Twelve seconds in the background with no track change: 0:20 before, 0:24 four seconds after waking | Pass, nothing sought |
+| The app's process killed while it plays | **media-hub plays on**, to the end of its list; the log has only "Cannot queue arguments of type 'Player::Client'". A restarted app shows its kept queue paused while the old one still sounds, until something is played |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Play music, close the app from the app switcher: the music stops | Still to do. This is the one check of the pause on closing; adb cannot close a window |
+| Open the app again: the mini-player has the track, and play carries on | Still to do |
+| Hold an item in the queue: "Remove from queue", "Stop after this track" | Still to do |
+| Screen off across a track change or two, then unlock and open the app: the track carries on, with at most a short break | Still to do |
 
 ## Volume and brightness in the audio player, version 0.0.17
 

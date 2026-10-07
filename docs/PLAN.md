@@ -8,7 +8,8 @@ queue, an item menu, multiple selection and an information page. Phase 3,
 audio, is under way: version 0.0.12 has the audio player and the mini-player,
 0.0.13 a queue that moves on in the background and can be added to,
 0.0.14 the music library, 0.0.15 shuffle and repeat, 0.0.16 the audio
-player's menu, and 0.0.17 its volume and brightness swipes.
+player's menu, 0.0.17 its volume and brightness swipes, and 0.0.18 a queue
+that is kept between launches and can be trimmed.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -410,7 +411,7 @@ Discuss items this phase reached, for a decision (D2):
 | Item | What it would take | Suggestion |
 |---|---|---|
 | Playback speed and fast play, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters | A second playback engine, in compiled code | After 0.1.0, as one decision |
-| Sleep timer and A-B repeat while the app is in the background | The app adding itself to the system's list of apps that are not frozen | An opt-in switch in Settings, Phase 4 |
+| Sleep timer and A-B repeat while the app is in the background | The app adding itself to the system's list of apps that are not frozen | An opt-in switch in Settings, Phase 4. It would also do away with the catching up after a freeze that 0.0.18 needs (see [Phase 3](#phase-3---audio)) |
 | Pop-up player | The platform has no floating windows | Drop |
 | Subtitle download | An account with an online subtitle service, and a file hash | Dropped (D13) |
 | Renaming a bookmark | A text field in a turned player; the system keyboard appears on the window's edge, not the content's | With playlists in Phase 4, which need naming too. The name dialog exists since 0.0.10 (`NameDialog.qml`); what is left is using it in a turned player |
@@ -548,8 +549,31 @@ How it is built:
       changed behind the playing item: taking out or inserting before it
       leaves the list's index pointing at the wrong item. That is why
       shuffle mixes only what follows.
-- [ ] Queue with search, reorder and remove, "stop after this track", queue
-      restored on launch. Reorder and remove are limited by the same rule:
+- [x] Queue restored on launch (version 0.0.18): what plays as audio is kept
+      in the app's database, its items when they change and its place when
+      that does, and is back in the mini-player at the next start, paused at
+      the track's resume point. Nothing is loaded until it is played. VLC
+      asks with a card; here it is simply there. A video queue is not kept:
+      it ends with its page.
+- [x] "Remove from queue" and "Stop after this track" (version 0.0.18), from
+      holding an item in the audio player's queue. Removing is for items
+      still to come, by the rule above. "Stop after" is the hub's list
+      ending at that item, so it holds while the app is frozen; moving past
+      the item by hand lifts it. When it stops, the queue is closed, where
+      VLC keeps it.
+- [x] Found on the way (version 0.0.18) **[device]**: with each index change
+      of the list, Qt's own player sets that item and plays it, as if the
+      list were its to run. Awake, that happens at the start of a track and
+      is not heard. After a freeze it happens on waking, for every change
+      made meanwhile, and the track that was playing started again. The app
+      now works out from the clock where the track had got to and seeks
+      there: a short break on opening the app, in place of a restart. The
+      stock Music app does not meet this, being exempt from freezing.
+- [x] Found on the way (version 0.0.18) **[device]**: media-hub plays on
+      when the app's process ends. The app now pauses when its window is
+      closed. A process that is killed outright cannot, and its music plays
+      on to the end of its list; the next thing played, by any app, stops it.
+- [ ] Queue with search and reorder. Reorder is limited by the same rule:
       only behind the playing item.
 - [x] Sleep timer, jump to time, A-B repeat and bookmarks in the audio player
       (version 0.0.16), behind a menu button in its header. The timer, the

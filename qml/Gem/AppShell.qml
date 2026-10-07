@@ -50,6 +50,9 @@ FocusScope {
 
     PlayerStore { id: playerStore }
 
+    // What played as audio last time is there again, paused, in the mini-player.
+    Component.onCompleted: core.restore()
+
     Playback {
         id: core
         store: playerStore

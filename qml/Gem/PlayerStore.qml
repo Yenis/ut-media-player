@@ -40,6 +40,8 @@ QtObject {
             // video on its own, out of the groups that form by name.
             tx.executeSql("CREATE TABLE IF NOT EXISTS video_groups(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL)");
             tx.executeSql("CREATE TABLE IF NOT EXISTS video_group_members(url TEXT PRIMARY KEY, group_id INTEGER NOT NULL)");
+            // Single values under a name: the audio queue to come back to.
+            tx.executeSql("CREATE TABLE IF NOT EXISTS kept(name TEXT PRIMARY KEY, value TEXT NOT NULL)");
         });
         DbHandle.handle = opened;
         return opened;
@@ -206,6 +208,23 @@ QtObject {
                           [url, Math.round(position), title]);
         });
         bookmarkRevision++;
+    }
+
+    // A value kept under a name, as text; "" if there is none.
+    function kept(name) {
+        var value = "";
+        db().readTransaction(function(tx) {
+            var rows = tx.executeSql("SELECT value FROM kept WHERE name = ?", [name]).rows;
+            if (rows.length > 0)
+                value = rows.item(0).value;
+        });
+        return value;
+    }
+
+    function keep(name, value) {
+        db().transaction(function(tx) {
+            tx.executeSql("INSERT OR REPLACE INTO kept(name, value) VALUES(?, ?)", [name, "" + value]);
+        });
     }
 
     function removeBookmark(url, position) {
