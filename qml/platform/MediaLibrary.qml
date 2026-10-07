@@ -28,7 +28,12 @@ Item {
             modified: parseInt(file.eTag) || 0,
             title: file.title,
             artist: file.author || "",
+            albumArtist: file.albumArtist || "",
             album: file.album || "",
+            genre: file.genre || "",
+            date: file.date || "",
+            trackNumber: file.trackNumber || 0,
+            discNumber: file.discNumber || 0,
             duration: file.duration * 1000,     // the scanner counts seconds
             // Coded size, rounded up to a multiple of 16: 1920x1088 for 1080p.
             width: file.width,
@@ -44,6 +49,15 @@ Item {
     // Every video the scanner knows, in the scanner's order.
     function videos() {
         var found = store.query("", MediaStore.VideoMedia);
+        var list = [];
+        for (var i = 0; i < found.length; i++)
+            list.push(_plain(found[i]));
+        return list;
+    }
+
+    // Every piece of music the scanner knows, in the scanner's order.
+    function tracks() {
+        var found = store.query("", MediaStore.AudioMedia);
         var list = [];
         for (var i = 0; i < found.length; i++)
             list.push(_plain(found[i]));

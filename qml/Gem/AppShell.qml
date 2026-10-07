@@ -35,6 +35,7 @@ FocusScope {
     readonly property alias videoPage: videoView
     readonly property var audioPage: audioLoader.item
     readonly property alias videoLibrary: videoTab
+    readonly property alias audioLibrary: audioTab
     readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
 
@@ -79,7 +80,9 @@ FocusScope {
         playList([media], 0, {});
     }
 
-    // Plays a list from its item `index`. options: { fromStart, asAudio }.
+    // Plays a list from its item `index`. options: { fromStart, asAudio,
+    // background }; `background` leaves the lists in front, with the
+    // mini-player, when the list plays as audio.
     function playList(list, index, options) {
         if (list.length === 0)
             return;
@@ -87,7 +90,8 @@ FocusScope {
         var asAudio = !!options.asAudio || !first.hasPicture;
         core.openQueue(list, index, !!options.fromStart, asAudio);
         if (asAudio) {
-            page = "audio";
+            if (!options.background)
+                page = "audio";
         } else {
             videoView.reset();
             page = "video";
@@ -100,14 +104,15 @@ FocusScope {
         if (list.length === 0)
             return;
         if (!audioActive || core.queueIndex < 0) {
-            playList(list, 0, {});
+            playList(list, 0, { background: true });
             return;
         }
         if (next)
             core.insertNext(list);
         else
             core.append(list);
-        var what = list.length === 1 ? "\u201c" + list[0].title + "\u201d" : list.length + " videos";
+        var what = list.length === 1 ? "\u201c" + list[0].title + "\u201d"
+                                     : list.length + (list[0].hasPicture ? " videos" : " tracks");
         notice.show(what + (next ? " will play next" : " added to the play queue"));
     }
 
@@ -155,6 +160,8 @@ FocusScope {
             page = "home";
         else if (page === "home" && tab === "video")
             return videoTab.back();
+        else if (page === "home" && tab === "audio")
+            return audioTab.back();
         else
             return false;
         return true;
@@ -211,12 +218,15 @@ FocusScope {
                 onPlayRequested: shell.playList(list, index, options)
                 onQueueRequested: shell.addToQueue(list, next)
             }
-            PlaceholderPage {
+            AudioLibraryPage {
+                id: audioTab
                 anchors.fill: parent
                 visible: shell.tab === "audio"
-                title: "Audio"
-                glyph: "audio"
-                text: "Artists, albums, tracks and genres will be here."
+                library: shell.library
+                overlay: home
+                playingUrl: shell.audioActive ? core.url : ""
+                onPlayRequested: shell.playList(list, index, options)
+                onQueueRequested: shell.addToQueue(list, next)
             }
             PlaceholderPage {
                 anchors.fill: parent
@@ -248,7 +258,6 @@ FocusScope {
                 opacity = 1;
                 noticeHide.restart();
             }
-            z: 1
             opacity: 0
             visible: opacity > 0
             anchors { horizontalCenter: parent.horizontalCenter; bottom: miniPlayer.top; bottomMargin: Theme.u(1.5) }

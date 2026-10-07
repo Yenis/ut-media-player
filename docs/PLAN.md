@@ -6,7 +6,8 @@ around it the app shell with VLC's five tabs and a video library with grid
 and list, sorting, filter, favourites, grouping, groups made by hand, a
 queue, an item menu, multiple selection and an information page. Phase 3,
 audio, is under way: version 0.0.12 has the audio player and the mini-player,
-and 0.0.13 a queue that moves on in the background and can be added to.
+0.0.13 a queue that moves on in the background and can be added to, and
+0.0.14 the music library.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -485,13 +486,24 @@ How it is built:
 
 | Part | File | What it does |
 |---|---|---|
+| Audio tab | `qml/Gem/AudioLibraryPage.qml`, `qml/js/AudioLibrary.js` | Artists, albums, tracks and genres, each worked out from the scanner's one list of tracks; an artist, album or genre opens in place |
 | Full player | `qml/Gem/AudioPlayerPage.qml` | Cover, title, artist, timeline, buttons, the queue's list; the seek gestures on the cover. For music and for a video played as audio |
 | Mini-player | `qml/Gem/MiniPlayer.qml` | The bar above the tabs while something plays as audio and the full player is not open |
 | Two ways of playing | `qml/Gem/Playback.qml` | A video on screen is one address at a time, moved on by the app; audio is a list given to media-hub, which moves through it also while the app is frozen. Switching between the two loads the item again |
 | Where audio lives | `qml/Gem/AppShell.qml` | Going back from the full player leaves it playing; only the mini-player's cross or the end of the queue ends it |
 
-- [ ] Library tabs: artists, albums, tracks, genres, playlists; album and
-      artist pages.
+- [x] Library tabs (version 0.0.14): artists, albums, tracks, genres. An
+      artist, album or genre opens to its tracks, with a heading per album
+      for an artist and a genre. A tap plays the list from that track on,
+      behind the page. Row menu: Play, Insert next, Add to play queue.
+      Artists go by album artist where a file names one. An album is an
+      album title within one folder: on real files the artist cannot decide,
+      a soundtrack's tracks naming a different one each, as album artist too
+      **[device]**. Playlists have their own tab, in Phase 4.
+- [ ] Library, still to do: separate artist and album pages as VLC has them
+      (an artist's albums as cards); sorting, filter, favourites and multiple
+      selection as in the video library; the rest of VLC's item menu
+      (information, add to playlist, go to album or artist).
 - [x] Mini-player bar on every main page (version 0.0.12): cover, title,
       artist, progress, play and pause; a tap opens the full player, a swipe
       to the left is next and to the right previous, and a cross stops

@@ -80,6 +80,10 @@ Item {
         else if (name === "video") shell.toVideo();
         else if (name === "back") shell.back();
         else if (name === "home") shell.page = "home";
+        else if (name === "atab") shell.audioLibrary.setTab(argument);
+        else if (name === "atap") shell.audioLibrary.activate(shell.audioLibrary.shown[parseInt(argument)]);
+        else if (name === "aaction") shell.audioLibrary.itemAction(shell.audioLibrary.shown[parseInt(argument.split(" ")[0])], argument.split(" ")[1]);
+        else if (name === "amenu") shell.audioLibrary.openItemMenu(parseInt(argument));
         else if (name === "expand") shell.page = "audio";
         else if (name === "stop") shell.closePlayer();
         else if (shell.audioPage && name === "sheet") shell.audioPage.openSheet(argument);
@@ -104,7 +108,7 @@ Item {
         else if (name === "focusfilter") shell.videoLibrary.openFilter();
         else if (name === "hidekeyboard") shell.videoLibrary.dismissKeyboard();
         else if (name === "display") shell.videoLibrary.openDisplaySheet();
-        else if (name === "closesheets") shell.videoLibrary.closeSheets();
+        else if (name === "closesheets") { shell.videoLibrary.closeSheets(); shell.audioLibrary.closeSheets(); }
         else if (name === "itemaction") shell.videoLibrary.itemAction(shell.videoLibrary.shown[parseInt(argument.split(" ")[0])], argument.split(" ")[1]);
         else if (name === "itemmenu") shell.videoLibrary.openItemMenu(parseInt(argument));
         else if (name === "diagnostics") shell.page = "diagnostics";
@@ -132,7 +136,7 @@ Item {
         var p = shell.playback;
         var v = shell.videoPage;
         console.log("REMOTE STATE " + JSON.stringify({
-            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, grid: shell.videoLibrary.grid, selected: shell.videoLibrary.selectionCount, shown: shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, artist: p.artist, art: p.art, mini: shell.audioActive, playing: p.playing, position: p.position,
+            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, grid: shell.videoLibrary.grid, selected: shell.videoLibrary.selectionCount, shown: shell.tab === "audio" ? shell.audioLibrary.shownTitles() : shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, artist: p.artist, art: p.art, mini: shell.audioActive, playing: p.playing, position: p.position,
             raw: p.player.position, duration: p.duration, audioMode: p.audioMode,
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
             error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd],

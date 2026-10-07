@@ -1,12 +1,51 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Music library, version 0.0.14
+
+### Checked on the computer, 7 October 2026
+
+The grouping in `qml/js/AudioLibrary.js`, run under node with made-up tracks.
+
+| Check | Result |
+|---|---|
+| Artists go by album artist where there is one, so a compilation is one "Various" and not one artist per track | Pass |
+| A track with no artist, album or genre is listed under "Unknown artist", "Unknown album", "Unknown genre" | Pass |
+| An album's tracks are in order of disc, then track number, then title | Pass |
+| An artist's rows: a heading per album, its tracks under it; a genre's headings name artist and album | Pass |
+| Lists are in alphabetical order whatever the case of the first letter | Pass |
+
+### Checked over adb, 7 October 2026
+
+On the phone's own music, 188 tracks, and the six test files.
+
+| Check | Result |
+|---|---|
+| The four lists: 32 artists, 11 genres, 188 tracks; rows with name and counts, a round picture for an artist | Pass |
+| Albums keyed by title and artist | **Fail on real files:** "Bloodborne Original Soundtrack - Disc 2" appeared four times, once per composer. Keyed by title and album artist: the same, the files naming each composer as album artist. Keyed by title and folder: one album of five tracks. Kept |
+| An artist opens to its tracks under album headings, with the covers found in the files; `back` returns to the list | Pass |
+| A tap on a track in "Tracks" plays all 188 from there, as one list handed to media-hub; the page stays, the mini-player shows, the track's title turns to the accent colour | Pass |
+| "Insert next" from a row's menu while something plays: the queue grows by one and a message says so | Pass |
+| "Add to play queue" with nothing playing plays the track and leaves the list in front | Pass, after a fix: it opened the full player at first |
+| A long album title in the header stops short of the play button | Pass, after a fix to `PageHeader.qml` |
+| No QML warnings in the log | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| The four tabs by touch; scrolling 188 tracks is smooth | Still to do |
+| Open an artist, an album, a genre; the header arrow and the back gesture return | Still to do |
+| A tap on a track plays, and the next one follows by itself | Still to do |
+| A row's menu: Play, Insert next, Add to play queue | Still to do |
+| Do the albums look right for your collection, grouped by title and folder? | Still to do |
 
 ## Queue in the background, version 0.0.13
 

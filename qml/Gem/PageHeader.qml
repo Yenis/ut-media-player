@@ -22,8 +22,10 @@ Item {
     }
 
     Text {
-        anchors { left: parent.left; verticalCenter: parent.verticalCenter
-                  leftMargin: header.canGoBack ? backButton.width + Theme.u(1) : Theme.u(2) }
+        anchors { left: parent.left; right: trailingSlot.left; verticalCenter: parent.verticalCenter
+                  leftMargin: header.canGoBack ? backButton.width + Theme.u(1) : Theme.u(2)
+                  rightMargin: Theme.u(1) }
+        elide: Text.ElideRight
         text: header.title
         color: Theme.text
         font.pixelSize: Theme.fontL

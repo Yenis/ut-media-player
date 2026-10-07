@@ -74,6 +74,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `play`, `pause`, `seek <ms>`, `seekby <ms>` | Playback |
 | `next`, `previous`, `queuejump <index>` | The queue |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
+| `atab <artists\|albums\|tracks\|genres>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
 | `expand`, `stop` | Opens the full audio player from the mini-player; stops what plays. In the audio player, `tapseek`, `info` and `sheet queue` act on it |
 | `tab <video\|audio\|browse\|playlists\|more>` | Shows a tab |
 | `view <grid\|list>` | How the Video tab shows its videos |

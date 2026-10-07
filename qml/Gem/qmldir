@@ -3,6 +3,7 @@ module Gem
 singleton Theme 1.0 Theme.qml
 
 AppShell 1.0 AppShell.qml
+AudioLibraryPage 1.0 AudioLibraryPage.qml
 AudioPlayerPage 1.0 AudioPlayerPage.qml
 GestureLayer 1.0 GestureLayer.qml
 Glyph 1.0 Glyph.qml
