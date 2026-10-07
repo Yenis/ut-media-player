@@ -91,6 +91,9 @@ Item {
         else if (shell.audioPage && name === "sheet") shell.audioPage.openSheet(argument);
         else if (shell.audioPage && name === "tapseek") shell.audioPage.tapSeek(argument);
         else if (shell.audioPage && name === "info") shell.audioPage.showInfo(argument, 5000);
+        else if (shell.audioPage && name === "volume") shell.audioPage.changeVolume(parseFloat(argument));
+        else if (shell.audioPage && name === "brightness") shell.audioPage.changeBrightness(parseFloat(argument));
+        else if (shell.audioPage && name === "level") shell.audioPage.showLevel(argument, 0.62, 5000);
         else if (shell.audioPage && name === "bookmark") shell.audioPage.addBookmark();
         else if (shell.audioPage && name === "ab") shell.audioPage.markAB();
         else if (name === "tab") { shell.page = "home"; shell.tab = argument; }

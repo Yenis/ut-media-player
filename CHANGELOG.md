@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.17 - unreleased
+
+- Volume and brightness by swipe in the audio player, as in the video
+  player: swipe up or down on the right side of the cover for the volume, on
+  the left side for the screen's brightness. VLC does not have these for
+  audio.
+- The brightness set there holds while the audio player is open. The phone
+  gets its own brightness back when you leave the page or the app.
+
 ## 0.0.16 - 7 October 2026
 
 - The audio player has a menu, behind the three dots at the top: Sleep

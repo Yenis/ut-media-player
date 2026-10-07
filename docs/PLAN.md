@@ -7,8 +7,8 @@ and list, sorting, filter, favourites, grouping, groups made by hand, a
 queue, an item menu, multiple selection and an information page. Phase 3,
 audio, is under way: version 0.0.12 has the audio player and the mini-player,
 0.0.13 a queue that moves on in the background and can be added to,
-0.0.14 the music library, 0.0.15 shuffle and repeat, and 0.0.16 the audio
-player's menu.
+0.0.14 the music library, 0.0.15 shuffle and repeat, 0.0.16 the audio
+player's menu, and 0.0.17 its volume and brightness swipes.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -519,6 +519,14 @@ How it is built:
       video". VLC's 20 s on a long press was tried and dropped (Yenis,
       7 October 2026): not needed, and a seek lands too unevenly on this
       backend for 20 s to be told from 10.
+- [x] Volume and brightness swipes in the full audio player (version
+      0.0.17, asked for by Yenis, 7 October 2026): up and down on the right
+      of the cover for the system volume, on the left for the backlight, as
+      in the video player. **Our own addition**, like the seek gestures: VLC
+      for Android has neither for audio. The brightness is the page's, as it
+      is the video player's: the phone's own comes back when the page or the
+      app is left. Unlike the video player the page does not remember its
+      brightness from one opening to the next, being made anew each time.
 - [ ] Full player: blurred cover as the background.
 - [x] Seek gestures in the full audio player (version 0.0.12), as in the
       video player: a double tap on a side seeks 10 s back or forward, one in

@@ -13,9 +13,10 @@ import "../js/Gestures.js" as Gestures
  * place; the mini-player has the button that stops it.
  *
  * Our own addition, which VLC does not have for audio: the video player's
- * seek gestures work on the cover. A double tap on a side seeks 10 s, a
- * horizontal swipe seeks further. Previous and next are buttons here, and a
- * sideways swipe on the mini-player.
+ * gestures work on the cover. A double tap on a side seeks 10 s, a
+ * horizontal swipe seeks further; a vertical swipe sets the volume on the
+ * right and the screen's brightness on the left. Previous and next are
+ * buttons here, and a sideways swipe on the mini-player.
  */
 Item {
     id: page
@@ -23,6 +24,8 @@ Item {
     property var playback: null
     property var store: null                // PlayerStore: bookmarks
     property var sleep: null                // SleepTimer
+    property var systemVolume: null         // platform/SystemVolume.qml, or null off the device
+    property var systemBrightness: null     // platform/SystemBrightness.qml, likewise
 
     signal collapseRequested()
     signal stopRequested()
@@ -104,10 +107,76 @@ Item {
     }
 
     function showInfo(text, ms) {
+        level.kind = "";
         info.text = text;
         info.visible = true;
         infoHide.interval = ms;
         infoHide.restart();
+    }
+
+    function showLevel(kind, value, ms) {
+        info.visible = false;
+        level.kind = kind;
+        level.value = value;
+        infoHide.interval = ms || 800;
+        infoHide.restart();
+    }
+
+    // ---- volume and brightness, as in the video player -------------------------------
+
+    // The level being set. The system answers a moment later, so a gesture
+    // counts from its own last value, not from what the system reports.
+    property real volumeLevel: -1
+
+    function changeVolume(delta) {
+        if (!systemVolume || !systemVolume.available) {
+            showInfo("The volume cannot be set from here", 1000);
+            return;
+        }
+        if (volumeLevel < 0 || level.kind !== "volume")
+            volumeLevel = systemVolume.level;
+        volumeLevel = Math.max(0, Math.min(1, volumeLevel + delta));
+        systemVolume.set(volumeLevel);
+        showLevel("volume", volumeLevel);
+    }
+
+    // What was set here (-1: nothing yet), and what the phone had before. As
+    // in the video player the brightness belongs to this page: the phone
+    // gets its own back when the page is left or the app is, and this page's
+    // returns with the app. The page itself is made anew each time it is
+    // opened, so it starts from the phone's brightness then.
+    property real playerBrightness: -1
+    property real brightnessBefore: -1
+    readonly property bool inUse: visible && Qt.application.state === Qt.ApplicationActive
+
+    onInUseChanged: {
+        if (playerBrightness < 0 || !systemBrightness)
+            return;
+        if (inUse) {
+            brightnessBefore = systemBrightness.level;
+            systemBrightness.set(playerBrightness);
+        } else {
+            systemBrightness.set(brightnessBefore);
+        }
+    }
+
+    Component.onDestruction: {
+        if (playerBrightness >= 0 && systemBrightness && inUse)
+            systemBrightness.set(brightnessBefore);
+    }
+
+    function changeBrightness(delta) {
+        if (!systemBrightness || !systemBrightness.available) {
+            showInfo("The brightness cannot be set from here", 1000);
+            return;
+        }
+        if (playerBrightness < 0) {
+            brightnessBefore = systemBrightness.level;
+            playerBrightness = brightnessBefore;
+        }
+        playerBrightness = Math.max(0.03, Math.min(1, playerBrightness + delta));
+        systemBrightness.set(playerBrightness);
+        showLevel("brightness", playerBrightness);
     }
 
     function tapSeek(side) {
@@ -152,7 +221,7 @@ Item {
 
     Timer {
         id: infoHide
-        onTriggered: info.visible = false
+        onTriggered: { info.visible = false; level.kind = ""; }
     }
 
     Timer {
@@ -258,9 +327,10 @@ Item {
         GestureLayer {
             anchors.fill: parent
             seekable: page.playback ? page.playback.seekable : false
-            volumeEnabled: false
-            brightnessEnabled: false
             pinchEnabled: false
+
+            onVolumeMoved: page.changeVolume(delta)
+            onBrightnessMoved: page.changeBrightness(delta)
 
             onDoubleTapped: {
                 if (zone === "centre")
@@ -296,6 +366,48 @@ Item {
             font.bold: true
         }
 
+        // Volume and brightness.
+        Rectangle {
+            id: level
+            property string kind: ""
+            property real value: 0
+            visible: kind !== ""
+            anchors.centerIn: parent
+            width: Theme.u(22)
+            height: Theme.u(7)
+            radius: Theme.u(1)
+            color: Qt.rgba(0, 0, 0, 0.6)
+
+            Glyph {
+                id: levelIcon
+                anchors { left: parent.left; leftMargin: Theme.u(1.5); verticalCenter: parent.verticalCenter }
+                width: Theme.u(2.8)
+                name: level.kind === "brightness" ? "brightness" : "volume"
+            }
+            Rectangle {
+                anchors { left: levelIcon.right; leftMargin: Theme.u(1.5); right: levelText.left; rightMargin: Theme.u(1.5)
+                          verticalCenter: parent.verticalCenter }
+                height: Math.max(2, Theme.u(0.4))
+                radius: height / 2
+                color: Qt.rgba(1, 1, 1, 0.25)
+                Rectangle {
+                    width: parent.width * level.value
+                    height: parent.height
+                    radius: parent.radius
+                    color: Theme.accent
+                }
+            }
+            Text {
+                id: levelText
+                anchors { right: parent.right; rightMargin: Theme.u(1.5); verticalCenter: parent.verticalCenter }
+                width: Theme.u(4.5)
+                horizontalAlignment: Text.AlignRight
+                text: Math.round(level.value * 100) + "%"
+                color: Theme.text
+                font.pixelSize: Theme.fontS
+            }
+        }
+
         // Swipe seek: how far, and where to.
         Rectangle {
             id: info
@@ -316,7 +428,7 @@ Item {
         }
 
         Text {
-            visible: !info.visible && (page.playback ? page.playback.error !== "" || page.playback.starting : false)
+            visible: !info.visible && level.kind === "" && (page.playback ? page.playback.error !== "" || page.playback.starting : false)
             anchors.centerIn: parent
             width: parent.width * 0.8
             horizontalAlignment: Text.AlignHCenter

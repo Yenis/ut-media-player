@@ -1,12 +1,34 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the audio player's menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Volume and brightness in the audio player, version 0.0.17
+
+### Checked over adb, 7 October 2026
+
+The levels were read from the sound and power indicators themselves.
+
+| Check | Result |
+|---|---|
+| `brightness -0.4` in the audio player: the backlight goes from 1.0 to 0.6 | Pass |
+| Leaving the page gives the phone its 1.0 back; opening the page again starts from 1.0 | Pass |
+| `volume -0.2` and `volume 0.2`: the media volume goes from 0.37 to 0.17 and back | Pass. The indicator read 0.73 before anything played: it reports the volume of what is sounding, and music has its own |
+| The overlay: speaker, bar and "62%" over the cover | Pass |
+| No QML warnings in the log | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Swipe up and down on the right of the cover: volume; on the left: brightness | Still to do |
+| A sideways swipe still seeks, and a double tap still seeks or pauses | Still to do |
+| The phone's brightness returns on going back to the lists, and with the screen locked and unlocked | Still to do |
 
 ## Audio player's menu, version 0.0.16
 

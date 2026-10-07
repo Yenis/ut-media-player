@@ -76,7 +76,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
 | `atab <artists\|albums\|tracks\|genres\|files>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
 | `repeat <none\|all\|one>`, `shuffle <0\|1>` | Repeat and shuffle. `state` reports both, and the next five titles of the queue |
-| `expand`, `stop` | Opens the full audio player from the mini-player; stops what plays. In the audio player, `tapseek`, `info`, `bookmark`, `ab` and `sheet <menu\|queue\|bookmarks\|jump\|sleep>` act on it |
+| `expand`, `stop` | Opens the full audio player from the mini-player; stops what plays. In the audio player, `tapseek`, `info`, `level`, `volume`, `brightness`, `bookmark`, `ab` and `sheet <menu\|queue\|bookmarks\|jump\|sleep>` act on it |
 | `tab <video\|audio\|browse\|playlists\|more>` | Shows a tab |
 | `view <grid\|list>` | How the Video tab shows its videos |
 | `sort <name\|filename\|length\|modified> [desc]`, `favonly <0\|1>`, `filter <text>` | Order and narrowing of the Video tab |

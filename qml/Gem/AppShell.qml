@@ -333,6 +333,8 @@ FocusScope {
                 playback: core
                 store: playerStore
                 sleep: sleeper
+                systemVolume: volumeLoader.status === Loader.Ready ? volumeLoader.item : null
+                systemBrightness: brightnessLoader.status === Loader.Ready ? brightnessLoader.item : null
                 onCollapseRequested: shell.page = "home"
                 onStopRequested: shell.closePlayer()
                 onVideoRequested: shell.toVideo()
