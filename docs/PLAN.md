@@ -500,6 +500,10 @@ How it is built:
       album title within one folder: on real files the artist cannot decide,
       a soundtrack's tracks naming a different one each, as album artist too
       **[device]**. Playlists have their own tab, in Phase 4.
+- [x] A "Files" list beside the four (version 0.0.14, asked for by Yenis,
+      7 October 2026; **our own addition**): every audio file by its file
+      name with its folder and length, in the order the system's library
+      gives them, neither sorted nor grouped.
 - [ ] Library, still to do: separate artist and album pages as VLC has them
       (an artist's albums as cards); sorting, filter, favourites and multiple
       selection as in the video library; the rest of VLC's item menu

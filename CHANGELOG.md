@@ -2,15 +2,18 @@
 
 ## 0.0.14 - unreleased
 
-- The Audio tab lists the music on the phone under Artists, Albums, Tracks
-  and Genres. An artist, album or genre opens to its tracks; an artist's and
-  a genre's are set out album by album.
+- The Audio tab lists the music on the phone under Artists, Albums, Tracks,
+  Genres and Files. An artist, album or genre opens to its tracks; an
+  artist's and a genre's are set out album by album. "Files" is the plain
+  list of audio files by file name, not sorted or grouped.
 - A tap on a track plays the list it is in from that track on, and leaves
   you in the list with the mini-player. The track that plays is marked.
 - Each row has a menu with Play, "Insert next" and "Add to play queue"; an
   open artist, album or genre has a play button at the top.
 - An album is the tracks that share an album title and a folder, so a
   soundtrack whose tracks each name a different artist stays one album.
+- Fixed: a queue started as audio from a track that was not the first one
+  could begin with the first one all the same.
 - A long title at the top of a page no longer runs under the buttons beside
   it.
 

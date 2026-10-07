@@ -2,8 +2,10 @@
 
 /*
  * The music library's arithmetic: what the Audio tab lists under artists,
- * albums, tracks and genres, and in which order. The tabs and their order are
- * VLC for Android's (docs/VLC-FEATURES.md, "Audio library").
+ * albums, tracks, genres and files, and in which order. The first four tabs
+ * and their order are VLC for Android's (docs/VLC-FEATURES.md, "Audio
+ * library"); "Files" is ours: every audio file by its file name, as the
+ * system's library hands them over, neither sorted nor grouped.
  *
  * A track is what platform/MediaLibrary.qml gives: { url, title, artist,
  * albumArtist, album, genre, date, trackNumber, discNumber, duration, art }.
@@ -13,7 +15,8 @@ var TABS = [
     { key: "artists", label: "Artists" },
     { key: "albums", label: "Albums" },
     { key: "tracks", label: "Tracks" },
-    { key: "genres", label: "Genres" }
+    { key: "genres", label: "Genres" },
+    { key: "files", label: "Files" }
 ];
 
 var UNKNOWN_ARTIST = "Unknown artist";
@@ -161,8 +164,22 @@ function allTracks(tracks) {
     return tracks.slice().sort(_byTitle);
 }
 
-// What a tab lists: groups for artists, albums and genres, tracks for tracks.
+// A track's file name, and the folder it is in, for the "Files" tab.
+function fileName(track) {
+    var path = track.filename || decodeURIComponent(track.url.toString());
+    return path.substring(path.lastIndexOf("/") + 1);
+}
+
+function folderName(track) {
+    var path = track.filename || decodeURIComponent(track.url.toString());
+    var folder = path.substring(0, path.lastIndexOf("/"));
+    return folder.substring(folder.lastIndexOf("/") + 1);
+}
+
+// What a tab lists: groups for artists, albums and genres, tracks for tracks
+// and files.
 function topLevel(tracks, tab) {
+    if (tab === "files") return tracks;
     if (tab === "artists") return artists(tracks);
     if (tab === "albums") return albums(tracks);
     if (tab === "genres") return genres(tracks);

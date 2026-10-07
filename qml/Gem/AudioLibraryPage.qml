@@ -6,7 +6,8 @@ import "../js/AudioLibrary.js" as AudioLibrary
 
 /*
  * The Audio tab: the music on the phone under VLC's four headings, artists,
- * albums, tracks and genres (docs/VLC-FEATURES.md, "Audio library"). An
+ * albums, tracks and genres (docs/VLC-FEATURES.md, "Audio library"), and
+ * under "Files", the plain list of audio files. An
  * artist, album or genre opens in place and lists its tracks; a tap on a
  * track plays the list it is in from that track on, behind the page, with
  * the mini-player showing it.
@@ -65,7 +66,7 @@ Item {
     }
 
     function surrounding() {
-        return openItem ? openItem.tracks : tab === "tracks" ? topLevel : [];
+        return openItem ? openItem.tracks : tab === "tracks" || tab === "files" ? topLevel : [];
     }
 
     function play(list, index) {
@@ -114,7 +115,8 @@ Item {
     function shownTitles() {
         return shown.map(function(item) {
             return item.section ? "# " + item.section
-                 : item.tracks ? item.title + " [" + item.tracks.length + "]" : item.title;
+                 : item.tracks ? item.title + " [" + item.tracks.length + "]"
+                 : tab === "files" ? AudioLibrary.fileName(item) : item.title;
         });
     }
 
@@ -195,6 +197,7 @@ Item {
 
             readonly property bool isSection: !!modelData.section
             readonly property bool isGroup: !!modelData.tracks
+            readonly property bool asFile: page.tab === "files" && !isSection && !isGroup
             readonly property bool playing: !isSection && !isGroup && modelData.url === page.playingUrl
 
             SectionLabel {
@@ -245,7 +248,7 @@ Item {
 
                 Text {
                     width: parent.width
-                    text: row.isSection ? "" : modelData.title
+                    text: row.isSection ? "" : row.asFile ? AudioLibrary.fileName(modelData) : modelData.title
                     color: row.playing ? Theme.accent : Theme.text
                     font.pixelSize: Theme.fontM
                     elide: Text.ElideRight
@@ -253,6 +256,7 @@ Item {
                 Text {
                     width: parent.width
                     text: row.isSection ? "" : row.isGroup ? modelData.subtitle
+                          : row.asFile ? AudioLibrary.folderName(modelData) + "  \u2022  " + Format.clock(modelData.duration)
                           : AudioLibrary.artistOf(modelData) + "  •  " + Format.clock(modelData.duration)
                     color: Theme.textFaint
                     font.pixelSize: Theme.fontXS

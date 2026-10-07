@@ -74,7 +74,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `play`, `pause`, `seek <ms>`, `seekby <ms>` | Playback |
 | `next`, `previous`, `queuejump <index>` | The queue |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
-| `atab <artists\|albums\|tracks\|genres>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
+| `atab <artists\|albums\|tracks\|genres\|files>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
 | `expand`, `stop` | Opens the full audio player from the mini-player; stops what plays. In the audio player, `tapseek`, `info` and `sheet queue` act on it |
 | `tab <video\|audio\|browse\|playlists\|more>` | Shows a tab |
 | `view <grid\|list>` | How the Video tab shows its videos |
@@ -139,7 +139,7 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | A file that is still loaded plays on from where it was paused | Opening the same address again does not rewind it; "Play from start" has to seek to 0 once playback has started |
 | Pause a video yourself when the app is suspended | media-hub plays on behind the lock screen and other apps |
 | A `Playlist` is for audio only | Played from a list, a video's picture stays black or stale. Audio in a list is moved on by media-hub itself, also while the app is frozen |
-| Wait for the list before choosing its item; expect stray index changes | `addItems` arrives later, and the list reports index -1 and 0 on the way to the item asked for |
+| Wait for the list before choosing its item; expect stray index changes | The list reports index -1 and 0 on the way to the item asked for, sometimes at once, inside `clear()` and `addItems()`, sometimes later. Whatever tells them from the hub moving on has to be set before the list is touched |
 | Add to a list with `addItems` at the end and `insertItem` before an existing item | `insertItems` is not implemented, and `insertItem` at the end is refused |
 | Ignore "Failed to open uri  because it can't be found" | Giving the player its list empties its address for a moment |
 | Nothing in the app runs while it is in the background | The app is frozen a few seconds after it leaves the foreground; playback continues without it |

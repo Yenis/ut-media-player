@@ -151,6 +151,9 @@ Item {
             mediaPlayer.play();
             return;
         }
+        // Set before the list is touched: emptying and filling it reports
+        // index changes at once, which must not be read as the hub moving on.
+        _pendingIndex = queueIndex;
         mediaPlayer.pause();
         if (mediaPlayer.playlist !== hubList)
             mediaPlayer.playlist = hubList;
@@ -159,7 +162,6 @@ Item {
         for (var i = 0; i < queue.length; i++)
             urls.push(queue[i].url.toString());
         hubList.addItems(urls);
-        _pendingIndex = queueIndex;
         _settle();
     }
 

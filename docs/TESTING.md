@@ -31,7 +31,8 @@ On the phone's own music, 188 tracks, and the six test files.
 | The four lists: 32 artists, 11 genres, 188 tracks; rows with name and counts, a round picture for an artist | Pass |
 | Albums keyed by title and artist | **Fail on real files:** "Bloodborne Original Soundtrack - Disc 2" appeared four times, once per composer. Keyed by title and album artist: the same, the files naming each composer as album artist. Keyed by title and folder: one album of five tracks. Kept |
 | An artist opens to its tracks under album headings, with the covers found in the files; `back` returns to the list | Pass |
-| A tap on a track in "Tracks" plays all 188 from there, as one list handed to media-hub; the page stays, the mini-player shows, the track's title turns to the accent colour | Pass |
+| A tap on a track in "Tracks" plays all 188 from there, as one list handed to media-hub; the page stays, the mini-player shows, the track's title turns to the accent colour | **Failed by hand (Yenis): whichever track was tapped, the first of the list played.** Filling the hub's list reported "index 0" at once, before the app had noted which item it was waiting for, and that was read as the hub having moved to the first item. The first adb run showed it too, as "1 of 188" after a tap on the third row, and it was not noticed. Fixed, and checked against media-hub's own track number: rows 6, 121 and 1 of 188 and row 8 of an album of 11 each play the row tapped, and `next` moves on from there |
+| "Files": 188 rows by file name, with folder and length, in the library's order; a tap plays from that file on | Pass |
 | "Insert next" from a row's menu while something plays: the queue grows by one and a message says so | Pass |
 | "Add to play queue" with nothing playing plays the track and leaves the list in front | Pass, after a fix: it opened the full player at first |
 | A long album title in the header stops short of the play button | Pass, after a fix to `PageHeader.qml` |
@@ -43,7 +44,8 @@ On the phone's own music, 188 tracks, and the six test files.
 |---|---|
 | The four tabs by touch; scrolling 188 tracks is smooth | Still to do |
 | Open an artist, an album, a genre; the header arrow and the back gesture return | Still to do |
-| A tap on a track plays, and the next one follows by itself | Still to do |
+| A tap on a track plays that track, in every list, and the next one follows by itself | Still to do, again |
+| "Files" lists the audio files as expected | Still to do |
 | A row's menu: Play, Insert next, Add to play queue | Still to do |
 | Do the albums look right for your collection, grouped by title and folder? | Still to do |
 
