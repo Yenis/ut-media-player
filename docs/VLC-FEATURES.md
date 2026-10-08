@@ -272,8 +272,8 @@ Source: `src/gui/browser/`.
 
 | Feature | Behaviour in VLC | Verdict |
 |---|---|---|
-| Local storage browser | Folders and files with a path bar; play a file or a whole folder | Spike S2 |
-| Removable storage | SD card and USB | Spike S2 |
+| Local storage browser | Folders and files with a path bar; play a file or a whole folder | Build. The app being unconfined (D12), it reads any folder |
+| Removable storage | SD card and USB | Build: what is mounted under `/media/<user>`. Not yet seen with a card |
 | Favourite folders | Pinned at the top of the tab | Build |
 | Show hidden files, folders first | Display options | Build |
 | Add folder to playlist | This folder, or with subfolders | Build |

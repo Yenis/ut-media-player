@@ -52,8 +52,26 @@ function baseName(path) {
     return dot > 0 ? name.substring(0, dot) : name;
 }
 
+// The files a media player is for, by the end of their names: what the
+// Browse tab lists, and how it tells music from video.
+var AUDIO_EXTENSIONS = ["mp3", "flac", "ogg", "oga", "opus", "m4a", "aac", "wav", "wma", "mka", "ape", "aif", "aiff"];
+var VIDEO_EXTENSIONS = ["mp4", "m4v", "mkv", "webm", "avi", "mov", "mpg", "mpeg", "ts", "m2ts", "wmv", "flv",
+                        "3gp", "ogv"];
+
 // Whether a file is music, going by its name: for files the library does not
 // know, which could otherwise only be assumed to have a picture.
 function isAudioName(path) {
-    return /\.(mp3|flac|ogg|oga|opus|m4a|aac|wav|wma|mka|ape|aiff?)$/i.test(path.toString());
+    var name = path.toString().toLowerCase();
+    return AUDIO_EXTENSIONS.indexOf(name.substring(name.lastIndexOf(".") + 1)) >= 0;
+}
+
+// Name patterns for a listing of a folder's media files, either case.
+function mediaNameFilters() {
+    var all = AUDIO_EXTENSIONS.concat(VIDEO_EXTENSIONS);
+    var filters = [];
+    for (var i = 0; i < all.length; i++) {
+        filters.push("*." + all[i]);
+        filters.push("*." + all[i].toUpperCase());
+    }
+    return filters;
 }

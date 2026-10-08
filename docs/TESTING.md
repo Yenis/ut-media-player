@@ -1,12 +1,38 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Browse tab, version 0.0.25
+
+### Checked over adb, 8 October 2026
+
+| Check | Result |
+|---|---|
+| The overview: "Storages" with Internal storage, "Favourites" with a note that there are none | Pass, after a fix: with no card mounted it listed "assets" and "qml" as storages. The model, given `/media/phablet`, which is not there, listed the app's own folder |
+| Internal storage: Documents, Downloads, Music, Pictures, Videos; Music: its folder, then 182 files | Pass |
+| A folder inside: files with length and size, the path "Internal storage › Music › gemplayer-test" above, the last part plain and the others to tap | Pass |
+| A tap on the third music file: it plays as "3 of 6", the list stays with the mini-player, the file's name turns to the accent colour | Pass |
+| A tap on the fourth video: the video player, "4 of 11" | Pass |
+| "Play all" on a folder that is not open | **Failed at first:** nothing played, and the next "Play all" played the folder asked for before. The listing was read before it had arrived. Fixed; a folder of eleven videos, a folder of one, the first again, and a folder of music each play their own |
+| The star on an open folder puts it under Favourites; entered from there, `back` leads to the overview | Pass |
+| The star on the overview | It stored an empty favourite. Fixed: the overview cannot be one |
+| `back` steps up folder by folder to the overview | Pass |
+| No QML warnings in the log | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Folders, files and the path bar by touch; the back gesture steps up | Still to do |
+| A folder's menu: Open, Play all, favourite | Still to do |
+| A long path: the bar scrolls and shows its end | Still to do |
+| An SD card or USB stick: it shows under Storages, and plays | Still to do |
 
 ## Queue page, search and moving, version 0.0.24
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.25 - unreleased
+
+- The Browse tab: the phone's folders. It starts with the storages and your
+  favourite folders; inside, it lists folders and the music and videos among
+  them, with the path along the top to go back up by.
+- A tap on a file plays it and what follows it in its folder. "Play all" in
+  a folder's menu, and the play button at the top of an open folder, play
+  the whole folder.
+- The star at the top of a folder, or "Add to favourites" in its menu, puts
+  it on the Browse tab's first page.
+
 ## 0.0.24 - 8 October 2026
 
 - The audio player's queue is a page of its own: every item with its place

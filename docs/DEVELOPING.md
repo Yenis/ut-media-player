@@ -74,6 +74,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `play`, `pause`, `seek <ms>`, `seekby <ms>` | Playback |
 | `next`, `previous`, `queuejump <index>` | The queue |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
+| `bopen [path]`, `btap <index>`, `baction <index> <open\|playAll\|favourite>`, `bfav`, `bplay` | The Browse tab: enters a folder (no path: the overview), a tap on the row at that place, a folder's menu entries, the star of the folder shown, and its play button. `state` reports the folder as `browsing` |
 | `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
 | `aalbumgrid <0\|1>` | Albums as cards with covers, or as rows |
 | `aselect <index>`, `aselaction <play\|insertNext\|append\|favourite>` | Adds a row of the Audio tab to the selection or takes it out, and the selection bar's buttons; `back` ends a selection. A heading counts as a row and cannot be selected |
@@ -182,6 +183,7 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | Listing a folder | `Qt.labs.folderlistmodel` | `qml/Gem/SubtitleTrack.qml` |
 | On-screen keyboard height | `Qt.inputMethod`, as GemTicker does; a plain Window does not make room for the keyboard itself | `qml/Gem/AppShell.qml` |
 | A file's size | `Qt.labs.folderlistmodel`: list the file's folder and read the `fileSize` role. QML has no way to ask about one file | `qml/Gem/MediaInfoPage.qml` |
+| A folder's contents | `Qt.labs.folderlistmodel`. Its answer comes later, with the model's status; and given a folder that does not exist, or none, it lists the app's own folder | `qml/Gem/BrowsePage.qml` |
 | Reading a text file | `XMLHttpRequest` on a `file://` address. Qt warns that this will be off by default one day | `qml/Gem/SubtitleTrack.qml` |
 
 QML cannot delete or rename a file, call an arbitrary D-Bus method, or open a

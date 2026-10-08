@@ -1,20 +1,15 @@
 # GemPlayer - a VLC-style media player for Ubuntu Touch - plan
 
-Status: **Phase 2 closed on 3 October 2026: the video side of the app is
-whole** (version 0.0.11). Phases 0, 1 and 2 are done: a video player, and
-around it the app shell with VLC's five tabs and a video library with grid
-and list, sorting, filter, favourites, grouping, groups made by hand, a
-queue, an item menu, multiple selection and an information page. Phase 3,
-audio, is under way: version 0.0.12 has the audio player and the mini-player,
-0.0.13 a queue that moves on in the background and can be added to,
-0.0.14 the music library, 0.0.15 shuffle and repeat, 0.0.16 the audio
-player's menu, 0.0.17 its volume and brightness swipes, 0.0.18 a queue
-that is kept between launches and can be trimmed, 0.0.19 a filter for
-the music lists and the blurred cover, 0.0.20 their sorting and
-favourites, 0.0.21 a track's information page and the ways to its
-album and artist, 0.0.22 their multiple selection, 0.0.23 album cards and
-an artist's albums, and 0.0.24 the queue's own page, with search and
-moving.
+Status: **Phase 3 closed on 8 October 2026: the audio side of the app is
+whole** (version 0.0.24). Phases 0 to 3 are done. Video: a player, and a
+library with grid and list, sorting, filter, favourites, grouping, a queue,
+an item menu, multiple selection and an information page (closed with
+0.0.11). Audio: a library by artist, album, track, genre and file, with
+filter, sorting, favourites and multiple selection; a player with our own
+gestures, a menu, shuffle and repeat; a mini-player; and a queue that moves
+on in the background, is kept between launches and can be searched, trimmed
+and put in order (0.0.12 to 0.0.24). Phase 4 is under way: version 0.0.25
+has the Browse tab.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -28,7 +23,7 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **To pick up next** | Phase 3, audio. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
+| **To pick up next** | Phase 4: playlists, then streams, settings and search. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
 
 What the first day established, in the order it was found:
 
@@ -661,8 +656,20 @@ How it is built:
 
 ## Phase 4 - Browse, playlists, streams and settings
 
-- [ ] Browse tab: local and removable storage with a path bar, favourite
-      folders, play a folder.
+- [x] Browse tab (version 0.0.25), `qml/Gem/BrowsePage.qml`: an overview
+      with the storages and the favourite folders; inside, folders and the
+      media files among them, a path bar, a tap that plays a file and what
+      follows it in its folder, "Play all" on a folder, and a star that
+      makes a folder a favourite. Internal storage is the home folder;
+      removable storage is whatever is mounted under `/media/<user>`, not
+      seen with a card yet. A folder plays one kind, music or videos: a tap
+      plays the kind of the file tapped, "Play all" the kind the folder has
+      more of. Files are told by the end of their name
+      (`qml/js/Format.js`), and what the library knows of one gives its
+      title and length. Listing is `Qt.labs.folderlistmodel`, which given a
+      folder that is not there lists the app's own instead **[device]**.
+- [ ] Browse, still to do: hidden files, "add folder to playlist" (with
+      playlists), a check with a card or stick.
 - [ ] Playlists tab: create, rename, delete, reorder; save the queue as a
       playlist; add from any list, the video library's item menu and
       selection bar included (carried over from Phase 2).

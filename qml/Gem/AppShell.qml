@@ -36,6 +36,7 @@ FocusScope {
     readonly property var audioPage: audioLoader.item
     readonly property alias videoLibrary: videoTab
     readonly property alias audioLibrary: audioTab
+    readonly property alias browser: browseTab
     readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
 
@@ -165,6 +166,8 @@ FocusScope {
             return videoTab.back();
         else if (page === "home" && tab === "audio")
             return audioTab.back();
+        else if (page === "home" && tab === "browse")
+            return browseTab.back();
         else
             return false;
         return true;
@@ -232,12 +235,16 @@ FocusScope {
                 onPlayRequested: shell.playList(list, index, options)
                 onQueueRequested: shell.addToQueue(list, next)
             }
-            PlaceholderPage {
+            BrowsePage {
+                id: browseTab
                 anchors.fill: parent
                 visible: shell.tab === "browse"
-                title: "Browse"
-                glyph: "folder"
-                text: "The phone's folders and favourite places will be here."
+                library: shell.library
+                store: playerStore
+                overlay: home
+                homePath: foldersLoader.status === Loader.Ready ? foldersLoader.item.home : ""
+                playingUrl: shell.audioActive ? core.url : ""
+                onPlayRequested: shell.playList(list, index, options)
             }
             PlaceholderPage {
                 anchors.fill: parent
