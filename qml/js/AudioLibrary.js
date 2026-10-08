@@ -19,6 +19,39 @@ var TABS = [
     { key: "files", label: "Files" }
 ];
 
+// How each tab's list can be ordered; the first is how it comes. After VLC's
+// choices for each list, without "insertion date", which the system's
+// library does not record. "Files" has none: it is the library's own order.
+var SORTS = {
+    artists: [
+        { key: "name", label: "Name", ascending: "A \u2192 Z", descending: "Z \u2192 A" }
+    ],
+    albums: [
+        { key: "name", label: "Name", ascending: "A \u2192 Z", descending: "Z \u2192 A" },
+        { key: "artist", label: "Artist", ascending: "A \u2192 Z", descending: "Z \u2192 A" },
+        { key: "date", label: "Release date", ascending: "Oldest first", descending: "Newest first" }
+    ],
+    tracks: [
+        { key: "name", label: "Name", ascending: "A \u2192 Z", descending: "Z \u2192 A" },
+        { key: "album", label: "Album", ascending: "A \u2192 Z", descending: "Z \u2192 A" },
+        { key: "artist", label: "Artist", ascending: "A \u2192 Z", descending: "Z \u2192 A" },
+        { key: "length", label: "Length", ascending: "Shortest first", descending: "Longest first" },
+        { key: "modified", label: "Recently added", ascending: "Oldest first", descending: "Newest first" }
+    ],
+    genres: [
+        { key: "name", label: "Name", ascending: "A \u2192 Z", descending: "Z \u2192 A" }
+    ],
+    files: []
+};
+
+function sortInfo(tab, key) {
+    var sorts = SORTS[tab] || [];
+    for (var i = 0; i < sorts.length; i++)
+        if (sorts[i].key === key)
+            return sorts[i];
+    return sorts.length > 0 ? sorts[0] : null;
+}
+
 var UNKNOWN_ARTIST = "Unknown artist";
 var UNKNOWN_ALBUM = "Unknown album";
 var UNKNOWN_GENRE = "Unknown genre";
@@ -147,10 +180,20 @@ function _sharedArtist(tracks) {
 
 function albums(tracks) {
     var list = _groups(tracks, "album", _albumKey, albumOf, _byPlace);
-    for (var i = 0; i < list.length; i++)
-        list[i].subtitle = _sharedArtist(list[i].tracks) + "  \u2022  "
-                           + _count(list[i].tracks.length, "track", "tracks");
+    for (var i = 0; i < list.length; i++) {
+        list[i].artist = _sharedArtist(list[i].tracks);
+        list[i].date = _dateOf(list[i].tracks);
+        list[i].subtitle = list[i].artist + "  \u2022  " + _count(list[i].tracks.length, "track", "tracks");
+    }
     return list;
+}
+
+// The first date found among some tracks, as the files give it, or "".
+function _dateOf(tracks) {
+    for (var i = 0; i < tracks.length; i++)
+        if (tracks[i].date)
+            return tracks[i].date;
+    return "";
 }
 
 function genres(tracks) {
@@ -193,14 +236,44 @@ function filtered(tracks, tab, text) {
     });
 }
 
+// Only the tracks that are favourites; `favourites` is { url: true }.
+function favouritesOnly(tracks, favourites) {
+    return tracks.filter(function(t) { return !!favourites[t.url]; });
+}
+
+function _number(a, b) { return a - b; }
+
+// Puts a tab's list into the order chosen. Names are in order already.
+function _sorted(list, tab, sort, descending) {
+    var by = null;
+    if (tab === "albums" && sort === "artist")
+        by = function(a, b) { return _text(a.artist, b.artist) || _byTitle(a, b); };
+    else if (tab === "albums" && sort === "date")
+        by = function(a, b) { return _text(a.date, b.date) || _byTitle(a, b); };
+    else if (tab === "tracks" && sort === "album")
+        by = _byAlbum;
+    else if (tab === "tracks" && sort === "artist")
+        by = _byArtist;
+    else if (tab === "tracks" && sort === "length")
+        by = function(a, b) { return _number(a.duration, b.duration) || _byTitle(a, b); };
+    else if (tab === "tracks" && sort === "modified")
+        by = function(a, b) { return _number(a.modified, b.modified) || _byTitle(a, b); };
+    if (by)
+        list.sort(by);
+    if (descending)
+        list.reverse();
+    return list;
+}
+
 // What a tab lists: groups for artists, albums and genres, tracks for tracks
-// and files.
-function topLevel(tracks, tab) {
+// and files; in the order chosen for it.
+function topLevel(tracks, tab, sort, descending) {
     if (tab === "files") return tracks;
-    if (tab === "artists") return artists(tracks);
-    if (tab === "albums") return albums(tracks);
-    if (tab === "genres") return genres(tracks);
-    return allTracks(tracks);
+    var list = tab === "artists" ? artists(tracks)
+             : tab === "albums" ? albums(tracks)
+             : tab === "genres" ? genres(tracks)
+             : allTracks(tracks);
+    return _sorted(list, tab, sort || "name", !!descending);
 }
 
 function findGroup(groups, key) {

@@ -18,6 +18,7 @@ Item {
     id: page
 
     property var library: null          // platform/MediaLibrary.qml, or null off the device
+    property var store: null            // PlayerStore: favourites
     property var overlay: page          // what the sheets cover; the shell passes all of "home"
     property string playingUrl: ""      // the track that plays as audio now, to mark it
 
@@ -30,7 +31,15 @@ Item {
     property bool filtering: false
     property string filter: ""
 
-    readonly property var topLevel: AudioLibrary.topLevel(AudioLibrary.filtered(tracks, tab, filter), tab)
+    // Each tab keeps its own order. Favourites are tracks; "only favourites"
+    // leaves every list with what those tracks make of it.
+    property string sort: "name"
+    property bool descending: false
+    property bool onlyFavourites: false
+    readonly property var favourites: store && store.favouriteRevision >= 0 ? store.favourites() : ({})
+
+    readonly property var kept: onlyFavourites ? AudioLibrary.favouritesOnly(tracks, favourites) : tracks
+    readonly property var topLevel: AudioLibrary.topLevel(AudioLibrary.filtered(kept, tab, filter), tab, sort, descending)
     readonly property var openItem: openKey ? AudioLibrary.findGroup(topLevel, openKey) : null
     // Rows: a group { kind, key, title, subtitle, tracks, art }, a track, or
     // a heading { section }.
@@ -53,8 +62,45 @@ Item {
     function setTab(key) {
         tab = AudioLibrary.TABS[AudioLibrary.tabIndex(key)].key;
         openKey = "";
-        settings.setValue("tab", tab);
+        _keep("tab", tab);
+        _readSort();
+    }
+
+    function _keep(key, value) {
+        settings.setValue(key, value);
         settings.sync();
+    }
+
+    // Settings hands a stored true back as the text "true".
+    function _flag(key, fallback) {
+        var value = settings.value(key, fallback);
+        return value === true || value === "true";
+    }
+
+    function _readSort() {
+        var info = AudioLibrary.sortInfo(tab, settings.value("sort." + tab, "name"));
+        sort = info ? info.key : "name";
+        descending = info ? _flag("descending." + tab, false) : false;
+    }
+
+    function setSort(key, desc) {
+        var info = AudioLibrary.sortInfo(tab, key);
+        if (!info)
+            return;
+        sort = info.key;
+        descending = desc;
+        _keep("sort." + tab, sort);
+        _keep("descending." + tab, desc);
+    }
+
+    function setOnlyFavourites(on) {
+        onlyFavourites = on;
+        _keep("onlyFavourites", on);
+    }
+
+    function openDisplaySheet() {
+        search.dismiss();
+        displaySheet.show();
     }
 
     // Leaves the open artist, album or genre, or else the filter; false if
@@ -127,6 +173,8 @@ Item {
             play(tracksOf(item), 0);
         else if (key === "append" || key === "insertNext")
             queueRequested(tracksOf(item), key === "insertNext");
+        else if (key === "favourite" && !item.tracks)
+            store.setFavourite(item.url, !favourites[item.url]);
     }
 
     function openItemMenu(index) {
@@ -138,6 +186,7 @@ Item {
 
     function closeSheets() {
         itemMenu.close();
+        displaySheet.close();
     }
 
     function shownTitles() {
@@ -158,7 +207,11 @@ Item {
         category: "audioLibrary"
     }
 
-    Component.onCompleted: tab = AudioLibrary.TABS[AudioLibrary.tabIndex(settings.value("tab", "artists"))].key
+    Component.onCompleted: {
+        tab = AudioLibrary.TABS[AudioLibrary.tabIndex(settings.value("tab", "artists"))].key;
+        onlyFavourites = _flag("onlyFavourites", false);
+        _readSort();
+    }
 
     Connections {
         target: page.library
@@ -194,6 +247,12 @@ Item {
                     else
                         page.openFilter();
                 }
+            }
+            IconButton {
+                visible: !page.openKey
+                glyph: "settings"
+                color: page.onlyFavourites ? Theme.accent : Theme.textDim
+                onClicked: page.openDisplaySheet()
             }
         }
     }
@@ -239,6 +298,8 @@ Item {
         text: !page.library ? "The media library is not available."
               : page.tracks.length > 0 && page.filter.trim().length > 0
                 ? "Nothing matches \u201c" + page.filter.trim() + "\u201d."
+              : page.tracks.length > 0 && page.onlyFavourites
+                ? "No favourites yet.\nA track's menu adds it to them."
               : "No music found.\nPut some in the Music folder and it will appear here."
         color: Theme.textDim
         font.pixelSize: Theme.fontM
@@ -290,6 +351,23 @@ Item {
                     name: "audio"
                     color: row.playing ? Theme.accent : Theme.textDim
                     visible: rowArt.status !== Image.Ready
+                }
+                // A favourite, marked as on a video's picture.
+                Rectangle {
+                    z: 1
+                    visible: !row.isSection && !row.isGroup && !!page.favourites[modelData.url]
+                    anchors { left: parent.left; bottom: parent.bottom; margins: Theme.u(0.4) }
+                    width: Theme.u(2)
+                    height: Theme.u(2)
+                    radius: Theme.u(0.4)
+                    color: Qt.rgba(0, 0, 0, 0.6)
+
+                    Glyph {
+                        anchors.centerIn: parent
+                        width: Theme.u(1.3)
+                        name: "star"
+                        color: Theme.accent
+                    }
                 }
                 Image {
                     id: rowArt
@@ -352,11 +430,49 @@ Item {
         parent: page.overlay
         anchors.fill: parent
         title: page.menuItem ? page.menuItem.title : ""
-        options: [
-            { key: "play", label: page.menuItem && page.menuItem.tracks ? "Play all" : "Play", glyph: "play" },
-            { key: "insertNext", label: "Insert next", glyph: "next" },
-            { key: "append", label: "Add to play queue", glyph: "add" }
-        ]
+        options: {
+            var item = page.menuItem;
+            var rows = [
+                { key: "play", label: item && item.tracks ? "Play all" : "Play", glyph: "play" },
+                { key: "insertNext", label: "Insert next", glyph: "next" },
+                { key: "append", label: "Add to play queue", glyph: "add" }
+            ];
+            if (item && !item.tracks && !item.section && page.store) {
+                var favourite = !!page.favourites[item.url];
+                rows.push({ key: "favourite", glyph: "star", selected: favourite,
+                            label: favourite ? "Remove from favourites" : "Add to favourites" });
+            }
+            return rows;
+        }
         onChosen: page.itemAction(page.menuItem, key)
+    }
+
+    // What the list shows and in which order, as the Video tab has it.
+    OptionSheet {
+        id: displaySheet
+        parent: page.overlay
+        anchors.fill: parent
+        title: "Display settings"
+        options: {
+            var rows = [
+                { key: "favourites", label: "Show only favourites", glyph: "star",
+                  selected: page.onlyFavourites, value: page.onlyFavourites ? "on" : "off", stay: true }
+            ];
+            var sorts = AudioLibrary.SORTS[page.tab] || [];
+            if (sorts.length > 0)
+                rows.push({ label: "Sort by\u2026" });
+            for (var i = 0; i < sorts.length; i++) {
+                var current = sorts[i].key === page.sort;
+                rows.push({ key: "sort:" + sorts[i].key, label: sorts[i].label, selected: current, stay: true,
+                            value: current ? (page.descending ? sorts[i].descending : sorts[i].ascending) : "" });
+            }
+            return rows;
+        }
+        onChosen: {
+            if (key === "favourites")
+                page.setOnlyFavourites(!page.onlyFavourites);
+            else if (key.indexOf("sort:") === 0)
+                page.setSort(key.substring(5), key.substring(5) === page.sort ? !page.descending : false);
+        }
     }
 }

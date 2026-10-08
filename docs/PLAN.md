@@ -9,8 +9,9 @@ audio, is under way: version 0.0.12 has the audio player and the mini-player,
 0.0.13 a queue that moves on in the background and can be added to,
 0.0.14 the music library, 0.0.15 shuffle and repeat, 0.0.16 the audio
 player's menu, 0.0.17 its volume and brightness swipes, 0.0.18 a queue
-that is kept between launches and can be trimmed, and 0.0.19 a filter for
-the music lists and the blurred cover.
+that is kept between launches and can be trimmed, 0.0.19 a filter for
+the music lists and the blurred cover, and 0.0.20 their sorting and
+favourites.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -511,10 +512,19 @@ How it is built:
       it: each list is narrowed by what it lists, so an artist, album or
       genre that matches keeps all its tracks. Not offered inside an open
       artist, album or genre.
+- [x] Sorting and favourites for the music lists (version 0.0.20), in a
+      "Display settings" sheet like the Video tab's. Orders, after VLC's for
+      each list and without its "insertion date": tracks by name, album,
+      artist, length, recently added; albums by name, artist, release date;
+      artists and genres by name; "Files" stays as the library gives it.
+      Each list remembers its own. Favourites are tracks, kept in the table
+      the videos' favourites are in; "only favourites" narrows every list to
+      what the favourite tracks make of it. VLC also lets an artist, album
+      or genre be a favourite; that is not built.
 - [ ] Library, still to do: separate artist and album pages as VLC has them
-      (an artist's albums as cards); sorting, favourites and multiple
-      selection as in the video library; the rest of VLC's item menu
-      (information, add to playlist, go to album or artist).
+      (an artist's albums as cards); multiple selection as in the video
+      library; the rest of VLC's item menu (information, add to playlist,
+      go to album or artist).
 - [x] Mini-player bar on every main page (version 0.0.12): cover, title,
       artist, progress, play and pause; a tap opens the full player, a swipe
       to the left is next and to the right previous, and a cross stops

@@ -81,6 +81,9 @@ Item {
         else if (name === "back") shell.back();
         else if (name === "home") shell.page = "home";
         else if (name === "atab") shell.audioLibrary.setTab(argument);
+        else if (name === "asort") shell.audioLibrary.setSort(argument.split(" ")[0], argument.split(" ")[1] === "desc");
+        else if (name === "afavonly") shell.audioLibrary.setOnlyFavourites(argument === "1");
+        else if (name === "adisplay") shell.audioLibrary.openDisplaySheet();
         else if (name === "afilter") { if (argument) shell.audioLibrary.setFilter(argument); else shell.audioLibrary.closeFilter(); }
         else if (name === "atap") shell.audioLibrary.activate(shell.audioLibrary.shown[parseInt(argument)]);
         else if (name === "aaction") shell.audioLibrary.itemAction(shell.audioLibrary.shown[parseInt(argument.split(" ")[0])], argument.split(" ")[1]);

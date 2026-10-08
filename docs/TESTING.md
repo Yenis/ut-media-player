@@ -1,12 +1,49 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Sorting and favourites for music, version 0.0.20
+
+### Checked on the computer, 8 October 2026
+
+The orders in `qml/js/AudioLibrary.js`, run under node with made-up tracks.
+
+| Check | Result |
+|---|---|
+| Tracks by name, album, artist, length and date changed, each way round | Pass |
+| Albums by name, artist and release date | Pass |
+| "Files" is left as it comes whatever is asked | Pass |
+| Only favourites: the albums that the favourite tracks belong to, with those tracks | Pass |
+| An order a list does not have falls back to its first | Pass |
+
+### Checked over adb, 8 October 2026
+
+On the phone's own 188 tracks.
+
+| Check | Result |
+|---|---|
+| Tracks, longest first: the 20-minute "King's Field IV" track leads | Pass |
+| Tracks, recently added: the six test files, pushed last, lead | Pass |
+| Albums, newest first, and by artist | Pass |
+| Two tracks marked from their menus: a star on each; "only favourites" leaves Tracks with the two and Artists with their two artists | Pass |
+| Unmarking them one by one empties the list: "No favourites yet." | Pass |
+| The display sheet: the favourites switch, then the orders of the list in view, the chosen one marked with its direction | Pass (layout) |
+| After a restart Albums is by name again, as it was left | Pass |
+| No QML warnings in the log | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| The sliders open the sheet; a tap chooses an order, a second tap turns it round | Still to do |
+| A track's menu adds it to the favourites; the star appears | Still to do |
+| "Show only favourites" in each of the five lists | Still to do |
 
 ## Music filter and blurred cover, version 0.0.19
 

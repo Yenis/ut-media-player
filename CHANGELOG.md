@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.20 - unreleased
+
+- Sorting for the music lists, behind the sliders at the top of the Audio
+  tab. Tracks by name, album, artist, length or how recently they were
+  added; albums by name, artist or release date; artists and genres by
+  name. A second tap on the chosen order turns it round. Each list keeps
+  its own order.
+- Favourite tracks: a track's menu adds it to the favourites or takes it
+  out, and a star marks it. "Show only favourites" in the same sheet leaves
+  every list with the favourites only.
+
 ## 0.0.19 - 8 October 2026
 
 - A filter for the music lists: the magnifying glass at the top of the
