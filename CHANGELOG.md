@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.24 - unreleased
+## 0.0.24 - 8 October 2026
 
 - The audio player's queue is a page of its own: every item with its place
   in the queue and its artist, the one that plays marked, opening at that
