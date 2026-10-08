@@ -75,6 +75,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `next`, `previous`, `queuejump <index>` | The queue |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
 | `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
+| `aalbumgrid <0\|1>` | Albums as cards with covers, or as rows |
 | `aselect <index>`, `aselaction <play\|insertNext\|append\|favourite>` | Adds a row of the Audio tab to the selection or takes it out, and the selection bar's buttons; `back` ends a selection. A heading counts as a row and cannot be selected |
 | `asort <key> [desc]`, `afavonly <0\|1>`, `adisplay` | The order of the Audio tab's list (`name`, and per list `album`, `artist`, `length`, `modified`, `date`), its favourites switch, and its display settings. `aaction <index> favourite` switches a track's mark; `info`, `goAlbum` and `goArtist` are a track's other menu entries |
 | `atab <artists\|albums\|tracks\|genres\|files>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |

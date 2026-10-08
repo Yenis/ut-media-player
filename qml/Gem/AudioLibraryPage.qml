@@ -7,7 +7,9 @@ import "../js/AudioLibrary.js" as AudioLibrary
 /*
  * The Audio tab: the music on the phone under VLC's four headings, artists,
  * albums, tracks and genres (docs/VLC-FEATURES.md, "Audio library"), and
- * under "Files", the plain list of audio files. An
+ * under "Files", the plain list of audio files. Albums are cards with their
+ * covers, as in VLC, or rows if the display settings say so. An artist opens
+ * to their albums, an album or a genre to its tracks. An
  * artist, album or genre opens in place and lists its tracks; a tap on a
  * track plays the list it is in from that track on, behind the page, with
  * the mini-player showing it.
@@ -25,6 +27,8 @@ Item {
     property var tracks: []
     property string tab: "artists"      // one of AudioLibrary.TABS
     property string openKey: ""         // the artist, album or genre that is open; "" for none
+    property string albumKey: ""        // within an open artist: the album that is open; "" for none
+    property bool albumGrid: true       // albums as cards with covers, or as rows
 
     // The filter narrows the list of the tab, not of an open artist, album
     // or genre.
@@ -43,7 +47,17 @@ Item {
     readonly property var openItem: openKey ? AudioLibrary.findGroup(topLevel, openKey) : null
     // Rows: a group { kind, key, title, subtitle, tracks, art }, a track, or
     // a heading { section }.
-    readonly property var shown: openKey ? (openItem ? AudioLibrary.rowsOf(openItem) : []) : topLevel
+    readonly property var artistAlbums: openItem && openItem.kind === "artist" ? AudioLibrary.albums(openItem.tracks) : []
+    readonly property var openAlbum: albumKey ? AudioLibrary.findGroup(artistAlbums, albumKey) : null
+    // The innermost thing that is open: what the header names and plays.
+    readonly property var current: openAlbum || openItem
+    readonly property var shown: !openKey ? topLevel
+                               : !openItem ? []
+                               : openAlbum ? AudioLibrary.rowsOf(openAlbum)
+                               : openItem.kind === "artist" ? artistAlbums
+                               : AudioLibrary.rowsOf(openItem)
+    readonly property bool showsAlbums: shown.length > 0 && shown[0].kind === "album"
+    readonly property bool asGrid: albumGrid && showsAlbums
 
     // Multiple selection, as in the Video tab: { key: true } for each
     // selected row, by a track's address or a group's key. A long press
@@ -125,6 +139,8 @@ Item {
         tracks = library ? library.tracks() : [];
         if (openKey && !openItem)
             openKey = "";
+        if (albumKey && !openAlbum)
+            albumKey = "";
     }
 
     function setTab(key) {
@@ -162,6 +178,11 @@ Item {
         _keep("descending." + tab, desc);
     }
 
+    function setAlbumGrid(on) {
+        albumGrid = on;
+        _keep("albumGrid", on);
+    }
+
     function setOnlyFavourites(on) {
         onlyFavourites = on;
         _keep("onlyFavourites", on);
@@ -181,6 +202,10 @@ Item {
         }
         if (selecting) {
             clearSelection();
+            return true;
+        }
+        if (albumKey) {
+            albumKey = "";
             return true;
         }
         if (openKey) {
@@ -216,7 +241,7 @@ Item {
     }
 
     function surrounding() {
-        return openItem ? openItem.tracks : tab === "tracks" || tab === "files" ? topLevel : [];
+        return current ? current.tracks : tab === "tracks" || tab === "files" ? topLevel : [];
     }
 
     function play(list, index) {
@@ -233,7 +258,11 @@ Item {
             return;
         }
         if (item.tracks) {
-            openKey = item.key;
+            // An album inside an artist opens within it.
+            if (openKey)
+                albumKey = item.key;
+            else
+                openKey = item.key;
             return;
         }
         var list = surrounding();
@@ -295,7 +324,11 @@ Item {
     }
 
     onLibraryChanged: reload()
-    onOpenKeyChanged: clearSelection()
+    onOpenKeyChanged: {
+        albumKey = "";
+        clearSelection();
+    }
+    onAlbumKeyChanged: clearSelection()
 
     // The keyboard goes when the page does.
     onVisibleChanged: {
@@ -314,6 +347,7 @@ Item {
     Component.onCompleted: {
         tab = AudioLibrary.TABS[AudioLibrary.tabIndex(settings.value("tab", "artists"))].key;
         onlyFavourites = _flag("onlyFavourites", false);
+        albumGrid = _flag("albumGrid", true);
         _readSort();
     }
 
@@ -331,15 +365,15 @@ Item {
     PageHeader {
         id: header
         anchors { left: parent.left; right: parent.right; top: parent.top }
-        title: page.openItem ? page.openItem.title : "Audio"
+        title: page.current ? page.current.title : "Audio"
         canGoBack: page.openKey.length > 0
         onBack: page.back()
         trailing: Row {
             IconButton {
-                visible: page.openItem !== null
+                visible: page.current !== null
                 glyph: "play"
                 color: Theme.text
-                onClicked: page.itemAction(page.openItem, "play")
+                onClicked: page.itemAction(page.current, "play")
             }
             IconButton {
                 visible: !page.openKey
@@ -461,11 +495,126 @@ Item {
         lineHeight: 1.3
     }
 
+    // Albums as cards: cover, title, artist and number of tracks, after
+    // VLC's album cards.
+    GridView {
+        id: cards
+        visible: page.asGrid
+        anchors { left: parent.left; right: parent.right; top: tabRow.bottom; bottom: parent.bottom
+                  leftMargin: Theme.u(0.5); rightMargin: Theme.u(0.5) }
+        topMargin: Theme.u(0.5)
+        clip: true
+        model: page.asGrid ? page.shown : []
+        onMovementStarted: search.dismiss()
+
+        // As many 160 dp columns as fit, and never fewer than two.
+        readonly property int columns: Math.max(2, Math.floor(width / Theme.u(20)))
+        readonly property real pad: Theme.u(1)
+
+        cellWidth: Math.floor(width / columns)
+        cellHeight: Math.round(pad + (cellWidth - 2 * pad) + Theme.u(0.5)
+                               + Theme.fontM * 1.4 + Theme.fontXS * 1.5 + Theme.u(1))
+
+        delegate: Item {
+            id: card
+            width: cards.cellWidth
+            height: cards.cellHeight
+
+            readonly property bool selected: !!page.selection[page.keyOf(modelData)]
+
+            Rectangle {
+                anchors.fill: parent
+                color: Theme.text
+                opacity: cardMouse.pressed ? 0.06 : 0
+            }
+
+            Rectangle {
+                id: cardCover
+                anchors { left: parent.left; right: parent.right; top: parent.top
+                          leftMargin: cards.pad; rightMargin: cards.pad; topMargin: cards.pad }
+                height: width
+                radius: Theme.u(0.5)
+                color: Theme.surfaceAlt
+                clip: true
+
+                Glyph {
+                    anchors.centerIn: parent
+                    width: parent.width * 0.3
+                    name: "audio"
+                    color: Theme.textDim
+                    visible: cardArt.status !== Image.Ready
+                }
+                Image {
+                    id: cardArt
+                    anchors.fill: parent
+                    source: modelData.art || ""
+                    sourceSize: Qt.size(384, 384)
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                }
+            }
+            Text {
+                id: cardTitle
+                anchors { left: cardCover.left; right: cardCover.right; top: cardCover.bottom; topMargin: Theme.u(0.5) }
+                text: modelData.title
+                color: Theme.text
+                font.pixelSize: Theme.fontM
+                elide: Text.ElideRight
+            }
+            Text {
+                anchors { left: cardCover.left; right: cardCover.right; top: cardTitle.bottom }
+                text: modelData.subtitle || ""
+                color: Theme.textFaint
+                font.pixelSize: Theme.fontXS
+                elide: Text.ElideRight
+            }
+
+            Rectangle {
+                visible: card.selected
+                anchors.fill: cardCover
+                radius: cardCover.radius
+                color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
+                border.width: Math.max(2, Theme.u(0.3))
+                border.color: Theme.accent
+
+                Glyph {
+                    anchors { right: parent.right; top: parent.top; margins: Theme.u(1) }
+                    width: Theme.u(2.6)
+                    name: "check"
+                    color: "white"
+                }
+            }
+
+            MouseArea {
+                id: cardMouse
+                anchors.fill: parent
+                onClicked: page.activate(modelData)
+                onPressAndHold: page.toggleSelected(modelData)
+            }
+
+            // The menu, on the cover's corner as on a video's picture.
+            IconButton {
+                visible: !page.selecting
+                anchors { right: cardCover.right; top: cardCover.top }
+                implicitWidth: Theme.u(4.5)
+                implicitHeight: Theme.u(4.5)
+                glyphSize: Theme.u(2.2)
+                glyph: "more"
+                color: "white"
+                onClicked: {
+                    page.menuItem = modelData;
+                    itemMenu.show();
+                }
+            }
+        }
+    }
+
     ListView {
         id: list
+        visible: !page.asGrid
         anchors { left: parent.left; right: parent.right; top: tabRow.bottom; bottom: parent.bottom }
         clip: true
-        model: page.shown
+        model: page.asGrid ? [] : page.shown
         onMovementStarted: search.dismiss()
 
         delegate: Item {
@@ -602,7 +751,7 @@ Item {
                                 label: favourite ? "Remove from favourites" : "Add to favourites" });
                 }
                 // Not to where one is already.
-                var here = page.openItem ? page.openItem.kind : "";
+                var here = page.current ? page.current.kind : "";
                 if (here !== "album")
                     rows.push({ key: "goAlbum", label: "Go to album", glyph: "playlist" });
                 if (here !== "artist")
@@ -635,7 +784,9 @@ Item {
         options: {
             var rows = [
                 { key: "favourites", label: "Show only favourites", glyph: "star",
-                  selected: page.onlyFavourites, value: page.onlyFavourites ? "on" : "off", stay: true }
+                  selected: page.onlyFavourites, value: page.onlyFavourites ? "on" : "off", stay: true },
+                { key: "albumGrid", label: page.albumGrid ? "Display albums in list" : "Display albums in grid",
+                  glyph: page.albumGrid ? "list" : "grid", stay: true }
             ];
             var sorts = AudioLibrary.SORTS[page.tab] || [];
             if (sorts.length > 0)
@@ -650,6 +801,8 @@ Item {
         onChosen: {
             if (key === "favourites")
                 page.setOnlyFavourites(!page.onlyFavourites);
+            else if (key === "albumGrid")
+                page.setAlbumGrid(!page.albumGrid);
             else if (key.indexOf("sort:") === 0)
                 page.setSort(key.substring(5), key.substring(5) === page.sort ? !page.descending : false);
         }

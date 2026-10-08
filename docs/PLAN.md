@@ -12,7 +12,8 @@ player's menu, 0.0.17 its volume and brightness swipes, 0.0.18 a queue
 that is kept between launches and can be trimmed, 0.0.19 a filter for
 the music lists and the blurred cover, 0.0.20 their sorting and
 favourites, 0.0.21 a track's information page and the ways to its
-album and artist, and 0.0.22 their multiple selection.
+album and artist, 0.0.22 their multiple selection, and 0.0.23 album
+cards and an artist's albums.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -536,8 +537,13 @@ How it is built:
       switches its favourite marks. An artist, album or genre selected
       stands for all its tracks. It ends with the cross, the back key, a
       change of list, and on opening or leaving a group.
-- [ ] Library, still to do: separate artist and album pages as VLC has them
-      (an artist's albums as cards).
+- [x] Album cards and an artist's albums (version 0.0.23). Albums show as
+      cards with their covers, in the Albums list and inside an artist; a
+      switch in the display settings shows them as rows. An artist opens to
+      their albums and an album from there to its tracks: two steps, where
+      VLC has an artist page with an "Albums" and a "Tracks" tab. The
+      header's play button plays everything by the artist. A genre still
+      opens to its tracks under artist and album headings.
 - [x] Mini-player bar on every main page (version 0.0.12): cover, title,
       artist, progress, play and pause; a tap opens the full player, a swipe
       to the left is next and to the right previous, and a cross stops

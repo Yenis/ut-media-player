@@ -81,6 +81,7 @@ Item {
         else if (name === "back") shell.back();
         else if (name === "home") shell.page = "home";
         else if (name === "atab") shell.audioLibrary.setTab(argument);
+        else if (name === "aalbumgrid") shell.audioLibrary.setAlbumGrid(argument === "1");
         else if (name === "aselect") shell.audioLibrary.toggleSelected(shell.audioLibrary.shown[parseInt(argument)]);
         else if (name === "aselaction") shell.audioLibrary.selectionAction(argument);
         else if (name === "asort") shell.audioLibrary.setSort(argument.split(" ")[0], argument.split(" ")[1] === "desc");

@@ -1,7 +1,7 @@
 {
     "name": "gemplayer.yenis",
     "title": "GemPlayer",
-    "version": "0.0.22",
+    "version": "0.0.23",
     "description": "A VLC-style media player. Early development build.",
     "framework": "@CLICK_FRAMEWORK@",
     "architecture": "@CLICK_ARCH@",

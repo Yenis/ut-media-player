@@ -1,12 +1,35 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Album cards and an artist's albums, version 0.0.23
+
+### Checked over adb, 8 October 2026
+
+| Check | Result |
+|---|---|
+| Albums: two cards to a row, each with its cover or the headphones, title, artist and number of tracks, and a menu button on the cover | Pass |
+| An artist opens to their albums as cards; the header names the artist and has the play button | Pass |
+| An album there opens to its tracks; a tap plays from that track on within the album ("2 of 17") | Pass |
+| `back` leads from the album to the artist, and from the artist to the Artists list | Pass |
+| "Go to artist" from a track opens the artist on their albums | Pass |
+| "Display albums in list": rows again, with small covers | Pass |
+| A genre still opens to its tracks under headings | Pass |
+| No QML warnings in the log | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Scrolling the album cards is smooth, and the covers appear without a long wait | Still to do |
+| Artist, album, track and back again by touch and by the back gesture | Still to do |
+| A long press on a card selects the album; the card's menu button opens its menu | Still to do |
 
 ## Multiple selection for music, version 0.0.22
 

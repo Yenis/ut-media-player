@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.23 - unreleased
+
+- Albums are shown as cards with their covers, two or more to a row.
+  "Display albums in list" in the display settings brings the rows back.
+- An artist opens to their albums, and an album from there to its tracks,
+  where before an artist opened to one long list of tracks. The play button
+  at the top still plays everything by the artist.
+
 ## 0.0.22 - 8 October 2026
 
 - Several at once in the music lists: a long press on a track, artist,
