@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.21 - unreleased
+## 0.0.21 - 8 October 2026
 
 - "Information" in a track's menu opens a page about it: its cover and
   title, a button to play it, what its tags say (artist, album, track
