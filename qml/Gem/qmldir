@@ -5,6 +5,7 @@ singleton Theme 1.0 Theme.qml
 AppShell 1.0 AppShell.qml
 AudioLibraryPage 1.0 AudioLibraryPage.qml
 AudioPlayerPage 1.0 AudioPlayerPage.qml
+BlurredCover 1.0 BlurredCover.qml
 GestureLayer 1.0 GestureLayer.qml
 Glyph 1.0 Glyph.qml
 GroupThumb 1.0 GroupThumb.qml

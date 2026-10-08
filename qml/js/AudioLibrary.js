@@ -176,6 +176,23 @@ function folderName(track) {
     return folder.substring(folder.lastIndexOf("/") + 1);
 }
 
+// The tracks a tab is left with when its list is filtered by `text`: by what
+// the tab lists, so that an artist, album or genre that matches keeps all of
+// its tracks. "Tracks" looks at title, artist and album.
+function filtered(tracks, tab, text) {
+    var needle = (text || "").trim().toLowerCase();
+    if (!needle)
+        return tracks;
+    function has(value) { return value.toLowerCase().indexOf(needle) >= 0; }
+    return tracks.filter(function(t) {
+        if (tab === "artists") return has(artistOf(t));
+        if (tab === "albums") return has(albumOf(t));
+        if (tab === "genres") return has(genreOf(t));
+        if (tab === "files") return has(fileName(t));
+        return has(t.title) || has(artistOf(t)) || has(albumOf(t));
+    });
+}
+
 // What a tab lists: groups for artists, albums and genres, tracks for tracks
 // and files.
 function topLevel(tracks, tab) {

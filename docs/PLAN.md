@@ -8,8 +8,9 @@ queue, an item menu, multiple selection and an information page. Phase 3,
 audio, is under way: version 0.0.12 has the audio player and the mini-player,
 0.0.13 a queue that moves on in the background and can be added to,
 0.0.14 the music library, 0.0.15 shuffle and repeat, 0.0.16 the audio
-player's menu, 0.0.17 its volume and brightness swipes, and 0.0.18 a queue
-that is kept between launches and can be trimmed.
+player's menu, 0.0.17 its volume and brightness swipes, 0.0.18 a queue
+that is kept between launches and can be trimmed, and 0.0.19 a filter for
+the music lists and the blurred cover.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -506,8 +507,12 @@ How it is built:
       7 October 2026; **our own addition**): every audio file by its file
       name with its folder and length, in the order the system's library
       gives them, neither sorted nor grouped.
+- [x] Filter for the music lists (version 0.0.19), as the video library has
+      it: each list is narrowed by what it lists, so an artist, album or
+      genre that matches keeps all its tracks. Not offered inside an open
+      artist, album or genre.
 - [ ] Library, still to do: separate artist and album pages as VLC has them
-      (an artist's albums as cards); sorting, filter, favourites and multiple
+      (an artist's albums as cards); sorting, favourites and multiple
       selection as in the video library; the rest of VLC's item menu
       (information, add to playlist, go to album or artist).
 - [x] Mini-player bar on every main page (version 0.0.12): cover, title,
@@ -528,7 +533,11 @@ How it is built:
       is the video player's: the phone's own comes back when the page or the
       app is left. Unlike the video player the page does not remember its
       brightness from one opening to the next, being made anew each time.
-- [ ] Full player: blurred cover as the background.
+- [x] Full player: blurred cover as the background (version 0.0.19).
+      `qml/Gem/BlurredCover.qml`, with `FastBlur` of QtGraphicalEffects
+      **[device]**, on a 128-pixel copy of the cover. Loaded through a
+      Loader, so the page stands without the module. Only for a cover that
+      is in the file, like every cover (D13).
 - [x] Seek gestures in the full audio player (version 0.0.12), as in the
       video player: a double tap on a side seeks 10 s back or forward, one in
       the middle pauses, and a horizontal swipe seeks (asked for by Yenis,

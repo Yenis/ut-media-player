@@ -1,12 +1,38 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Music filter and blurred cover, version 0.0.19
+
+### Checked over adb, 7 October 2026
+
+On the phone's own 188 tracks.
+
+| Check | Result |
+|---|---|
+| Artists filtered by "kita": the five artists with Kitamura in their name, each with all its tracks | Pass |
+| Albums by "remix": "Bloodborne Remixes" and "Demon's and Dark Souls Remixes" | Pass |
+| Tracks by "gwyn": five tracks, found by title | Pass |
+| Genres by "zzz": nothing, and "Nothing matches “zzz”." | Pass |
+| Files by ".flac": `test-2.flac` | Pass |
+| A filtered album opens, and a tap plays its track; `back` leaves the album, then the filter | Pass |
+| The audio player on a track with a cover: the cover blurred and darkened behind the page, text and buttons readable | Pass |
+| A track without a cover: the plain background | Pass |
+| No QML warnings in the log | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Type into the filter; the list follows; scrolling puts the keyboard away | Still to do |
+| The cross in the field empties it; the magnifying glass closes the filter | Still to do |
+| The blurred background changes with the track, and playback stays smooth | Still to do |
 
 ## Kept queue, remove and stop after, version 0.0.18
 

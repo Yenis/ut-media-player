@@ -25,7 +25,12 @@ Item {
     property string tab: "artists"      // one of AudioLibrary.TABS
     property string openKey: ""         // the artist, album or genre that is open; "" for none
 
-    readonly property var topLevel: AudioLibrary.topLevel(tracks, tab)
+    // The filter narrows the list of the tab, not of an open artist, album
+    // or genre.
+    property bool filtering: false
+    property string filter: ""
+
+    readonly property var topLevel: AudioLibrary.topLevel(AudioLibrary.filtered(tracks, tab, filter), tab)
     readonly property var openItem: openKey ? AudioLibrary.findGroup(topLevel, openKey) : null
     // Rows: a group { kind, key, title, subtitle, tracks, art }, a track, or
     // a heading { section }.
@@ -52,12 +57,34 @@ Item {
         settings.sync();
     }
 
-    // Leaves the open artist, album or genre; false if there was none.
+    // Leaves the open artist, album or genre, or else the filter; false if
+    // there was neither.
     function back() {
-        if (!openKey)
-            return false;
-        openKey = "";
-        return true;
+        if (openKey) {
+            openKey = "";
+            return true;
+        }
+        if (filtering) {
+            closeFilter();
+            return true;
+        }
+        return false;
+    }
+
+    function openFilter() {
+        filtering = true;
+        search.open();
+    }
+
+    function closeFilter() {
+        search.reset();
+        filtering = false;
+    }
+
+    // For the development remote.
+    function setFilter(text) {
+        filtering = true;
+        search.text = text;
     }
 
     // The tracks a row stands for, and those around a track.
@@ -77,6 +104,7 @@ Item {
     function activate(item) {
         if (!item || item.section)
             return;
+        search.dismiss();
         if (item.tracks) {
             openKey = item.key;
             return;
@@ -122,6 +150,9 @@ Item {
 
     onLibraryChanged: reload()
 
+    // The keyboard goes when the page does.
+    onVisibleChanged: if (!visible) search.dismiss()
+
     Settings {
         id: settings
         category: "audioLibrary"
@@ -153,12 +184,40 @@ Item {
                 color: Theme.text
                 onClicked: page.itemAction(page.openItem, "play")
             }
+            IconButton {
+                visible: !page.openKey
+                glyph: "search"
+                color: page.filtering ? Theme.accent : Theme.textDim
+                onClicked: {
+                    if (page.filtering)
+                        page.closeFilter();
+                    else
+                        page.openFilter();
+                }
+            }
+        }
+    }
+
+    Item {
+        id: filterBar
+        anchors { left: parent.left; right: parent.right; top: header.bottom }
+        height: page.filtering && !page.openKey ? Theme.u(7) : 0
+        visible: height > 0
+
+        SearchField {
+            id: search
+            anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter
+                      leftMargin: Theme.u(2); rightMargin: Theme.u(2) }
+            placeholder: page.tab === "artists" ? "Filter artists" : page.tab === "albums" ? "Filter albums"
+                       : page.tab === "genres" ? "Filter genres" : page.tab === "files" ? "Filter files"
+                       : "Filter tracks"
+            onTextChanged: page.filter = text
         }
     }
 
     Item {
         id: tabRow
-        anchors { left: parent.left; right: parent.right; top: header.bottom }
+        anchors { left: parent.left; right: parent.right; top: filterBar.bottom }
         height: page.openKey ? 0 : Theme.u(7)
         visible: !page.openKey
 
@@ -178,6 +237,8 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.WordWrap
         text: !page.library ? "The media library is not available."
+              : page.tracks.length > 0 && page.filter.trim().length > 0
+                ? "Nothing matches \u201c" + page.filter.trim() + "\u201d."
               : "No music found.\nPut some in the Music folder and it will appear here."
         color: Theme.textDim
         font.pixelSize: Theme.fontM
@@ -189,6 +250,7 @@ Item {
         anchors { left: parent.left; right: parent.right; top: tabRow.bottom; bottom: parent.bottom }
         clip: true
         model: page.shown
+        onMovementStarted: search.dismiss()
 
         delegate: Item {
             id: row

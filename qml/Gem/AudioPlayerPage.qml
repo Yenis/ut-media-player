@@ -236,6 +236,12 @@ Item {
         color: Theme.bg
     }
 
+    Loader {
+        anchors.fill: parent
+        source: "BlurredCover.qml"
+        onLoaded: item.art = Qt.binding(function() { return page.playback ? page.playback.art : ""; })
+    }
+
     PageHeader {
         id: header
         anchors { left: parent.left; right: parent.right; top: parent.top }

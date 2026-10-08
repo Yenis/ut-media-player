@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.19 - unreleased
+
+- A filter for the music lists: the magnifying glass at the top of the
+  Audio tab narrows the list you are in as you type. Artists, albums and
+  genres are found by their name, files by their file name, tracks by
+  title, artist or album.
+- The audio player shows the cover, blurred and darkened, behind the whole
+  page.
+
 ## 0.0.18 - 7 October 2026
 
 - What was playing as audio is there again when the app is opened: the queue

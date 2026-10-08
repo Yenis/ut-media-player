@@ -74,6 +74,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `play`, `pause`, `seek <ms>`, `seekby <ms>` | Playback |
 | `next`, `previous`, `queuejump <index>` | The queue |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
+| `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
 | `atab <artists\|albums\|tracks\|genres\|files>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
 | `queueremove <index>`, `stopafter <index>` | Takes an item still to come out of the queue; sets or lifts "stop after this track" on an item |
 | `repeat <none\|all\|one>`, `shuffle <0\|1>` | Repeat and shuffle. `state` reports both, and the next five titles of the queue |
@@ -96,7 +97,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `volume <delta>`, `brightness <delta>`, `subdelay <ms>` | What the swipes and keys do |
 | `bookmark`, `ab`, `screenshot`, `sleep <ms>`, `tapseek <back\|forward>` | Menu actions |
 | `info <text>`, `level <volume\|brightness>` | Shows an overlay for five seconds |
-| `shot <name>` | The app saves a picture of its own window |
+| `shot <name>` | The app saves a picture of its own window. A page with a photograph on it takes longer to save than `tools/dev.sh shot` waits: send `cmd shot`, wait, and `adb pull` it |
 | `state` | Logs a line `REMOTE STATE {...}` with position, page, errors |
 
 What it cannot do: touch gestures, the orientation sensor, the power button.
