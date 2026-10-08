@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.20 - unreleased
+## 0.0.20 - 8 October 2026
 
 - Sorting for the music lists, behind the sliders at the top of the Audio
   tab. Tracks by name, album, artist, length or how recently they were
