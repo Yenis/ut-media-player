@@ -12,8 +12,9 @@ player's menu, 0.0.17 its volume and brightness swipes, 0.0.18 a queue
 that is kept between launches and can be trimmed, 0.0.19 a filter for
 the music lists and the blurred cover, 0.0.20 their sorting and
 favourites, 0.0.21 a track's information page and the ways to its
-album and artist, 0.0.22 their multiple selection, and 0.0.23 album
-cards and an artist's albums.
+album and artist, 0.0.22 their multiple selection, 0.0.23 album cards and
+an artist's albums, and 0.0.24 the queue's own page, with search and
+moving.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -611,8 +612,13 @@ How it is built:
       when the app's process ends. The app now pauses when its window is
       closed. A process that is killed outright cannot, and its music plays
       on to the end of its list; the next thing played, by any app, stops it.
-- [ ] Queue with search and reorder. Reorder is limited by the same rule:
-      only behind the playing item.
+- [x] Queue with search and reorder (version 0.0.24). The audio player's
+      queue is a page (`qml/Gem/QueuePage.qml`) in place of a sheet: place,
+      title, artist and length of each item, the playing one marked and
+      scrolled to, a filter by title or artist. Reordering is "Play next",
+      "Move up" and "Move down" in an item's menu, where VLC drags; and by
+      the rule above only among the items still to come. "Stop after this
+      track" moves with its item. The video player keeps its sheet.
 - [x] Sleep timer, jump to time, A-B repeat and bookmarks in the audio player
       (version 0.0.16), behind a menu button in its header. The timer, the
       store and the pickers are the video player's; the menu and its sheets
@@ -642,12 +648,15 @@ How it is built:
       the end, and inserting one item before an existing one. Inserting
       several at once is "not yet implemented" there, and inserting at the
       very end is refused.
-- [ ] Album art: check whether the system's thumbnailer looks covers up
-      online; if it does, show only the art found in the files (D13). Until
-      that is known, the safe half is in place (version 0.0.12): the library
-      gives `image://albumart/artist=...&album=...` for a track with no cover
-      of its own **[device]**, and `qml/platform/MediaLibrary.qml` does not
-      pass that on; only a cover inside the file is shown.
+- [x] Album art: the system's thumbnailer is built to look covers up
+      online, so only the art found in the files is shown (D13), as it has
+      been since 0.0.12. Checked on the phone on 8 October 2026 **[device]**:
+      its settings (`com.lomiri.Thumbnailer`) hold a `dash-ubuntu-com-key`
+      and a `max-downloads` of 8, and its service links Qt's network
+      library. The library gives `image://albumart/artist=...&album=...` for
+      a track with no cover of its own, and `qml/platform/MediaLibrary.qml`
+      does not pass that on. Whether the lookup still reaches a server was
+      not tried, on purpose: trying it is making the connection.
 - [ ] Discuss, when reached: equalizer, replay gain, passthrough.
 
 ## Phase 4 - Browse, playlists, streams and settings

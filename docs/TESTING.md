@@ -1,12 +1,45 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Queue page, search and moving, version 0.0.24
+
+### Checked over adb, 8 October 2026
+
+The album is the six test tracks; what plays next was read from media-hub.
+
+| Check | Result |
+|---|---|
+| The fifth item moved to play next: it leads what is to come, the others follow in their order | Pass |
+| An item with "stop after this track" moved to the end: the stop is on the last item now | Pass |
+| A move to before the playing item lands right behind it instead | Pass |
+| `next` after the moves: media-hub plays what the app lists as next | Pass |
+| The queue page: "Queue – 2 of 6", each item with its place, artist and length, the playing one tinted, "Stops after this track" under the item that has it | Pass |
+| Filtered by "hz": the five tracks with "Hz" in their title, with their places in the queue | Pass |
+| A filter with no match: "Nothing in the queue matches “zz”." | Pass |
+| `back` closes the filter, then the queue, and leaves the player open | Pass |
+| No QML warnings in the log | Pass |
+
+### The system's album art, 8 October 2026
+
+| Check | Result |
+|---|---|
+| Is the thumbnailer made to fetch covers online? | **Yes.** `gsettings list-recursively com.lomiri.Thumbnailer` has `dash-ubuntu-com-key` and `max-downloads 8`, and `thumbnailer-service` links `libQt5Network`. `image://albumart/` stays unused (D13) |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| The queue opens at the playing item in a long queue | Still to do |
+| Hold an item still to come: Play next, Move up, Move down; the menu stays open for up and down | Still to do |
+| The filter by typing; a tap on a result goes to that item | Still to do |
+| Headset and Bluetooth buttons, and the sound indicator's play, previous and next, while music plays from a queue | Still to do. The last open check of the audio phase; adb cannot press them |
 
 ## Album cards and an artist's albums, version 0.0.23
 

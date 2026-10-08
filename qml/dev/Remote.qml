@@ -92,6 +92,9 @@ Item {
         else if (name === "aaction") shell.audioLibrary.itemAction(shell.audioLibrary.shown[parseInt(argument.split(" ")[0])], argument.split(" ")[1]);
         else if (name === "amenu") shell.audioLibrary.openItemMenu(parseInt(argument));
         else if (name === "queueremove") p.removeAt(parseInt(argument));
+        else if (shell.audioPage && name === "qfilter") shell.audioPage.setQueueFilter(argument);
+        else if (shell.audioPage && name === "qrows") console.log("REMOTE QROWS " + JSON.stringify(shell.audioPage.queueRows().slice(0, 8)));
+        else if (name === "queuemove") p.moveItem(parseInt(argument.split(" ")[0]), parseInt(argument.split(" ")[1]));
         else if (name === "stopafter") p.setStopAfter(parseInt(argument));
         else if (name === "repeat") p.setRepeat(argument);
         else if (name === "shuffle") p.setShuffle(argument === "1");

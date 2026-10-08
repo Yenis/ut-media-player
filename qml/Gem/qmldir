@@ -20,6 +20,7 @@ PlaceholderPage 1.0 PlaceholderPage.qml
 Playback 1.0 Playback.qml
 PlayerControls 1.0 PlayerControls.qml
 PlayerStore 1.0 PlayerStore.qml
+QueuePage 1.0 QueuePage.qml
 SearchField 1.0 SearchField.qml
 SectionLabel 1.0 SectionLabel.qml
 SeekBar 1.0 SeekBar.qml

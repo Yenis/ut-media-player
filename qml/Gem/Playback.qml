@@ -428,6 +428,25 @@ Item {
             _syncTail();
     }
 
+    // Moves an item that is still to come to another place among those
+    // still to come. "Stop after this track" stays with its item.
+    function moveItem(from, to) {
+        var last = queue.length - 1;
+        to = Math.max(queueIndex + 1, Math.min(to, last));
+        if (from <= queueIndex || from > last || from === to)
+            return;
+        var stop = stopAfter >= 0 ? queue[stopAfter] : null;
+        var moved = queue.slice();
+        var item = moved.splice(from, 1)[0];
+        moved.splice(to, 0, item);
+        queue = moved;
+        if (stop)
+            stopAfter = queue.indexOf(stop);
+        _keepQueue();
+        if (_listMode && !_unloaded)
+            _syncTail();
+    }
+
     // Sets "stop after this track" on an item, or lifts it from the item
     // that has it.
     function setStopAfter(index) {

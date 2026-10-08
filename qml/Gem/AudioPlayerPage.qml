@@ -49,12 +49,22 @@ Item {
         sleepPicker.close();
     }
 
+    // One step: a sheet over the queue first, then the queue's filter, the
+    // queue, and at last the page.
     function back() {
-        if (sheetOpen)
+        if (queueItemMenu.open)
+            queueItemMenu.close();
+        else if (queueSheet.open)
+            queueSheet.back();
+        else if (sheetOpen)
             closeSheets();
         else
             collapseRequested();
     }
+
+    // For the development remote.
+    function setQueueFilter(text) { queueSheet.setFilter(text); }
+    function queueRows() { return queueSheet.rowTitles(); }
 
     // By name, for the development remote.
     function openSheet(name) {
@@ -606,29 +616,12 @@ Item {
         }
     }
 
-    // The queue. A tap goes to that item; holding one that plays or is
-    // still to come opens its menu.
-    OptionSheet {
+    // The queue, as a page of its own over the player.
+    QueuePage {
         id: queueSheet
         anchors.fill: parent
-        title: page.playback ? "Queue – " + (page.playback.queueIndex + 1) + " of " + page.playback.queue.length
-                               + " – hold an item for more"
-                             : "Queue"
-        options: {
-            var list = [];
-            var queue = page.playback ? page.playback.queue : [];
-            for (var i = 0; i < queue.length; i++)
-                list.push({ key: "" + i, label: queue[i].title, glyph: queue[i].hasPicture ? "video" : "audio",
-                            selected: i === page.playback.queueIndex,
-                            value: (i === page.playback.stopAfter ? "stops after  •  " : "")
-                                   + Format.clock(queue[i].duration) });
-            return list;
-        }
-        onChosen: page.playback.jumpTo(parseInt(key))
-        onHeld: {
-            var index = parseInt(key);
-            if (index < page.playback.queueIndex)
-                return;
+        playback: page.playback
+        onMenuRequested: {
             page.queueMenuIndex = index;
             queueItemMenu.show();
         }
@@ -637,7 +630,8 @@ Item {
     property int queueMenuIndex: -1
 
     // One item of the queue: VLC's "Remove from queue" and "Stop after this
-    // track". What plays cannot be removed.
+    // track", and the moves that stand in for its dragging. What plays
+    // cannot be removed or moved, and nothing can be moved before it.
     OptionSheet {
         id: queueItemMenu
         anchors.fill: parent
@@ -648,15 +642,32 @@ Item {
             var list = [];
             if (!p)
                 return list;
-            if (page.queueMenuIndex > p.queueIndex)
+            var at = page.queueMenuIndex;
+            if (at > p.queueIndex) {
+                if (at > p.queueIndex + 1) {
+                    list.push({ key: "playNext", label: "Play next", glyph: "next" });
+                    list.push({ key: "up", label: "Move up", glyph: "up", stay: true });
+                }
+                if (at < p.queue.length - 1)
+                    list.push({ key: "down", label: "Move down", glyph: "down", stay: true });
                 list.push({ key: "remove", label: "Remove from queue", glyph: "clear" });
+            }
             list.push({ key: "stopAfter", label: "Stop after this track", glyph: "pause",
                         selected: p.stopAfter === page.queueMenuIndex,
                         value: p.stopAfter === page.queueMenuIndex ? "on" : "" });
             return list;
         }
         onChosen: {
-            if (key === "remove")
+            var at = page.queueMenuIndex;
+            if (key === "playNext") {
+                page.playback.moveItem(at, page.playback.queueIndex + 1);
+            } else if (key === "up") {
+                page.playback.moveItem(at, at - 1);
+                page.queueMenuIndex = at - 1;
+            } else if (key === "down") {
+                page.playback.moveItem(at, at + 1);
+                page.queueMenuIndex = at + 1;
+            } else if (key === "remove")
                 page.playback.removeAt(page.queueMenuIndex);
             else if (key === "stopAfter")
                 page.playback.setStopAfter(page.queueMenuIndex);

@@ -79,7 +79,8 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `aselect <index>`, `aselaction <play\|insertNext\|append\|favourite>` | Adds a row of the Audio tab to the selection or takes it out, and the selection bar's buttons; `back` ends a selection. A heading counts as a row and cannot be selected |
 | `asort <key> [desc]`, `afavonly <0\|1>`, `adisplay` | The order of the Audio tab's list (`name`, and per list `album`, `artist`, `length`, `modified`, `date`), its favourites switch, and its display settings. `aaction <index> favourite` switches a track's mark; `info`, `goAlbum` and `goArtist` are a track's other menu entries |
 | `atab <artists\|albums\|tracks\|genres\|files>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
-| `queueremove <index>`, `stopafter <index>` | Takes an item still to come out of the queue; sets or lifts "stop after this track" on an item |
+| `queueremove <index>`, `stopafter <index>`, `queuemove <from> <to>` | Takes an item still to come out of the queue; sets or lifts "stop after this track" on an item; moves an item still to come |
+| `qfilter [text]`, `qrows` | With the audio player's queue open (`sheet queue`): filters it, and logs its first rows as `REMOTE QROWS` |
 | `repeat <none\|all\|one>`, `shuffle <0\|1>` | Repeat and shuffle. `state` reports both, and the next five titles of the queue |
 | `expand`, `stop` | Opens the full audio player from the mini-player; stops what plays. In the audio player, `tapseek`, `info`, `level`, `volume`, `brightness`, `bookmark`, `ab` and `sheet <menu\|queue\|bookmarks\|jump\|sleep>` act on it |
 | `tab <video\|audio\|browse\|playlists\|more>` | Shows a tab |
