@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.23 - unreleased
+## 0.0.23 - 8 October 2026
 
 - Albums are shown as cards with their covers, two or more to a row.
   "Display albums in list" in the display settings brings the rows back.

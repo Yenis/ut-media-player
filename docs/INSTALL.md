@@ -19,8 +19,8 @@ Download the `.click` file from the
 then, with the phone connected:
 
 ```bash
-adb push gemplayer.yenis_0.0.22_all.click /home/phablet/
-adb shell "gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install /home/phablet/gemplayer.yenis_0.0.22_all.click"
+adb push gemplayer.yenis_0.0.23_all.click /home/phablet/
+adb shell "gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install /home/phablet/gemplayer.yenis_0.0.23_all.click"
 ```
 
 The second command asks the system's click service to install the file, as
