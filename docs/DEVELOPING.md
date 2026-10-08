@@ -75,6 +75,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `next`, `previous`, `queuejump <index>` | The queue |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
 | `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
+| `aselect <index>`, `aselaction <play\|insertNext\|append\|favourite>` | Adds a row of the Audio tab to the selection or takes it out, and the selection bar's buttons; `back` ends a selection. A heading counts as a row and cannot be selected |
 | `asort <key> [desc]`, `afavonly <0\|1>`, `adisplay` | The order of the Audio tab's list (`name`, and per list `album`, `artist`, `length`, `modified`, `date`), its favourites switch, and its display settings. `aaction <index> favourite` switches a track's mark; `info`, `goAlbum` and `goArtist` are a track's other menu entries |
 | `atab <artists\|albums\|tracks\|genres\|files>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
 | `queueremove <index>`, `stopafter <index>` | Takes an item still to come out of the queue; sets or lifts "stop after this track" on an item |
@@ -103,6 +104,18 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 
 What it cannot do: touch gestures, the orientation sensor, the power button.
 Those are checked by hand; [TESTING.md](TESTING.md) lists them.
+
+The phone has to be unlocked with its screen on: behind the lock screen the
+app is frozen as soon as it starts, reads no commands, and nothing here says
+why. Ask the system:
+
+```bash
+adb shell 'export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus;
+  gdbus call --session --dest com.lomiri.LomiriGreeter --object-path /com/lomiri/LomiriGreeter \
+  --method org.freedesktop.DBus.Properties.Get com.lomiri.LomiriGreeter IsActive'
+```
+
+`(<true>,)` is the lock screen showing.
 
 To see what the system thinks is playing while the app is frozen, ask
 media-hub directly:

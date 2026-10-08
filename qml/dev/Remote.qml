@@ -81,6 +81,8 @@ Item {
         else if (name === "back") shell.back();
         else if (name === "home") shell.page = "home";
         else if (name === "atab") shell.audioLibrary.setTab(argument);
+        else if (name === "aselect") shell.audioLibrary.toggleSelected(shell.audioLibrary.shown[parseInt(argument)]);
+        else if (name === "aselaction") shell.audioLibrary.selectionAction(argument);
         else if (name === "asort") shell.audioLibrary.setSort(argument.split(" ")[0], argument.split(" ")[1] === "desc");
         else if (name === "afavonly") shell.audioLibrary.setOnlyFavourites(argument === "1");
         else if (name === "adisplay") shell.audioLibrary.openDisplaySheet();
@@ -149,7 +151,7 @@ Item {
         var p = shell.playback;
         var v = shell.videoPage;
         console.log("REMOTE STATE " + JSON.stringify({
-            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, repeat: p.repeat, shuffle: p.shuffle, stopAfter: p.stopAfter, upcoming: p.queue.slice(p.queueIndex + 1, p.queueIndex + 6).map(function(m) { return m.title; }), grid: shell.videoLibrary.grid, selected: shell.videoLibrary.selectionCount, shown: shell.tab === "audio" ? shell.audioLibrary.shownTitles() : shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, artist: p.artist, art: p.art, mini: shell.audioActive, playing: p.playing, position: p.position,
+            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, repeat: p.repeat, shuffle: p.shuffle, stopAfter: p.stopAfter, upcoming: p.queue.slice(p.queueIndex + 1, p.queueIndex + 6).map(function(m) { return m.title; }), grid: shell.videoLibrary.grid, selected: shell.tab === "audio" ? shell.audioLibrary.selectionCount : shell.videoLibrary.selectionCount, shown: shell.tab === "audio" ? shell.audioLibrary.shownTitles() : shell.videoLibrary.shownTitles(), keyboard: shell.keyboardHeight, url: p.url, artist: p.artist, art: p.art, mini: shell.audioActive, playing: p.playing, position: p.position,
             raw: p.player.position, duration: p.duration, audioMode: p.audioMode,
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
             error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd],

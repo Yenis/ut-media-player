@@ -11,8 +11,8 @@ audio, is under way: version 0.0.12 has the audio player and the mini-player,
 player's menu, 0.0.17 its volume and brightness swipes, 0.0.18 a queue
 that is kept between launches and can be trimmed, 0.0.19 a filter for
 the music lists and the blurred cover, 0.0.20 their sorting and
-favourites, and 0.0.21 a track's information page and the ways to its
-album and artist.
+favourites, 0.0.21 a track's information page and the ways to its
+album and artist, and 0.0.22 their multiple selection.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -530,9 +530,14 @@ How it is built:
       and "only favourites" too if that would hide it; back then leads to
       that list, not to where one came from. "Add to playlist" waits for
       playlists (Phase 4).
+- [x] Multiple selection in the music lists (version 0.0.22), as in the
+      Video tab: a long press starts it, taps add and take out, a bar in the
+      header's place plays the selection, inserts it next, appends it, or
+      switches its favourite marks. An artist, album or genre selected
+      stands for all its tracks. It ends with the cross, the back key, a
+      change of list, and on opening or leaving a group.
 - [ ] Library, still to do: separate artist and album pages as VLC has them
-      (an artist's albums as cards); multiple selection as in the video
-      library.
+      (an artist's albums as cards).
 - [x] Mini-player bar on every main page (version 0.0.12): cover, title,
       artist, progress, play and pause; a tap opens the full player, a swipe
       to the left is next and to the right previous, and a cross stops

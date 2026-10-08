@@ -1,12 +1,35 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## Multiple selection for music, version 0.0.22
+
+### Checked over adb, 8 October 2026
+
+| Check | Result |
+|---|---|
+| Three tracks of an open artist selected: "3 selected" in the bar with play, insert next, add and star; the rows tinted; the row menus gone | Pass |
+| Play: the three as a queue, in the order shown, the selection ended | Pass |
+| Two more selected and inserted next: the queue reads the playing track, the two, then the rest | Pass |
+| Two albums selected and added to the queue: their seven tracks follow at the end | Pass |
+| Two tracks selected and starred: "only favourites" then lists the two; selected again and starred, they are unmarked | Pass |
+| `back` ends a selection; so does switching to another list | Pass |
+| A heading cannot be selected | Pass: a row number that fell on one selected nothing |
+| No QML warnings in the log | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| A long press selects, taps add and take out, in each of the five lists | Still to do |
+| The four buttons of the bar | Still to do |
+| The cross and the back gesture end the selection | Still to do |
 
 ## A track's information, "Go to album" and "Go to artist", version 0.0.21
 

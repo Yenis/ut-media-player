@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.22 - unreleased
+
+- Several at once in the music lists: a long press on a track, artist,
+  album or genre selects it, and taps add more or take them out again. A
+  bar at the top then plays the selection, inserts it next, adds it to the
+  play queue, or adds it to the favourites or removes it from them. The
+  cross and the back key end the selection.
+
 ## 0.0.21 - 8 October 2026
 
 - "Information" in a track's menu opens a page about it: its cover and

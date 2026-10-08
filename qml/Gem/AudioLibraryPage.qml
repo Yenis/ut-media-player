@@ -45,6 +45,14 @@ Item {
     // a heading { section }.
     readonly property var shown: openKey ? (openItem ? AudioLibrary.rowsOf(openItem) : []) : topLevel
 
+    // Multiple selection, as in the Video tab: { key: true } for each
+    // selected row, by a track's address or a group's key. A long press
+    // starts it, taps add and take out, and the bar in the header's place
+    // acts on what is selected.
+    property var selection: ({})
+    readonly property int selectionCount: Object.keys(selection).length
+    readonly property bool selecting: selectionCount > 0
+
     property var menuItem: null
     property var infoTrack: null        // the track whose information page is open
 
@@ -54,6 +62,65 @@ Item {
     // at the end.
     signal queueRequested(var list, bool next)
 
+    function keyOf(item) {
+        return item.tracks ? item.key : item.url;
+    }
+
+    function toggleSelected(item) {
+        if (!item || item.section)
+            return;
+        search.dismiss();
+        var next = {};
+        for (var key in selection)
+            next[key] = true;
+        if (next[keyOf(item)])
+            delete next[keyOf(item)];
+        else
+            next[keyOf(item)] = true;
+        selection = next;
+    }
+
+    function clearSelection() {
+        selection = ({});
+    }
+
+    // The selected tracks, the groups' included, in the order shown.
+    function selectedTracks() {
+        var list = [];
+        for (var i = 0; i < shown.length; i++) {
+            if (shown[i].section || !selection[keyOf(shown[i])])
+                continue;
+            if (shown[i].tracks)
+                list = list.concat(shown[i].tracks);
+            else
+                list.push(shown[i]);
+        }
+        return list;
+    }
+
+    function allSelectedFavourites() {
+        var list = selectedTracks();
+        for (var i = 0; i < list.length; i++)
+            if (!favourites[list[i].url])
+                return false;
+        return list.length > 0;
+    }
+
+    // What the selection bar's buttons do; each ends the selection, as in VLC.
+    function selectionAction(key) {
+        var list = selectedTracks();
+        if (key === "favourite") {
+            var on = !allSelectedFavourites();
+            for (var i = 0; i < list.length; i++)
+                store.setFavourite(list[i].url, on);
+        }
+        clearSelection();
+        if (key === "play")
+            play(list, 0);
+        else if (key === "append" || key === "insertNext")
+            queueRequested(list, key === "insertNext");
+    }
+
     function reload() {
         tracks = library ? library.tracks() : [];
         if (openKey && !openItem)
@@ -62,6 +129,7 @@ Item {
 
     function setTab(key) {
         tab = AudioLibrary.TABS[AudioLibrary.tabIndex(key)].key;
+        clearSelection();
         openKey = "";
         _keep("tab", tab);
         _readSort();
@@ -111,6 +179,10 @@ Item {
             infoTrack = null;
             return true;
         }
+        if (selecting) {
+            clearSelection();
+            return true;
+        }
         if (openKey) {
             openKey = "";
             return true;
@@ -156,6 +228,10 @@ Item {
         if (!item || item.section)
             return;
         search.dismiss();
+        if (selecting) {
+            toggleSelected(item);
+            return;
+        }
         if (item.tracks) {
             openKey = item.key;
             return;
@@ -219,11 +295,13 @@ Item {
     }
 
     onLibraryChanged: reload()
+    onOpenKeyChanged: clearSelection()
 
     // The keyboard goes when the page does.
     onVisibleChanged: {
         if (!visible) {
             search.dismiss();
+            clearSelection();
             infoTrack = null;
         }
     }
@@ -280,6 +358,57 @@ Item {
                 color: page.onlyFavourites ? Theme.accent : Theme.textDim
                 onClicked: page.openDisplaySheet()
             }
+        }
+    }
+
+    // The selection bar, in the header's place.
+    Rectangle {
+        visible: page.selecting
+        anchors.fill: header
+        color: Theme.surface
+
+        IconButton {
+            id: selectionClose
+            anchors { left: parent.left; leftMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
+            glyph: "clear"
+            color: Theme.text
+            onClicked: page.clearSelection()
+        }
+        Text {
+            anchors { left: selectionClose.right; leftMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
+            text: page.selectionCount + " selected"
+            color: Theme.text
+            font.pixelSize: Theme.fontL
+            font.bold: true
+        }
+        Row {
+            anchors { right: parent.right; rightMargin: Theme.u(1); verticalCenter: parent.verticalCenter }
+
+            IconButton {
+                glyph: "play"
+                color: Theme.text
+                onClicked: page.selectionAction("play")
+            }
+            IconButton {
+                glyph: "next"
+                color: Theme.text
+                onClicked: page.selectionAction("insertNext")
+            }
+            IconButton {
+                glyph: "add"
+                color: Theme.text
+                onClicked: page.selectionAction("append")
+            }
+            IconButton {
+                glyph: "star"
+                color: page.selecting && page.allSelectedFavourites() ? Theme.accent : Theme.text
+                onClicked: page.selectionAction("favourite")
+            }
+        }
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+            height: 1
+            color: Theme.line
         }
     }
 
@@ -346,6 +475,7 @@ Item {
 
             readonly property bool isSection: !!modelData.section
             readonly property bool isGroup: !!modelData.tracks
+            readonly property bool selected: !isSection && !!page.selection[page.keyOf(modelData)]
             readonly property bool asFile: page.tab === "files" && !isSection && !isGroup
             readonly property bool playing: !isSection && !isGroup && modelData.url === page.playingUrl
 
@@ -356,8 +486,8 @@ Item {
 
             Rectangle {
                 anchors.fill: parent
-                color: Theme.text
-                opacity: !row.isSection && rowMouse.pressed ? 0.06 : 0
+                color: row.selected ? Theme.accent : Theme.text
+                opacity: row.selected ? 0.18 : (!row.isSection && rowMouse.pressed ? 0.06 : 0)
             }
 
             Rectangle {
@@ -435,11 +565,12 @@ Item {
                 anchors.fill: parent
                 enabled: !row.isSection
                 onClicked: page.activate(modelData)
+                onPressAndHold: page.toggleSelected(modelData)
             }
 
             IconButton {
                 id: rowMore
-                visible: !row.isSection
+                visible: !row.isSection && !page.selecting
                 anchors { right: parent.right; rightMargin: Theme.u(0.5); verticalCenter: parent.verticalCenter }
                 glyph: "more"
                 onClicked: {
