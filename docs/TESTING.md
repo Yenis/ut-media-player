@@ -1,12 +1,34 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
+
+## A track's information, "Go to album" and "Go to artist", version 0.0.21
+
+### Checked over adb, 8 October 2026
+
+| Check | Result |
+|---|---|
+| Information for a track with a cover: the cover square, title, Play, then Artist, Album, Track, Released, Length, File size, Format and on | Pass |
+| Information for a test track: the headphones for a cover, Genre "Test", 0:30, 241 KB | Pass |
+| "Go to album" from a filtered track list: the filter closes, Albums opens on that track's album | Pass |
+| Inside an album the menu offers "Go to artist" and not "Go to album" | Pass |
+| "Go to artist" from there: the artist's tracks under the album's heading; `back` leads to the Artists list | Pass |
+| A video's information page is as it was: wide picture, "Resume", Length, File size, Resolution, Format and on | Pass |
+| No QML warnings in the log | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Information from a track's menu by touch; the arrow and the back gesture close it; Play plays | Still to do |
+| "Go to album" and "Go to artist" from each list | Still to do |
+| A video's Information page is as it was | Still to do |
 
 ## Sorting and favourites for music, version 0.0.20
 

@@ -75,7 +75,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `next`, `previous`, `queuejump <index>` | The queue |
 | `audio`, `video`, `back`, `home`, `diagnostics` | Pages |
 | `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
-| `asort <key> [desc]`, `afavonly <0\|1>`, `adisplay` | The order of the Audio tab's list (`name`, and per list `album`, `artist`, `length`, `modified`, `date`), its favourites switch, and its display settings. `aaction <index> favourite` switches a track's mark |
+| `asort <key> [desc]`, `afavonly <0\|1>`, `adisplay` | The order of the Audio tab's list (`name`, and per list `album`, `artist`, `length`, `modified`, `date`), its favourites switch, and its display settings. `aaction <index> favourite` switches a track's mark; `info`, `goAlbum` and `goArtist` are a track's other menu entries |
 | `atab <artists\|albums\|tracks\|genres\|files>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
 | `queueremove <index>`, `stopafter <index>` | Takes an item still to come out of the queue; sets or lifts "stop after this track" on an item |
 | `repeat <none\|all\|one>`, `shuffle <0\|1>` | Repeat and shuffle. `state` reports both, and the next five titles of the queue |

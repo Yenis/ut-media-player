@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.21 - unreleased
+
+- "Information" in a track's menu opens a page about it: its cover and
+  title, a button to play it, what its tags say (artist, album, track
+  number, genre, release date), its length, file size, format, file and
+  folder, and when it was last changed.
+- "Go to album" and "Go to artist" in a track's menu open the album or the
+  artist the track belongs to.
+
 ## 0.0.20 - 8 October 2026
 
 - Sorting for the music lists, behind the sliders at the top of the Audio

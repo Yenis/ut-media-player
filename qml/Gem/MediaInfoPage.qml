@@ -4,8 +4,9 @@ import Gem 1.0
 import "../js/Format.js" as Format
 
 /*
- * What is known about one video, after VLC's InfoActivity: its picture and
- * name, where it is, how long and how large it is, and a button to play it.
+ * What is known about one video or one piece of music, after VLC's
+ * InfoActivity: its picture and name, where it is, how long and how large it
+ * is, and a button to play it. For music, what its tags say as well.
  * VLC lists the file's tracks and codecs below that; the system's library
  * and playback service report neither, so there is no such list here.
  */
@@ -20,6 +21,10 @@ Item {
     signal playRequested()
 
     visible: media !== null
+
+    // Music has a cover and tags; a video a picture, a size and a place
+    // it was watched up to.
+    readonly property bool music: media ? media.hasPicture === false : false
 
     readonly property string path: media ? (media.filename || decodeURIComponent(media.url.replace("file://", ""))) : ""
     readonly property string folderPath: path.substring(0, path.lastIndexOf("/"))
@@ -60,6 +65,20 @@ Item {
             return [];
         var list = [];
         var dot = fileName.lastIndexOf(".");
+        if (music) {
+            if (media.artist)
+                list.push({ label: "Artist", value: media.artist });
+            if (media.album)
+                list.push({ label: "Album", value: media.album });
+            if (media.albumArtist && media.albumArtist !== media.artist)
+                list.push({ label: "Album artist", value: media.albumArtist });
+            if (media.trackNumber > 0)
+                list.push({ label: "Track", value: (media.discNumber > 0 ? media.discNumber + " \u2013 " : "") + media.trackNumber });
+            if (media.genre)
+                list.push({ label: "Genre", value: media.genre });
+            if (media.date)
+                list.push({ label: "Released", value: media.date });
+        }
         list.push({ label: "Length", value: Format.clock(media.duration) });
         if (fileSize >= 0)
             list.push({ label: "File size", value: Format.fileSize(fileSize) });
@@ -72,6 +91,8 @@ Item {
         list.push({ label: "Folder", value: folderPath });
         if (media.modified > 0)
             list.push({ label: "Changed", value: Qt.formatDateTime(new Date(media.modified * 1000), "d MMMM yyyy, hh:mm") });
+        if (music)
+            return list;
         if (entry && entry.seen > 0)
             list.push({ label: "Played", value: "To the end" });
         else if (entry && entry.position > 0)
@@ -107,11 +128,39 @@ Item {
             topPadding: Theme.u(2)
             spacing: Theme.u(2)
 
+            // The cover, or the headphones where the file has none.
+            Rectangle {
+                visible: page.music
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: Math.min(parent.width - Theme.u(4), Theme.u(26))
+                height: width
+                radius: Theme.u(0.5)
+                color: Theme.surfaceAlt
+                clip: true
+
+                Glyph {
+                    anchors.centerIn: parent
+                    width: parent.width * 0.4
+                    name: "audio"
+                    color: Theme.accent
+                    visible: cover.status !== Image.Ready
+                }
+                Image {
+                    id: cover
+                    anchors.fill: parent
+                    source: page.music && page.media.art ? page.media.art : ""
+                    sourceSize: Qt.size(512, 512)
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                }
+            }
+
             VideoThumb {
+                visible: !page.music
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: Math.min(parent.width - Theme.u(4), Theme.u(44))
                 height: width * 10 / 16
-                art: page.media ? page.media.art : ""
+                art: page.media && !page.music ? page.media.art : ""
                 seen: page.entry !== null && page.entry.seen > 0
                 favourite: page.favourite
                 progress: page.entry && page.entry.duration > 0 ? page.entry.position / page.entry.duration : 0
@@ -128,7 +177,7 @@ Item {
 
             TextButton {
                 anchors { left: parent.left; leftMargin: Theme.u(2) }
-                text: page.entry && page.entry.position > 0 ? "Resume" : "Play"
+                text: !page.music && page.entry && page.entry.position > 0 ? "Resume" : "Play"
                 onClicked: page.playRequested()
             }
 

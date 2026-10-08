@@ -276,6 +276,12 @@ function topLevel(tracks, tab, sort, descending) {
     return _sorted(list, tab, sort || "name", !!descending);
 }
 
+// The key of the album or the artist a track is listed under, as the groups
+// of `albums` and `artists` carry it.
+function groupKey(kind, track) {
+    return kind + ":" + (kind === "album" ? _albumKey(track) : artistOf(track));
+}
+
 function findGroup(groups, key) {
     for (var i = 0; i < groups.length; i++)
         if (groups[i].key === key)

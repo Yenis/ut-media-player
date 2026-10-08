@@ -10,8 +10,9 @@ audio, is under way: version 0.0.12 has the audio player and the mini-player,
 0.0.14 the music library, 0.0.15 shuffle and repeat, 0.0.16 the audio
 player's menu, 0.0.17 its volume and brightness swipes, 0.0.18 a queue
 that is kept between launches and can be trimmed, 0.0.19 a filter for
-the music lists and the blurred cover, and 0.0.20 their sorting and
-favourites.
+the music lists and the blurred cover, 0.0.20 their sorting and
+favourites, and 0.0.21 a track's information page and the ways to its
+album and artist.
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -425,7 +426,7 @@ How it is built:
 | Part | File | What it does |
 |---|---|---|
 | Shell | `qml/Gem/AppShell.qml`, `TabBar.qml` | The bar along the bottom and the page behind each tab. The players cover both |
-| Information | `qml/Gem/MediaInfoPage.qml` | What is known about one video; the file's size comes from a listing of its folder |
+| Information | `qml/Gem/MediaInfoPage.qml` | What is known about one video, and since 0.0.21 one piece of music; the file's size comes from a listing of its folder |
 | Asking for a name | `qml/Gem/NameDialog.qml` | One line of text with Cancel and a confirming button, placed clear of the keyboard. For groups now, playlists and bookmarks later |
 | Order, filter, favourites, grouping | `qml/js/Library.js`, `qml/Gem/SearchField.qml`, `PlayerStore.qml`, `GroupThumb.qml` | What the list shows and in which order; folders and groups; the filter's text field; favourites in the app's database |
 | Queue | `qml/Gem/Playback.qml`, `PlayerControls.qml`, `VideoPlayerPage.qml` | The list of what plays after what, moved on by the app; previous, next and the queue's list in the player |
@@ -521,10 +522,17 @@ How it is built:
       the videos' favourites are in; "only favourites" narrows every list to
       what the favourite tracks make of it. VLC also lets an artist, album
       or genre be a favourite; that is not built.
+- [x] The rest of a track's menu (version 0.0.21): "Information", "Go to
+      album", "Go to artist". The information page is the videos'
+      (`MediaInfoPage.qml`), which now shows a square cover and the tags for
+      music, and leaves out resolution and "played". "Go to" switches to the
+      Albums or Artists list and opens the group there, closing the filter,
+      and "only favourites" too if that would hide it; back then leads to
+      that list, not to where one came from. "Add to playlist" waits for
+      playlists (Phase 4).
 - [ ] Library, still to do: separate artist and album pages as VLC has them
       (an artist's albums as cards); multiple selection as in the video
-      library; the rest of VLC's item menu (information, add to playlist,
-      go to album or artist).
+      library.
 - [x] Mini-player bar on every main page (version 0.0.12): cover, title,
       artist, progress, play and pause; a tap opens the full player, a swipe
       to the left is next and to the right previous, and a cross stops

@@ -46,6 +46,7 @@ Item {
     readonly property var shown: openKey ? (openItem ? AudioLibrary.rowsOf(openItem) : []) : topLevel
 
     property var menuItem: null
+    property var infoTrack: null        // the track whose information page is open
 
     // Play `list` from its item `index`. options: { asAudio, background }.
     signal playRequested(var list, int index, var options)
@@ -106,6 +107,10 @@ Item {
     // Leaves the open artist, album or genre, or else the filter; false if
     // there was neither.
     function back() {
+        if (infoTrack) {
+            infoTrack = null;
+            return true;
+        }
         if (openKey) {
             openKey = "";
             return true;
@@ -175,6 +180,22 @@ Item {
             queueRequested(tracksOf(item), key === "insertNext");
         else if (key === "favourite" && !item.tracks)
             store.setFavourite(item.url, !favourites[item.url]);
+        else if (key === "info" && !item.tracks)
+            infoTrack = item;
+        else if ((key === "goAlbum" || key === "goArtist") && !item.tracks)
+            goTo(key === "goAlbum" ? "album" : "artist", item);
+    }
+
+    // Opens the album or the artist a track belongs to, in that list. What
+    // would hide it there, the filter or "only favourites", is switched off.
+    function goTo(kind, track) {
+        var key = AudioLibrary.groupKey(kind, track);
+        closeFilter();
+        setTab(kind === "album" ? "albums" : "artists");
+        if (!AudioLibrary.findGroup(topLevel, key))
+            setOnlyFavourites(false);
+        if (AudioLibrary.findGroup(topLevel, key))
+            openKey = key;
     }
 
     function openItemMenu(index) {
@@ -200,7 +221,12 @@ Item {
     onLibraryChanged: reload()
 
     // The keyboard goes when the page does.
-    onVisibleChanged: if (!visible) search.dismiss()
+    onVisibleChanged: {
+        if (!visible) {
+            search.dismiss();
+            infoTrack = null;
+        }
+    }
 
     Settings {
         id: settings
@@ -437,14 +463,36 @@ Item {
                 { key: "insertNext", label: "Insert next", glyph: "next" },
                 { key: "append", label: "Add to play queue", glyph: "add" }
             ];
-            if (item && !item.tracks && !item.section && page.store) {
-                var favourite = !!page.favourites[item.url];
-                rows.push({ key: "favourite", glyph: "star", selected: favourite,
-                            label: favourite ? "Remove from favourites" : "Add to favourites" });
+            if (item && !item.tracks && !item.section) {
+                rows.push({ key: "info", label: "Information", glyph: "info" });
+                if (page.store) {
+                    var favourite = !!page.favourites[item.url];
+                    rows.push({ key: "favourite", glyph: "star", selected: favourite,
+                                label: favourite ? "Remove from favourites" : "Add to favourites" });
+                }
+                // Not to where one is already.
+                var here = page.openItem ? page.openItem.kind : "";
+                if (here !== "album")
+                    rows.push({ key: "goAlbum", label: "Go to album", glyph: "playlist" });
+                if (here !== "artist")
+                    rows.push({ key: "goArtist", label: "Go to artist", glyph: "audio" });
             }
             return rows;
         }
         onChosen: page.itemAction(page.menuItem, key)
+    }
+
+    MediaInfoPage {
+        parent: page.overlay
+        anchors.fill: parent
+        media: page.infoTrack
+        favourite: page.infoTrack ? !!page.favourites[page.infoTrack.url] : false
+        onCloseRequested: page.infoTrack = null
+        onPlayRequested: {
+            var track = page.infoTrack;
+            page.infoTrack = null;
+            page.play([track], 0);
+        }
     }
 
     // What the list shows and in which order, as the Video tab has it.
