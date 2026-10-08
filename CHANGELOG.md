@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.19 - unreleased
+## 0.0.19 - 8 October 2026
 
 - A filter for the music lists: the magnifying glass at the top of the
   Audio tab narrows the list you are in as you type. Artists, albums and
