@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.22 - unreleased
+## 0.0.22 - 8 October 2026
 
 - Several at once in the music lists: a long press on a track, artist,
   album or genre selects it, and taps add more or take them out again. A
