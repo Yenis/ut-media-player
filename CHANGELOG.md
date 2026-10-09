@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.25 - unreleased
+## 0.0.25 - 8 October 2026
 
 - The Browse tab: the phone's folders. It starts with the storages and your
   favourite folders; inside, it lists folders and the music and videos among

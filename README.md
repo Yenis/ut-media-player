@@ -4,15 +4,15 @@ A media player for Ubuntu Touch, modelled on VLC for Android: its gestures, its
 player menu, its library and its queue, built in QML on the media stack Ubuntu
 Touch already ships.
 
-**Status: early development.** Version 0.0.24 plays the videos on the phone
+**Status: early development.** Version 0.0.25 plays the videos on the phone
 with VLC's gestures, resume, "play as audio", external subtitles, bookmarks,
 A-B repeat and a sleep timer, and has the five tabs of the finished app, with
 the videos in a grid or a list that can be sorted, filtered, grouped and
 played one after another. It lists the music on the phone by artist, album,
 track, genre and file, and plays it in an audio player with a mini-player
 that stays above the tabs and a queue that plays on in the background,
-with shuffle and repeat. Folder browsing, playlists and settings are still
-to come. The plan and its progress are in
+with shuffle and repeat. The Browse tab goes through the phone's folders
+and plays from them. Playlists and settings are still to come. The plan and its progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
 Test builds are published on the
