@@ -8,6 +8,68 @@ the rest is the Phase 0 spike from
 a QML-only media player. The spike is still in the app, under More →
 Diagnostics.
 
+## Open checks
+
+Everything that is not confirmed by a test, in one place (started 9 October
+2026). Yenis has no time for checks by hand at present and will come back to
+them; until then nothing here counts as confirmed, and nothing is to be
+dropped from this list without a result.
+
+What counts as what:
+
+- **Pass over adb** means the logic works when driven through the
+  development remote. It says nothing about touch, the back gesture, the
+  keyboard, how it feels, or anything the remote cannot press.
+- **Pass by hand** is the only thing that closes a row under "By hand".
+- When a check is done, its row in the section below is given its result and
+  the count here is lowered. A new layer adds its "By hand" rows to this
+  table in the same change.
+
+### By hand, per layer
+
+71 checks are open. The rows themselves are in each section's "By hand"
+table, marked "Still to do" or "Not reported".
+
+| Layer | Open | Needs more than the phone |
+|---|---|---|
+| [Browse tab, 0.0.25](#browse-tab-version-0025) | 4 | An SD card or USB stick for one |
+| [Queue page, 0.0.24](#queue-page-search-and-moving-version-0024) | 4 | A headset or Bluetooth buttons for one |
+| [Album cards, 0.0.23](#album-cards-and-an-artists-albums-version-0023) | 3 | |
+| [Multiple selection for music, 0.0.22](#multiple-selection-for-music-version-0022) | 3 | |
+| [Track information and "go to", 0.0.21](#a-tracks-information-go-to-album-and-go-to-artist-version-0021) | 3 | |
+| [Sorting and favourites for music, 0.0.20](#sorting-and-favourites-for-music-version-0020) | 3 | |
+| [Music filter and blurred cover, 0.0.19](#music-filter-and-blurred-cover-version-0019) | 3 | |
+| [Kept queue, 0.0.18](#kept-queue-remove-and-stop-after-version-0018) | 0 | |
+| [Volume and brightness in the audio player, 0.0.17](#volume-and-brightness-in-the-audio-player-version-0017) | 3 | |
+| [Audio player's menu, 0.0.16](#audio-players-menu-version-0016) | 4 | |
+| [Shuffle and repeat, 0.0.15](#shuffle-and-repeat-version-0015) | 5 | The screen off across an album's end for one |
+| [Music library, 0.0.14](#music-library-version-0014) | 6 | One of them failed by hand before its fix: a tap plays the track tapped |
+| [Queue in the background, 0.0.13](#queue-in-the-background-version-0013) | 4 | The cable unplugged for one |
+| [Audio player and mini-player, 0.0.12](#audio-player-and-mini-player-version-0012) | 3 | |
+| [Information page, 0.0.11](#information-page-version-0011) | 3 | |
+| [Groups made by hand, 0.0.10](#groups-made-by-hand-version-0010) | 4 | |
+| [Multiple selection, 0.0.9](#multiple-selection-version-009) | 4 | |
+| [Queue and item menu, 0.0.8](#queue-and-item-menu-version-008) | 2 | Both "Not reported" |
+| [Video library, 0.0.7](#video-library-version-007) | 0 | |
+| [Video library, 0.0.6](#video-library-version-006) | 1 | Putting the keyboard away, failed by hand before its fix |
+| [Video library, 0.0.5](#video-library-version-005) | 4 | |
+| [App shell, 0.0.4](#app-shell-version-004) | 2 | |
+| [Player, 0.0.3](#player-version-003) | 3 | A real film with its own `.srt`; a hardware keyboard |
+| [Player, 0.0.2](#player-version-002) | 0 | |
+
+### Not in any table above
+
+| Check | Where it comes from | State |
+|---|---|---|
+| A video played as audio, 30 minutes in a pocket with the screen off | S6; run 5 reached 10 minutes | Open; part of the battle test |
+| Removable storage: `/media` lists, and its files play | S2, and the Browse tab | Open; no card has been in the phone |
+| Playback under other apps and behind the lock screen as one check of the audio side, with the sound indicator and headset buttons | [PLAN.md](PLAN.md), Phase 3, the one unticked box | Open; its parts are rows of 0.0.12, 0.0.13 and 0.0.24 |
+| The sleep timer and A-B repeat for music behind the lock screen | [PLAN.md](PLAN.md), Phase 1, platform limits | Known to fire late; not measured |
+| A confined build without the `networking` group still plays a stream | D13; read in media-hub's source on 9 October 2026 | **[source]** only. Needs a confined test build on the phone |
+| "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
+| The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
+| Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
 ## Browse tab, version 0.0.25
 
 ### Checked over adb, 8 October 2026

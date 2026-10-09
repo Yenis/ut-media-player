@@ -9,7 +9,11 @@ filter, sorting, favourites and multiple selection; a player with our own
 gestures, a menu, shuffle and repeat; a mini-player; and a queue that moves
 on in the background, is kept between launches and can be searched, trimmed
 and put in order (0.0.12 to 0.0.24). Phase 4 is under way: version 0.0.25
-has the Browse tab.
+has the Browse tab. On 9 October 2026 the plan was put in order before the
+rest of Phase 4: the open checks were gathered in one list, and the
+questions of confinement, of streams without a network permission and of
+incognito mode were looked into and settled (D14, D15); see [Confinement](#confinement),
+[Network](#network) and [Phase 4](#phase-4---browse-playlists-streams-and-settings).
 Target device is the
 Pixel 3a on Ubuntu Touch 24.04-1.x (tag `24.04-1.4`), the same one GemTicker
 was verified on.
@@ -23,7 +27,8 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **To pick up next** | Phase 4: playlists, then streams, settings and search. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
+| **Not confirmed by hand** | 71 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | Phase 4: playlists, then streams (off until allowed, D14), settings and search. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
 
 What the first day established, in the order it was found:
 
@@ -99,8 +104,9 @@ Facts are marked:
 | D10 | Background playback | **Audio plays while other apps are in use and while the screen is locked**, as the stock Music app does. **Video stops when the app leaves the foreground**, except through "Play as audio". This matches VLC's own default **[vlc]** |
 | D11 | "Play as audio" | **Essential.** A playing video can be switched to audio-only and back; see [Play as audio](#play-as-audio) |
 | D12 | Confinement | **Unconfined** (decided 2 October 2026), for development and the battle test. A confined app cannot play files from `~/Videos` or `~/Music` nor read the media library: media-hub and mediascanner allow that by package name only **[source, device]**. File access is kept behind one module so that a confined build with a Content Hub import library stays possible; a fix is proposed upstream. Which form goes to the OpenStore is decided in Phase 6. See [Confinement](#confinement) |
-
 | D13 | Network | **Nothing over the network except playing streams** (decided by Yenis, 3 October 2026). The aim is an app that needs no network permission and cannot connect anywhere by itself. Dropped for good: network shares, casting, remote access, subtitle download, film metadata. Kept: opening a stream by address, stream history, and a link handed over by another app, since each is playing a stream. See [Network](#network) |
+| D14 | Streams | **Off until the user allows them** (decided by Yenis, 9 October 2026). A setting, "Allow streams", is off on a new install; while it is off the player refuses every address that is not a file, and asking for a stream brings a dialog that says the app is offline and what allowing means. The system has no network permission to grant at run time, so the switch is the app's own. See [Network](#network) |
+| D15 | Incognito mode | **Dropped** (Yenis, 9 October 2026): not needed. With it go VLC's "Persistent incognito mode" and its header icon |
 
 ### Still open
 
@@ -116,7 +122,7 @@ What D13 rests on, and what is still to be shown:
 | The app's own code opens no connection. QML's only way to is `XMLHttpRequest`; it is used twice, both times on a `file://` address: subtitles (`SubtitleTrack.qml`) and the development remote (`dev/Remote.qml`) | Checked by search, 3 October 2026. To be checked again before each release |
 | The diagnostics page played three test streams from the internet in its automatic run | Taken out on 3 October 2026 (version 0.0.11), its question being answered. No network address is left in the app's code |
 | Until streams are built (Phase 4, "open by address") | Nothing in the app touches the network at all, and nothing is to be added that does (Yenis, 3 October 2026) |
-| No network permission | The package is unconfined today (D12), so the system enforces nothing: the rule is kept by what the code does. A confined build (Phase 6) would then be declared **without** the `networking` policy group, which makes it enforced. Whether streams still play in that build is **[verify]**: they should, media-hub doing the fetching |
+| No network permission | The package is unconfined today (D12), so the system enforces nothing: the rule is kept by what the code does. A confined build (Phase 6) would then be declared **without** the `networking` policy group, which makes it enforced. Streams should still play in that build: media-hub lets a confined click open any network address without looking at its groups **[source]**, see below. Not yet seen on the device |
 | Album art in Phase 3 | The system's thumbnailer may look covers up online for `image://albumart/` **[verify]**. If it does, the app shows only the art found in the files |
 
 Rules that follow, for every later phase:
@@ -124,6 +130,47 @@ Rules that follow, for every later phase:
 - No `XMLHttpRequest`, `Image` or any other loader on an `http(s)` address.
   A network address goes to the player and nowhere else.
 - No feature that needs a server, an account or a lookup.
+
+#### Network off until a stream is asked for (researched 9 October 2026)
+
+The wish (Yenis): the app starts with every network permission off; only
+when the user wants to play a stream are they told that the app is offline
+and asked to allow the network; otherwise it stays off.
+
+What Ubuntu Touch has:
+
+| Point | Finding |
+|---|---|
+| A permission the user grants while the app runs | **Not for the network.** A click's policy groups are written in the package and fixed at install; changing them takes a new version. The prompts of the trust store exist for the camera, the microphone and location only. UBports documentation, "AppArmor Policy Groups", and the trust store's history |
+| So the wish as worded | **Cannot be built**: there is nothing for the app to ask the system for, and nothing for the user to grant |
+| Who fetches a stream | media-hub, not the app (S5, S13) **[device]** |
+| Whether media-hub asks if the app may use the network | **It does not, for a click.** `authenticate_open_uri_request` in `src/service/apparmor/lomiri.cpp` lets a confined client open any network stream; only for a snap does it look for the `network` interface **[source]**, read 9 October 2026 |
+| What the groups are meant for | The documentation describes `audio` and `video` as "allows playing remote content via media-hub", apart from `networking`, "can access the network" **[source]** |
+
+What follows is better than the wish in one way and weaker in another:
+
+- **Better:** the app need never have a network permission at all, not
+  even while a stream plays. In a confined build without `networking` the
+  app's own process cannot open a connection, and the system enforces it;
+  the stream is fetched by the system's player. There is nothing to switch
+  on.
+- **Weaker:** because media-hub does not ask, the system cannot be what
+  keeps streams off. "Off until allowed" has to be the app's own switch.
+- **Today** the app is unconfined (D12), so neither is enforced by the
+  system: both are kept by the code, as D13 already says.
+
+Decided as D14 (Yenis, 9 October 2026), to be built with "streams" in Phase 4:
+
+| Part | Behaviour |
+|---|---|
+| A setting, "Allow streams", **off** on a new install | While it is off the player refuses every address that is not a file. The check sits in one place, `Playback.qml`, in front of everything that can hand it an address: the address field, the stream history, a link from another app |
+| Asking for a stream while it is off | A dialog in place of playback: GemPlayer is offline; playing a stream lets the system's player connect to that address, and to nothing else; "Allow streams" or "Cancel". Cancel leaves it off |
+| Afterwards | The switch is in Settings and can be turned off again. The More tab shows which state the app is in |
+| What the texts may claim | "GemPlayer itself cannot connect" only for a confined build without `networking`. For the unconfined build: "GemPlayer has no code that connects" |
+
+Still to be shown on the phone: that a confined build without `networking`
+plays a stream. It takes a confined test build, and is listed in
+[TESTING.md](TESTING.md#open-checks).
 
 ### Confinement
 
@@ -143,7 +190,7 @@ it. The options for D12:
 | Option | What works | Cost |
 |---|---|---|
 | A. Stay confined, library by import | The user picks videos and music in the file manager and hands them over. Content Hub hard-links them into the app's folder, so files on the phone's own storage take no extra space **[source]**; files on an SD card are copied. From there they play, in the background too. Network streams work | The library holds only what was imported; new files do not appear by themselves. No artist, album or duration from the system library. Removing an import needs compiled code, since QML cannot delete a file |
-| B. Go unconfined | Everything the plan assumes, as far as the remaining spike rows confirm it: both services accept an unconfined app | The package runs with the user's full rights instead of in a sandbox. In the OpenStore that means a manual review and a visible warning on the listing **[verify]**. Self-installing is unaffected |
+| B. Go unconfined | Everything the plan assumes, as far as the remaining spike rows confirm it: both services accept an unconfined app | The package runs with the user's full rights instead of in a sandbox. In the OpenStore that means a manual review, for which the source must be open, and the listing says the app is unconfined (UBports forum, "Unconfined apps", read 9 October 2026; the store's own rules are still to be read in Phase 6). Self-installing is unaffected |
 | C. Change the platform | A confined app with the reserved groups could play and query, if media-hub and mediascanner asked AppArmor whether the app may read the file instead of comparing package names | A patch to two UBports components, their review, and an OTA release before any user has it. Not in our hands, but we can propose it |
 | D. Play without media-hub | Qt's own GStreamer backend is on the device and would read files in-process | The app is suspended in the background, so no audio with the screen off. That breaks D10 and D11 |
 
@@ -151,6 +198,33 @@ Chosen: B, confirmed on the device, with file access kept behind one module so
 that A remains possible, and C proposed upstream. Which of A or B goes to the
 OpenStore is decided in Phase 6, when it is known whether C landed. D is ruled
 out by D10 and D11.
+
+#### Is the Browse tab the reason? (asked by Yenis, 9 October 2026)
+
+No. The app is unconfined because of playback and the library, which were
+there before the Browse tab was. Dropping Browse would not let the app be
+confined: the Video and Audio tabs would stop working first.
+
+| Part of the app | Confined, with every group a click may declare | What it would need |
+|---|---|---|
+| Playing a file in `~/Music`, `~/Videos` or on a card | Refused by media-hub, which goes by package name **[device]** | Unconfined, or option C |
+| Video tab, Audio tab: the system's library | Empty: mediascanner answers `music.ubports` only **[device]** | Unconfined, or option C |
+| Browse tab: listing folders | `~/Music` and `~/Videos` list, with the two reserved groups; the home folder, Documents, Downloads and `/media` list nothing **[device]** | Unconfined |
+| Playing a file handed over by another app | Works: it lands in the app's own folder **[device]** | Nothing |
+| Playing a stream | Works **[device]**, with `networking` declared; without it, see [Network](#network) | Nothing |
+
+So the choice is not "with or without Browse" but between two apps:
+
+| | Unconfined (today) | Confined (option A) |
+|---|---|---|
+| What the user gets | Everything built so far | No Video or Audio library from the system and no Browse tab. A library of what was handed over through Content Hub, one batch at a time; no artist, album or genre unless the app reads tags itself, which QML cannot |
+| OpenStore | Manual review of the source by the store's team, and the listing says the app is unconfined | Automatic review passes: `audio`, `video`, `content_exchange` and `keep-display-on` are all of the "common" class |
+| What the system enforces | Nothing; the app keeps its own rules | The sandbox, and no network if `networking` is left out |
+
+The manual review is a step taken by people who read the source, which is
+public and small; it is slower, not a refusal. The Browse tab stays (Yenis,
+9 October 2026), and the plan stays as it is: unconfined through the battle
+test, the choice in Phase 6.
 
 ---
 
@@ -196,10 +270,10 @@ Touch, is in [VLC-FEATURES.md](VLC-FEATURES.md). In short:
 
 | Verdict | What falls under it |
 |---|---|
-| **Build** | Gestures, player controls and menu, lock, aspect modes, resume and seen marker, sleep timer, jump to time, A-B repeat, bookmarks, queue, repeat and shuffle, playlists, favourites, history, incognito mode, video grouping, sorting, multiple selection, stream history, subtitle styling, settings |
+| **Build** | Gestures, player controls and menu, lock, aspect modes, resume and seen marker, sleep timer, jump to time, A-B repeat, bookmarks, queue, repeat and shuffle, playlists, favourites, history, video grouping, sorting, multiple selection, stream history, subtitle styling, settings |
 | **Spike** | Everything that touches the system: playback itself, background audio, play as audio, library models and thumbnails, direct file access, external subtitles, system controls, orientation, keep-screen-on, opening from other apps, network streams |
 | **Discuss** | Playback speed, equalizer, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters, replay gain, decoder settings, 360° video, pop-up player |
-| **Dropped** | By D13: network shares, casting, remote access, subtitle download, film metadata. Not needed: choosing library folders |
+| **Dropped** | By D13: network shares, casting, remote access, subtitle download, film metadata. Not needed: choosing library folders, incognito mode (D15) |
 | **N/A** | Android widgets, Android Auto, Android TV, ringtone, launcher shortcuts, permission onboarding |
 
 ### How Discuss items are handled
@@ -285,7 +359,12 @@ All of it is in [VLC-FEATURES.md](VLC-FEATURES.md).
 - [x] `LICENSE` (D5), `README.md` with the credit to VLC for Android,
       `CHANGELOG.md`, `docs/INSTALL.md`, `docs/STORE.md`, `docs/TESTING.md`.
 - [x] Builds as `gemplayer.yenis_0.0.1_all.click` and installs on the Pixel 3a.
-- [ ] A real icon. `assets/icon.png` is a placeholder.
+- [x] A real icon (9 October 2026). The placeholder's style was kept, the
+      amber hexagon and play triangle on black, and made a gem: the hexagon
+      is a cut stone seen from above, and the play triangle is cut into
+      three facets. Chosen by Yenis from six variations. Drawn by
+      `tools/make-icons.py`, which writes `assets/icon.png` and
+      `icon-512.png`.
 - [ ] Draft the upstream proposal for media-hub and mediascanner (D12, option C).
 
 ### Spike (done)
@@ -674,10 +753,13 @@ How it is built:
       playlist; add from any list, the video library's item menu and
       selection bar included (carried over from Phase 2).
 - [ ] More tab: streams (open by address, history), playback history, settings,
-      about.
+      about. Streams are off until allowed (D14): the "Allow streams"
+      setting, the dialog, and the one check in `Playback.qml`.
 - [ ] Library search across videos, artists, albums, tracks, genres and
       playlists.
-- [ ] Incognito mode.
+- [x] Incognito mode: dropped (D15). It was VLC's switch for leaving no
+      trace of what is played: no progress, seen marker, history entry or
+      last queue saved while it is on. Nothing to do with the network.
 - [ ] Content Hub import, "open with" and sharing.
 - [ ] Settings in VLC's grouping: interface, video, subtitles, audio, history,
       advanced; export and restore.
@@ -758,6 +840,7 @@ that nothing built later has to be undone.
 |---|---|
 | Layout and static UI | Rendered offscreen in the Clickable build image at Pixel 3a resolution, as for GemTicker |
 | Playback, gestures, background behaviour, confinement | Only on the device. Each phase ends with a device check and a read of the journal for AppArmor denials and QML errors |
+| What has not been checked by hand | Kept in [TESTING.md, "Open checks"](TESTING.md#open-checks). Every layer adds its rows there; a row leaves only with a result |
 
 ## Lessons carried over from GemTicker
 

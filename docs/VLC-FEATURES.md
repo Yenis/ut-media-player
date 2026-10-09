@@ -261,7 +261,7 @@ Source: `src/gui/audio/AudioBrowserFragment.kt`,
 | Playlists | Create, rename, delete, reorder, remove items, add from anywhere, play, shuffle | `src/gui/PlaylistFragment.kt`, `src/gui/dialogs/SavePlaylistDialog.kt` | Build |
 | Favourites | Mark media and folders; "only favourites" filter | `ContextOption.kt` | Build |
 | History | Recently played, newest first; play, add to queue, clear. Can be switched off | `src/gui/HistoryFragment.kt` | Build |
-| Incognito mode | Nothing is written to history or resume points | `PlaylistManager.kt` `savePosition` | Build |
+| Incognito mode | While it is on, nothing is saved about what is played: no progress or seen marker, no play count or history entry, no last queue. A tick in the main menu; ends with a restart unless "Persistent incognito mode" is set | `PlaylistManager.kt` (`saveMediaMeta`, `savePosition`, `saveMediaList`, `savePlaycount`), `UiTools.updateIncognitoMode`, `AppSetupDelegate.kt` | Dropped (D15, 9 October 2026): not needed |
 | Media information | Path, size, tracks, duration | `src/gui/InfoActivity.kt` | Build for what the metadata gives |
 | Library folders | Choose which folders are scanned; rescan on start | `res/xml/preferences.xml` | Dropped (3 October 2026): MediaScanner scans fixed places, and a choice would take a scanner of our own. Grouping by folder and the Browse tab cover the need |
 | Metadata lookup | Posters and summaries for films and series | `application/moviepedia` | Dropped (D13) |

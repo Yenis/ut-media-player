@@ -44,8 +44,15 @@ the file manager, and the app plays the hard links Content Hub creates in the
 app's own folder. It would declare `audio`, `video`, `content_exchange`,
 `keep-display-on` and `networking`, all of which `click-review` accepts.
 Under D13 the aim is to leave `networking` out as well: streams are fetched
-by media-hub, not by the app. Whether they still play without the group is
-to be tried when a confined build is made.
+by media-hub, not by the app. media-hub's source lets a confined click open
+any network stream without looking at its policy groups
+(`authenticate_open_uri_request` in `src/service/apparmor/lomiri.cpp`, read
+9 October 2026), and the documentation describes `audio` and `video` as
+allowing "remote content via media-hub". So they should play without the
+group; it is still to be tried when a confined build is made.
+
+Such a build would have no Video or Audio library from the system and no
+Browse tab: see "Is the Browse tab the reason?" in [PLAN.md](PLAN.md).
 
 ## Listing
 
