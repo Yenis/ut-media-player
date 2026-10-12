@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.28 - unreleased
+## 0.0.28 - 12 October 2026
 
 - A playback history, under More: what you played, the latest first, with
   when. A tap plays an item again; its menu inserts it next, adds it to the

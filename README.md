@@ -4,7 +4,7 @@ A media player for Ubuntu Touch, modelled on VLC for Android: its gestures, its
 player menu, its library and its queue, built in QML on the media stack Ubuntu
 Touch already ships.
 
-**Status: early development.** Version 0.0.27 plays the videos on the phone
+**Status: early development.** Version 0.0.28 plays the videos on the phone
 with VLC's gestures, resume, "play as audio", external subtitles, bookmarks,
 A-B repeat and a sleep timer, and has the five tabs of the finished app, with
 the videos in a grid or a list that can be sorted, filtered, grouped and
@@ -13,8 +13,8 @@ track, genre and file, and plays it in an audio player with a mini-player
 that stays above the tabs and a queue that plays on in the background,
 with shuffle and repeat. The Browse tab goes through the phone's folders
 and plays from them, the Playlists tab keeps lists of your own, and a
-stream plays from its address once streams are allowed. Settings and
-search are still to come. The plan and its progress are in
+stream plays from its address once streams are allowed. What was played
+is kept in a history. Settings and search are still to come. The plan and its progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
 Test builds are published on the
@@ -53,7 +53,8 @@ GemPlayer has no accounts and no tracking, and it does nothing over the
 network except play a stream whose address you give it. Streams are off
 until you allow them, so the app arrives offline. An address you open goes
 to the system's player, which fetches the stream; the app itself opens no
-connection. The addresses are kept on the phone, in the app's history. It
+connection. The addresses, and the history of what was played, are kept
+on the phone. It
 has no network shares, no casting, no remote control, and looks nothing up
 online.
 
