@@ -21,6 +21,7 @@ Item {
 
     property var playback: null
     property var store: null                // PlayerStore: bookmarks
+    property var prefs: null                // Prefs: gestures, skip length, subtitle style
     property var sleep: null                // SleepTimer
     property var systemVolume: null         // platform/SystemVolume.qml, or null off the device
     property var systemBrightness: null     // platform/SystemBrightness.qml, likewise
@@ -311,7 +312,8 @@ Item {
             showInfo("Unseekable stream", 1000);
             return;
         }
-        var step = side === "forward" ? 10000 : -10000;
+        var length = (prefs ? prefs.skipSeconds : 10) * 1000;
+        var step = side === "forward" ? length : -length;
         if (tapSeekSide !== side)
             tapSeekTotal = 0;
         tapSeekSide = side;
@@ -412,6 +414,11 @@ Item {
             anchors.fill: parent
             locked: page.locked
             seekable: page.playback ? page.playback.seekable : false
+            volumeEnabled: page.prefs ? page.prefs.gestureVolume : true
+            brightnessEnabled: page.prefs ? page.prefs.gestureBrightness : true
+            swipeSeekEnabled: page.prefs ? page.prefs.gestureSwipeSeek : true
+            doubleTapSeekEnabled: page.prefs ? page.prefs.gestureDoubleTap : true
+            pinchEnabled: page.prefs ? page.prefs.gesturePinch : true
 
             onTapped: {
                 if (page.locked) {
@@ -468,9 +475,20 @@ Item {
             }
         }
 
-        // External subtitles, drawn here: white with a dark outline, at the
-        // bottom of the picture, or above the controls while those show.
+        // External subtitles, drawn here: with a dark outline, at the bottom
+        // of the picture, or above the controls while those show. Size,
+        // colour and the box behind are the settings'.
+        Rectangle {
+            visible: subtitleLine.visible && (page.prefs ? page.prefs.subtitleBackground : false)
+            z: 1
+            anchors.centerIn: subtitleLine
+            width: subtitleLine.contentWidth + Theme.u(1.6)
+            height: subtitleLine.contentHeight + Theme.u(0.6)
+            radius: Theme.u(0.4)
+            color: Qt.rgba(0, 0, 0, 0.65)
+        }
         Text {
+            id: subtitleLine
             // Above the controls, but out of the way of a sheet.
             visible: text !== "" && !page.sheetOpen
             z: 1
@@ -482,10 +500,11 @@ Item {
             wrapMode: Text.WordWrap
             textFormat: Text.StyledText
             text: subtitles.text
-            color: "white"
+            color: page.prefs ? page.prefs.subtitleColour : "white"
             style: Text.Outline
             styleColor: "black"
             font.pixelSize: Math.max(Theme.fontM, Math.min(parent.width, parent.height) * 0.052)
+                            * (page.prefs ? page.prefs.subtitleScale : 1)
         }
 
         // Double-tap seek: how far, on the side that was tapped.

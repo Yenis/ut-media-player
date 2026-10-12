@@ -64,6 +64,10 @@ Item {
 
     property string error: ""
 
+    // A video carries on where it was left. The owner sets it from the
+    // settings; off, every video starts from its beginning.
+    property bool resumeVideos: true
+
     // Streams are allowed. Off on a new install; kept from launch to launch.
     property bool streamsAllowed: false
 
@@ -632,8 +636,10 @@ Item {
         _seekTarget = -1;
         // A video carries on where it was left. Music starts at its start, as
         // in VLC: a song tapped again is not wanted from its middle.
-        _pendingStart = store && !fromStart && media.hasPicture ? store.resumePoint(url) : 0;
-        _fromStart = !!fromStart;
+        _pendingStart = store && resumeVideos && !fromStart && media.hasPicture ? store.resumePoint(url) : 0;
+        // With resume switched off a video is sent to its start like "Play
+        // from start": still loaded, it would play on from where it was paused.
+        _fromStart = !!fromStart || (!!media.hasPicture && !resumeVideos);
         _awaitingStart = true;
         startLimit.restart();
     }

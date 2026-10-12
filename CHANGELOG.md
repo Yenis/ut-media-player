@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.0.29 - unreleased
+
+- Settings, under More. Nothing changes until you switch something: every
+  setting starts at how the app behaved before.
+- Video: whether a video carries on where it was left, and whether a video
+  that is playing goes on as audio when the app is left or the screen goes
+  off, where before it was always paused.
+- Gestures in the players: volume, brightness, swipe to seek, double tap to
+  seek and pinch can each be switched off. The skip length of a double tap,
+  the rewind and forward buttons and the arrow keys is 5, 10, 15 or 30
+  seconds.
+- Subtitles: four sizes, white or yellow, and a dark box behind the text,
+  with a sample that shows the result.
+- Audio: whether the queue is brought back when the app is opened.
+- Advanced: clear the playback history, clear the stream history, and
+  forget where videos were left and which were played.
+
 ## 0.0.28 - 12 October 2026
 
 - A playback history, under More: what you played, the latest first, with

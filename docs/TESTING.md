@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -27,11 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-92 checks are open. The rows themselves are in each section's "By hand"
+100 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [Settings, 0.0.29](#settings-version-0029) | 8 | Subtitles on a bright picture for one |
 | [History and About, 0.0.28](#playback-history-and-about-version-0028) | 5 | |
 | [Streams, 0.0.27](#streams-version-0027) | 8 | Wi-Fi, and an address to open |
 | [Playlists, 0.0.26](#playlists-version-0026) | 8 | |
@@ -72,6 +73,48 @@ table, marked "Still to do" or "Not reported".
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Settings, version 0.0.29
+
+### Checked over adb, 12 October 2026
+
+Each setting was changed through the same function the page's switches
+call, and what it does was then looked at.
+
+| Check | Result |
+|---|---|
+| The page: Video, Gestures in the players, Subtitles with a sample, Audio, History, Advanced; every value at its default | Pass (layout) |
+| Skip length 30 s, `tapseek forward` in the audio player: from 0:02 to 0:34 | Pass. In the video player the same step landed 13 s short on `long-35min`, a seek there going to the keyframe before its target |
+| Resume off: a video left at 5:00 starts at 0:03, opened fresh and opened again while still loaded | Pass, after a fix: still loaded, it played on from 5:04. It is now sent to its start as "Play from start" is |
+| Resume on again: the same video carries on at 5:02 | Pass |
+| "Play on as audio" on, a video playing, the calculator brought to the front: media-hub reads "Playing" 12 s later; back in the app, the audio player with the mini-player behind it, 25 s further on | Pass |
+| The same with the setting off, as before: media-hub reads "Paused"; back in the app the video is paused | Pass |
+| Subtitles huge and yellow on `sidecar` | Pass. The dark box cannot be told from the black under this picture; it shows in the page's sample |
+| "Bring back the queue" off, music playing, the app restarted: nothing in the mini-player | Pass |
+| The settings are kept across a restart | Pass |
+| "Forget progress" asks first; done, no video has a tick or a bar | Pass |
+| "Clear the playback history" and "Clear the stream history": both lists empty | Pass |
+| `back` leaves Settings for More | Pass |
+| No QML warnings in the log | Pass |
+
+The restart in the queue check was the remote's, which kills the process:
+the music played on in media-hub, as a killed app's does (0.0.18), and was
+stopped by playing something else. And "Forget progress" was run for real
+on the phone: every resume point and played mark there is gone, the test
+files' and those of the one video that is not a test file.
+
+### By hand
+
+| Check | Result |
+|---|---|
+| More → Settings; the page scrolls; the header arrow and the back gesture lead back | Still to do |
+| Each gesture switched off is gone from the video player, and from the audio player | Still to do: no gesture can be made over adb |
+| With volume off, the brightness swipe takes both halves, and the other way round | Still to do |
+| Double tap to seek off: a double tap on a side does nothing, in the middle it pauses | Still to do |
+| The skip length by double tap and by the buttons, at 5 s and at 30 s | Still to do |
+| Subtitles: each size and colour, and the dark box, on a bright picture | Still to do |
+| "Play on as audio" with the power button, not another app | Still to do |
+| The three questions under Advanced: "Cancel" leaves things as they are | Still to do |
 
 ## Playback history and About, version 0.0.28
 

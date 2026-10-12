@@ -9,9 +9,9 @@ filter, sorting, favourites and multiple selection; a player with our own
 gestures, a menu, shuffle and repeat; a mini-player; and a queue that moves
 on in the background, is kept between launches and can be searched, trimmed
 and put in order (0.0.12 to 0.0.24). Phase 4 is under way: version 0.0.25
-has the Browse tab, 0.0.26 the playlists, 0.0.27 the streams and 0.0.28
-the playback history and About, all three checked on the phone over adb on
-12 October 2026. On 9 October 2026 the plan was put in order before the
+has the Browse tab, 0.0.26 the playlists, 0.0.27 the streams, 0.0.28 the
+playback history and About and 0.0.29 the settings, all four checked on the
+phone over adb on 12 October 2026. On 9 October 2026 the plan was put in order before the
 rest of Phase 4: the open checks were gathered in one list, and the
 questions of confinement, of streams without a network permission and of
 incognito mode were looked into and settled (D14, D15); see [Confinement](#confinement),
@@ -29,8 +29,8 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **Not confirmed by hand** | 92 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4: settings, then search. Settings is where the choices put off since Phase 1 are made: see the open boxes of [Phase 1](#phase-1---video-player) and its Discuss table. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
+| **Not confirmed by hand** | 100 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | Phase 4: library search, then the rest of its list. One question is Yenis's to answer first: whether the app may add itself to the system's list of apps that are not frozen (see the Discuss table of [Phase 1](#phase-1---video-player)); it was left out of the settings until then. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
 
 What the first day established, in the order it was found:
 
@@ -450,15 +450,19 @@ hidden.
       brightness, pinch to fit. Tried by hand.
 - [x] Volume gesture sets the system volume, brightness gesture the real
       backlight; the phone's own brightness returns when the player is left.
-- [ ] A setting for each gesture, and for the skip lengths (with Settings, Phase 4).
-- [ ] Optional rewind and forward buttons (with Settings).
+- [x] A setting for each gesture, and for the skip length (version 0.0.29):
+      one length for the double tap, the buttons and the keys, in both
+      players.
+- [ ] Optional rewind and forward buttons in the video player. Not in the
+      settings of 0.0.29: it needs room in the control bar first.
 - [x] Lock with slide to unlock.
 - [x] Orientation: the player turns its own content to follow the phone, and
       the button locks it.
 - [x] The twelve picture sizes: tap steps through six, long press lists all.
 - [x] Player menu in VLC's order.
-- [x] Resume where the file was left (always; the "ask" and "never" choices come
-      with Settings). Seen marker when a file is played to the end.
+- [x] Resume where the file was left: always, or never, by a setting since
+      0.0.29. VLC's third choice, to ask each time, is not built: the
+      question would have to be put in a turned player. Seen marker when a file is played to the end.
 - [x] Jump to time, on a keypad of its own.
 - [x] A-B repeat, with marks on the timeline.
 - [x] Sleep timer, with VLC's two options. Limited by the platform, see below.
@@ -837,15 +841,36 @@ How it is built:
       version, what the app is, the credit to VLC for Android (D5), the
       licence, where the source is, and what it does with the network. The
       addresses are text: nothing is opened (D13).
-- [ ] More tab, still to do: settings.
+- [x] Settings (version 0.0.29), under More. `qml/Gem/Prefs.qml` holds the
+      values, one object for the app, and `qml/Gem/SettingsPage.qml` shows
+      them in VLC's grouping as far as there is something to set. Every
+      default is how the app behaved before, so an update changes nothing.
+  - Video: resume where a video was left; play on as audio when the app is
+    left (VLC's "Background/PiP mode", without the PiP).
+  - Gestures in the players: volume, brightness, swipe to seek, double tap
+    to seek, pinch; and the skip length, 5, 10, 15 or 30 s.
+  - Subtitles: size, white or yellow, a dark box behind; a sample.
+  - Audio: bring back the queue at the start.
+  - History: the playback history's switch, and the way to the streams'.
+  - Advanced: clear the playback history, the stream history, and the
+    progress and played marks, each after a question.
+  - Found on the way **[device]**: with resume off, a video still loaded in
+    media-hub played on from where it had been paused, as "Play from
+    start" once did. It is sent to its start the same way.
+  - Not in it yet: the choice to be asked before resuming; rewind and
+    forward buttons in the video player; picking a subtitle file and its
+    encoding; separate skip lengths for audio and video, as VLC has them;
+    export and restore, which need a way to write a file; and staying
+    awake in the background for the sleep timer, which is a Discuss item
+    and Yenis's to decide.
 - [ ] Library search across videos, artists, albums, tracks, genres and
       playlists.
 - [x] Incognito mode: dropped (D15). It was VLC's switch for leaving no
       trace of what is played: no progress, seen marker, history entry or
       last queue saved while it is on. Nothing to do with the network.
 - [ ] Content Hub import, "open with" and sharing.
-- [ ] Settings in VLC's grouping: interface, video, subtitles, audio, history,
-      advanced; export and restore.
+- [ ] Settings, the rest: what the list under 0.0.29 above says is not in
+      it yet; export and restore.
 - [ ] Landscape and tablet layouts.
 - [ ] Empty, error and unsupported-format states.
 - [ ] Tips for the gestures; parental control.

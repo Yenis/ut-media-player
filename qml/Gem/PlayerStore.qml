@@ -130,6 +130,14 @@ QtObject {
         save(url, duration, duration);
     }
 
+    // Forgets where every file was left and which were seen.
+    function clearProgress() {
+        db().transaction(function(tx) {
+            tx.executeSql("DELETE FROM media");
+        });
+        revision++;
+    }
+
     // Every favourite, as { url: true }.
     function favourites() {
         var all = {};
@@ -321,6 +329,13 @@ QtObject {
     function renameStream(url, title) {
         db().transaction(function(tx) {
             tx.executeSql("UPDATE streams SET title = ? WHERE url = ?", [title, url]);
+        });
+        streamRevision++;
+    }
+
+    function clearStreams() {
+        db().transaction(function(tx) {
+            tx.executeSql("DELETE FROM streams");
         });
         streamRevision++;
     }

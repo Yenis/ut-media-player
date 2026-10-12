@@ -23,6 +23,7 @@ Item {
 
     property var playback: null
     property var store: null                // PlayerStore: bookmarks
+    property var prefs: null                // Prefs: gestures and skip length
     property var sleep: null                // SleepTimer
     property var systemVolume: null         // platform/SystemVolume.qml, or null off the device
     property var systemBrightness: null     // platform/SystemBrightness.qml, likewise
@@ -199,12 +200,14 @@ Item {
         showLevel("brightness", playerBrightness);
     }
 
+    readonly property int skipLength: (prefs ? prefs.skipSeconds : 10) * 1000
+
     function tapSeek(side) {
         if (!playback.seekable) {
             showInfo("Unseekable stream", 1000);
             return;
         }
-        var step = side === "forward" ? 10000 : -10000;
+        var step = side === "forward" ? skipLength : -skipLength;
         if (tapSeekSide !== side)
             tapSeekTotal = 0;
         tapSeekSide = side;
@@ -353,6 +356,10 @@ Item {
         GestureLayer {
             anchors.fill: parent
             seekable: page.playback ? page.playback.seekable : false
+            volumeEnabled: page.prefs ? page.prefs.gestureVolume : true
+            brightnessEnabled: page.prefs ? page.prefs.gestureBrightness : true
+            swipeSeekEnabled: page.prefs ? page.prefs.gestureSwipeSeek : true
+            doubleTapSeekEnabled: page.prefs ? page.prefs.gestureDoubleTap : true
             pinchEnabled: false
 
             onVolumeMoved: page.changeVolume(delta)
@@ -574,7 +581,8 @@ Item {
             }
         }
 
-        // Previous, rewind, play, forward, next. Rewind and forward go 10 s.
+        // Previous, rewind, play, forward, next. Rewind and forward go by the
+        // settings' skip length, 10 s unless changed.
         Item {
             width: parent.width
             height: Theme.u(10)
@@ -597,7 +605,7 @@ Item {
                 glyph: "rewind"
                 color: Theme.text
                 enabled: page.playback ? page.playback.seekable : false
-                onClicked: page.playback.seekBy(-10000)
+                onClicked: page.playback.seekBy(-page.skipLength)
             }
             IconButton {
                 id: forwardButton
@@ -607,7 +615,7 @@ Item {
                 glyph: "fastforward"
                 color: Theme.text
                 enabled: page.playback ? page.playback.seekable : false
-                onClicked: page.playback.seekBy(10000)
+                onClicked: page.playback.seekBy(page.skipLength)
             }
             IconButton {
                 anchors { right: rewindButton.left; rightMargin: Theme.u(1); verticalCenter: parent.verticalCenter }

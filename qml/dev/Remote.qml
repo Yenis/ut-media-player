@@ -86,7 +86,10 @@ Item {
         else if (name === "baction") shell.browser.itemAction(shell.browser.shown[parseInt(argument.split(" ")[0])], argument.split(" ")[1]);
         else if (name === "bfav") shell.browser.setFavourite(shell.browser.path, !shell.browser.isFavourite);
         else if (name === "bplay") shell.browser.playHere(null);
-        else if (name === "history" || name === "about") { shell.page = "home"; shell.tab = "more"; shell.moreView = name; }
+        else if (name === "sscroll") shell.settingsPage.scrollTo(parseInt(argument));
+        else if (name === "pref") shell.prefs.setFromText(argument.split(" ")[0], argument.split(" ")[1]);
+        else if (name === "sclear") { if (argument.split(" ")[1] === "now") shell.settingsPage.clear(argument.split(" ")[0]); else shell.settingsPage.askClear(argument); }
+        else if (name === "history" || name === "about" || name === "settings") { shell.page = "home"; shell.tab = "more"; shell.moreView = name; }
         else if (name === "hkeep") p.setKeepHistory(argument === "1");
         else if (name === "hmenu") shell.historyPage.openMenu(parseInt(argument));
         else if (name === "haction") shell.historyPage.itemAction(parseInt(argument.split(" ")[0]), argument.split(" ")[1]);
@@ -154,7 +157,7 @@ Item {
         else if (name === "focusfilter") shell.videoLibrary.openFilter();
         else if (name === "hidekeyboard") shell.videoLibrary.dismissKeyboard();
         else if (name === "display") shell.videoLibrary.openDisplaySheet();
-        else if (name === "closesheets") { shell.videoLibrary.closeSheets(); shell.audioLibrary.closeSheets(); shell.browser.closeSheets(); shell.playlistsPage.closeSheets(); shell.playlistPicker.close(); shell.streamsPage.closeSheets(); shell.historyPage.closeSheets(); }
+        else if (name === "closesheets") { shell.videoLibrary.closeSheets(); shell.audioLibrary.closeSheets(); shell.browser.closeSheets(); shell.playlistsPage.closeSheets(); shell.playlistPicker.close(); shell.streamsPage.closeSheets(); shell.historyPage.closeSheets(); shell.settingsPage.closeSheets(); }
         else if (name === "itemaction") shell.videoLibrary.itemAction(shell.videoLibrary.shown[parseInt(argument.split(" ")[0])], argument.split(" ")[1]);
         else if (name === "itemmenu") shell.videoLibrary.openItemMenu(parseInt(argument));
         else if (name === "diagnostics") shell.page = "diagnostics";
@@ -182,7 +185,7 @@ Item {
         var p = shell.playback;
         var v = shell.videoPage;
         console.log("REMOTE STATE " + JSON.stringify({
-            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, repeat: p.repeat, shuffle: p.shuffle, stopAfter: p.stopAfter, upcoming: p.queue.slice(p.queueIndex + 1, p.queueIndex + 6).map(function(m) { return m.title; }), grid: shell.videoLibrary.grid, selected: shell.tab === "audio" ? shell.audioLibrary.selectionCount : shell.videoLibrary.selectionCount, shown: shell.tab === "audio" ? shell.audioLibrary.shownTitles() : shell.tab === "browse" ? shell.browser.shownTitles() : shell.tab === "playlists" ? shell.playlistsPage.shownTitles() : shell.tab === "more" ? (shell.moreView === "history" ? shell.historyPage.shownTitles() : shell.streamsPage.shownTitles()) : shell.videoLibrary.shownTitles(), playlist: shell.playlistsPage.current ? shell.playlistsPage.current.name : "", picking: shell.playlistPicker.open ? shell.playlistPicker.items.length : 0, streams: p.streamsAllowed, keepHistory: p.keepHistory, gate: shell.streamGate.open ? shell.streamGate.address : "", more: shell.moreView, hasVideo: p.player.hasVideo, browsing: shell.browser.path, keyboard: shell.keyboardHeight, url: p.url, artist: p.artist, art: p.art, mini: shell.audioActive, playing: p.playing, position: p.position,
+            page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, repeat: p.repeat, shuffle: p.shuffle, stopAfter: p.stopAfter, upcoming: p.queue.slice(p.queueIndex + 1, p.queueIndex + 6).map(function(m) { return m.title; }), grid: shell.videoLibrary.grid, selected: shell.tab === "audio" ? shell.audioLibrary.selectionCount : shell.videoLibrary.selectionCount, shown: shell.tab === "audio" ? shell.audioLibrary.shownTitles() : shell.tab === "browse" ? shell.browser.shownTitles() : shell.tab === "playlists" ? shell.playlistsPage.shownTitles() : shell.tab === "more" ? (shell.moreView === "history" ? shell.historyPage.shownTitles() : shell.streamsPage.shownTitles()) : shell.videoLibrary.shownTitles(), playlist: shell.playlistsPage.current ? shell.playlistsPage.current.name : "", picking: shell.playlistPicker.open ? shell.playlistPicker.items.length : 0, streams: p.streamsAllowed, keepHistory: p.keepHistory, prefs: shell.prefs.summary(), gate: shell.streamGate.open ? shell.streamGate.address : "", more: shell.moreView, hasVideo: p.player.hasVideo, browsing: shell.browser.path, keyboard: shell.keyboardHeight, url: p.url, artist: p.artist, art: p.art, mini: shell.audioActive, playing: p.playing, position: p.position,
             raw: p.player.position, duration: p.duration, audioMode: p.audioMode,
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
             error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd],

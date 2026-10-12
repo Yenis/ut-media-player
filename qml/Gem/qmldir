@@ -22,6 +22,7 @@ PageHeader 1.0 PageHeader.qml
 Playback 1.0 Playback.qml
 PlayerControls 1.0 PlayerControls.qml
 PlayerStore 1.0 PlayerStore.qml
+Prefs 1.0 Prefs.qml
 PlaylistPicker 1.0 PlaylistPicker.qml
 PlaylistsPage 1.0 PlaylistsPage.qml
 QueuePage 1.0 QueuePage.qml
@@ -30,6 +31,7 @@ SectionLabel 1.0 SectionLabel.qml
 SeekBar 1.0 SeekBar.qml
 SegmentedChoice 1.0 SegmentedChoice.qml
 SettingRow 1.0 SettingRow.qml
+SettingsPage 1.0 SettingsPage.qml
 SleepTimer 1.0 SleepTimer.qml
 StreamGate 1.0 StreamGate.qml
 StreamsPage 1.0 StreamsPage.qml

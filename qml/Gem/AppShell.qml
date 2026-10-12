@@ -44,7 +44,7 @@ FocusScope {
 
     readonly property alias historyPage: historyView
 
-    // What covers the More tab: "" for nothing, "streams", "history" or "about".
+    // What covers the More tab: "" for nothing, "streams", "history", "settings" or "about".
     property string moreView: ""
     readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
@@ -59,13 +59,23 @@ FocusScope {
         : 0
 
     PlayerStore { id: playerStore }
+    Prefs { id: settingsStore }
 
-    // What played as audio last time is there again, paused, in the mini-player.
-    Component.onCompleted: core.restore()
+    readonly property alias prefs: settingsStore
+    readonly property alias settingsPage: settingsView
+
+    // What played as audio last time is there again, paused, in the
+    // mini-player, unless the settings say otherwise.
+    Component.onCompleted: {
+        settingsStore.load();
+        if (settingsStore.restoreQueue)
+            core.restore();
+    }
 
     Playback {
         id: core
         store: playerStore
+        resumeVideos: settingsStore.resumeVideos
         onEnded: if (shell.page === "video" || core.audioMode) shell.closePlayer()
         onMediaChanged: if (shell.page === "video") videoView.reset()
     }
@@ -289,10 +299,16 @@ FocusScope {
         onStateChanged: {
             if (Qt.application.state === Qt.ApplicationActive)
                 return;
-            if (Qt.application.state === Qt.ApplicationSuspended && shell.page === "video" && !core.audioMode)
-                core.pause();
-            else
+            if (Qt.application.state === Qt.ApplicationSuspended && shell.page === "video" && !core.audioMode) {
+                // As the settings have it: on as audio, if it was playing,
+                // or paused. VLC's default is to stop.
+                if (settingsStore.videoPlaysOnAsAudio && core.playing)
+                    shell.toAudio();
+                else
+                    core.pause();
+            } else {
                 core.saveNow();
+            }
         }
     }
 
@@ -369,6 +385,7 @@ FocusScope {
                 streamsAllowed: core.streamsAllowed
                 keepingHistory: core.keepHistory
                 onStreamsRequested: shell.moreView = "streams"
+                onSettingsRequested: shell.moreView = "settings"
                 onHistoryRequested: shell.moreView = "history"
                 onAboutRequested: shell.moreView = "about"
                 onDiagnosticsRequested: shell.page = "diagnostics"
@@ -386,6 +403,19 @@ FocusScope {
                 onPlayRequested: shell.playList(list, index, options)
                 onQueueRequested: shell.addToQueue(list, next)
                 onPlaylistRequested: shell.addToPlaylist(list)
+            }
+            SettingsPage {
+                id: settingsView
+                anchors.fill: parent
+                visible: shell.tab === "more" && shell.moreView === "settings"
+                prefs: settingsStore
+                store: playerStore
+                overlay: home
+                keepingHistory: core.keepHistory
+                streamsAllowed: core.streamsAllowed
+                onCloseRequested: shell.moreView = ""
+                onKeepHistoryRequested: core.setKeepHistory(on)
+                onStreamsRequested: shell.moreView = "streams"
             }
             AboutPage {
                 anchors.fill: parent
@@ -474,6 +504,7 @@ FocusScope {
         visible: shell.page === "video"
         playback: core
         store: playerStore
+        prefs: settingsStore
         sleep: sleeper
         systemVolume: volumeLoader.status === Loader.Ready ? volumeLoader.item : null
         systemBrightness: brightnessLoader.status === Loader.Ready ? brightnessLoader.item : null
@@ -490,6 +521,7 @@ FocusScope {
             AudioPlayerPage {
                 playback: core
                 store: playerStore
+                prefs: settingsStore
                 sleep: sleeper
                 systemVolume: volumeLoader.status === Loader.Ready ? volumeLoader.item : null
                 systemBrightness: brightnessLoader.status === Loader.Ready ? brightnessLoader.item : null

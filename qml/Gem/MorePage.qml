@@ -16,6 +16,7 @@ Item {
 
     signal streamsRequested()
     signal historyRequested()
+    signal settingsRequested()
     signal aboutRequested()
     signal diagnosticsRequested()
 
@@ -71,6 +72,22 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: page.historyRequested()
+                }
+            }
+
+            SectionLabel { text: "Settings" }
+            SettingRow {
+                title: "Settings"
+                detail: "Gestures, resume, subtitles, and what is kept."
+                trailing: Glyph {
+                    width: Theme.u(2.2)
+                    name: "forward"
+                    color: Theme.textDim
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: page.settingsRequested()
                 }
             }
 

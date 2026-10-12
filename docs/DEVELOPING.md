@@ -77,6 +77,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `bopen [path]`, `btap <index>`, `baction <index> <open\|playAll\|favourite>`, `bfav`, `bplay` | The Browse tab: enters a folder (no path: the overview), a tap on the row at that place, a folder's menu entries, the star of the folder shown, and its play button. `state` reports the folder as `browsing` |
 | `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
 | `aalbumgrid <0\|1>` | Albums as cards with covers, or as rows |
+| `settings`, `sscroll <y>`, `pref <name> <value>`, `sclear <history\|streams\|progress> [now]` | Opens the Settings page and scrolls it; sets one setting by its name in `qml/Gem/Prefs.qml` (`1` and `0` for a switch); the question before clearing, or with `now` the clearing itself. `state` reports every setting under `prefs` |
 | `history`, `about`, `hkeep <0\|1>`, `hmenu <index>`, `haction <index> <play\|insertNext\|append\|addToPlaylist\|remove>`, `hclear [now]` | Opens the History or the About page; the "Keep a playback history" switch; an entry's menu and one choice from it; the question before clearing, or with `now` the clearing itself. `state` reports the switch as `keepHistory` |
 | `streams`, `sallow <0\|1>`, `sopen <address>`, `gate <allow\|cancel>` | Opens the Streams page; the "Allow streams" switch; opens an address; answers the question that comes when streams are off. `state` reports the switch as `streams`, the question's address as `gate`, and the backend's `hasVideo` |
 | `smenu <index>`, `saction <index> <play\|rename <name>\|copy\|addToPlaylist\|delete>` | The stream history: the menu of the address at that place, and one choice from it |
@@ -181,6 +182,7 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | Expect a seek to land early and late | It goes to the keyframe before the target and takes 0.4 to 1.5 s; a seek before playback has started is ignored |
 | Do not trust `hasAudio`, `metaData` or `volume` | Wrong, empty, and ignored |
 | Set your own time limit when opening a stream | A dead address raises no error |
+| `tools/dev.sh restart` kills the app, so music it was playing plays on | The window's closing is what pauses; a killed process cannot. Stop the music before a restart, or play and stop something after it |
 | A file that is still loaded plays on from where it was paused | Opening the same address again does not rewind it; "Play from start" has to seek to 0 once playback has started |
 | Pause a video yourself when the app is suspended | media-hub plays on behind the lock screen and other apps |
 | A `Playlist` is for audio only | Played from a list, a video's picture stays black or stale. Audio in a list is moved on by media-hub itself, also while the app is frozen |
