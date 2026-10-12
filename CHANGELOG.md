@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.26 - unreleased
+## 0.0.26 - 12 October 2026
 
 - The Playlists tab: your own lists of music and videos. The plus at the
   top makes one; inside a playlist a tap plays it from that item on, and an
