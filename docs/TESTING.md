@@ -27,12 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-100 checks are open. The rows themselves are in each section's "By hand"
+102 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
-| [Settings, 0.0.29](#settings-version-0029) | 8 | Subtitles on a bright picture for one |
+| [Settings, 0.0.29](#settings-version-0029) | 10 | Subtitles on a bright picture for one |
 | [History and About, 0.0.28](#playback-history-and-about-version-0028) | 5 | |
 | [Streams, 0.0.27](#streams-version-0027) | 8 | Wi-Fi, and an address to open |
 | [Playlists, 0.0.26](#playlists-version-0026) | 8 | |
@@ -95,6 +95,10 @@ call, and what it does was then looked at.
 | "Forget progress" asks first; done, no video has a tick or a bar | Pass |
 | "Clear the playback history" and "Clear the stream history": both lists empty | Pass |
 | `back` leaves Settings for More | Pass |
+| "Keep running in the background" on: the system's list reads `['music.ubports', 'gemplayer.yenis']`; off again: `['music.ubports']` | Pass |
+| With it on, music and a sleep timer of 20 s, the calculator in front: media-hub reads "Paused" 28 s later, and the app answers the remote from behind the calculator | Pass, at once, without a restart of the app |
+| With it on, a video playing, the calculator in front | **Failed at first: the video played on.** The app's state behind the calculator is "inactive", never "suspended"; its window says nothing more. Fixed: with the switch on, three seconds of "inactive" count as the app being left. media-hub then reads "Paused" |
+| With it off, the same: paused, as before | Pass |
 | No QML warnings in the log | Pass |
 
 The restart in the queue check was the remote's, which kills the process:
@@ -115,6 +119,8 @@ files' and those of the one video that is not a test file.
 | Subtitles: each size and colour, and the dark box, on a bright picture | Still to do |
 | "Play on as audio" with the power button, not another app | Still to do |
 | The three questions under Advanced: "Cancel" leaves things as they are | Still to do |
+| "Keep running in the background" on: a sleep timer of a few minutes on music with the screen off; A-B repeat with the screen off | Still to do |
+| With it on: a video pauses when the phone is locked; pulling the system's panel down for a moment does not pause it, holding it open does; and a day's battery beside a day with it off | Still to do |
 
 ## Playback history and About, version 0.0.28
 

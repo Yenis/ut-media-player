@@ -14,6 +14,10 @@
 - Subtitles: four sizes, white or yellow, and a dark box behind the text,
   with a sample that shows the result.
 - Audio: whether the queue is brought back when the app is opened.
+- Advanced: "Keep running in the background", off unless you switch it on.
+  With it on the system no longer freezes the app when it is left, so the
+  sleep timer and A-B repeat also work with the screen off and under other
+  apps, at the cost of more battery.
 - Advanced: clear the playback history, clear the stream history, and
   forget where videos were left and which were played.
 

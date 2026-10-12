@@ -90,6 +90,8 @@ FocusScope {
     Loader { id: volumeLoader; source: "../platform/SystemVolume.qml" }
     Loader { id: brightnessLoader; source: "../platform/SystemBrightness.qml" }
     Loader { id: foldersLoader; source: "../platform/Folders.qml" }
+    Loader { id: backgroundLoader; source: "../platform/BackgroundRunning.qml" }
+    readonly property var backgroundRunning: backgroundLoader.status === Loader.Ready ? backgroundLoader.item : null
     Loader {
         source: "../platform/ContentImport.qml"
         onLoaded: item.incoming.connect(shell.openUrl)
@@ -294,21 +296,41 @@ FocusScope {
 
     // media-hub would play a video on behind the lock screen or another app.
     // VLC's default is to stop it unless it was switched to audio (D10).
+    //
+    // The app hears that it was left in one of two ways. Frozen by the
+    // system, as an app normally is, it is told "suspended" just before.
+    // Kept running in the background (platform/BackgroundRunning.qml), it
+    // is never suspended and only ever "inactive" [device], which it also
+    // is for a moment under the system's panels; so there it counts as
+    // left once it has been inactive for as long as a freeze takes to come.
+    function _left() {
+        if (page !== "video" || core.audioMode)
+            return;
+        // As the settings have it: on as audio, if it was playing, or paused.
+        if (settingsStore.videoPlaysOnAsAudio && core.playing)
+            toAudio();
+        else
+            core.pause();
+    }
+
+    Timer {
+        id: leftCheck
+        interval: 3000
+        onTriggered: if (Qt.application.state !== Qt.ApplicationActive) shell._left()
+    }
+
     Connections {
         target: Qt.application
         onStateChanged: {
-            if (Qt.application.state === Qt.ApplicationActive)
+            if (Qt.application.state === Qt.ApplicationActive) {
+                leftCheck.stop();
                 return;
-            if (Qt.application.state === Qt.ApplicationSuspended && shell.page === "video" && !core.audioMode) {
-                // As the settings have it: on as audio, if it was playing,
-                // or paused. VLC's default is to stop.
-                if (settingsStore.videoPlaysOnAsAudio && core.playing)
-                    shell.toAudio();
-                else
-                    core.pause();
-            } else {
-                core.saveNow();
             }
+            core.saveNow();
+            if (Qt.application.state === Qt.ApplicationSuspended)
+                shell._left();
+            else if (shell.backgroundRunning && shell.backgroundRunning.exempt)
+                leftCheck.restart();
         }
     }
 
@@ -413,6 +435,7 @@ FocusScope {
                 overlay: home
                 keepingHistory: core.keepHistory
                 streamsAllowed: core.streamsAllowed
+                background: shell.backgroundRunning
                 onCloseRequested: shell.moreView = ""
                 onKeepHistoryRequested: core.setKeepHistory(on)
                 onStreamsRequested: shell.moreView = "streams"

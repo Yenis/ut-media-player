@@ -16,6 +16,7 @@ Item {
     property var prefs: null            // Prefs
     property var store: null            // PlayerStore: what "Advanced" clears
     property var overlay: page          // what the sheets cover; the shell passes all of "home"
+    property var background: null       // platform/BackgroundRunning.qml, or null off the device
     property bool keepingHistory: true
     property bool streamsAllowed: false
 
@@ -262,6 +263,18 @@ Item {
             // ---- advanced ---------------------------------------------------------------
 
             SectionLabel { text: "Advanced" }
+            SettingRow {
+                // Only where the system has such a list.
+                visible: page.background !== null
+                title: "Keep running in the background"
+                detail: page.background && page.background.exempt
+                        ? "On. The app is not frozen when it is left, so the sleep timer and A-B repeat also work with the screen off and under other apps. It uses more battery. GemPlayer is on the system's list of apps that are not frozen; switching this off takes it out again."
+                        : "Off. The system freezes the app a few seconds after it is left. Music plays on, but the sleep timer and A-B repeat wait until the app is opened again. Switching this on adds GemPlayer to the system's list of apps that are not frozen."
+                trailing: Toggle {
+                    checked: page.background ? page.background.exempt : false
+                    onToggled: page.background.setExempt(checked)
+                }
+            }
             SettingRow {
                 title: "Clear the playback history"
                 detail: "The list under More, History."

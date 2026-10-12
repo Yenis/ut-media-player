@@ -29,8 +29,8 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **Not confirmed by hand** | 100 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4: library search, then the rest of its list. One question is Yenis's to answer first: whether the app may add itself to the system's list of apps that are not frozen (see the Discuss table of [Phase 1](#phase-1---video-player)); it was left out of the settings until then. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
+| **Not confirmed by hand** | 102 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | Phase 4: library search, then the rest of its list. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
 
 What the first day established, in the order it was found:
 
@@ -109,6 +109,8 @@ Facts are marked:
 | D13 | Network | **Nothing over the network except playing streams** (decided by Yenis, 3 October 2026). The aim is an app that needs no network permission and cannot connect anywhere by itself. Dropped for good: network shares, casting, remote access, subtitle download, film metadata. Kept: opening a stream by address, stream history, and a link handed over by another app, since each is playing a stream. See [Network](#network) |
 | D14 | Streams | **Off until the user allows them** (decided by Yenis, 9 October 2026). A setting, "Allow streams", is off on a new install; while it is off the player refuses every address that is not a file, and asking for a stream brings a dialog that says the app is offline and what allowing means. The system has no network permission to grant at run time, so the switch is the app's own. See [Network](#network) |
 | D15 | Incognito mode | **Dropped** (Yenis, 9 October 2026): not needed. With it go VLC's "Persistent incognito mode" and its header icon |
+
+| D16 | Running in the background | **The app may add itself to the system's list of apps that are not frozen, when the user switches that on** (decided by Yenis, 12 October 2026). Off by default. It is the setting `com.canonical.qtmir lifecycle-exempt-appids`, which holds the stock Music app; an unconfined app can write it. With it on, the sleep timer and A-B repeat work behind the lock screen and other apps. Switching off takes the app out of the list again. A confined build could not do this |
 
 ### Still open
 
@@ -496,7 +498,7 @@ Discuss items this phase reached, for a decision (D2):
 | Item | What it would take | Suggestion |
 |---|---|---|
 | Playback speed and fast play, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters | A second playback engine, in compiled code | After 0.1.0, as one decision |
-| Sleep timer and A-B repeat while the app is in the background | The app adding itself to the system's list of apps that are not frozen | An opt-in switch in Settings, Phase 4. It would also do away with the catching up after a freeze that 0.0.18 needs (see [Phase 3](#phase-3---audio)) |
+| Sleep timer and A-B repeat while the app is in the background | The app adding itself to the system's list of apps that are not frozen | Decided as D16 and built in 0.0.29: an opt-in switch under Settings, Advanced. The catching up after a freeze that 0.0.18 needs stays in, for when the switch is off |
 | Pop-up player | The platform has no floating windows | Drop |
 | Subtitle download | An account with an online subtitle service, and a file hash | Dropped (D13) |
 | Renaming a bookmark | A text field in a turned player; the system keyboard appears on the window's edge, not the content's | With playlists in Phase 4, which need naming too. The name dialog exists since 0.0.10 (`NameDialog.qml`); what is left is using it in a turned player |
@@ -852,17 +854,27 @@ How it is built:
   - Subtitles: size, white or yellow, a dark box behind; a sample.
   - Audio: bring back the queue at the start.
   - History: the playback history's switch, and the way to the streams'.
+  - Advanced: "Keep running in the background" (D16),
+    `qml/platform/BackgroundRunning.qml`, which reads and writes the
+    system's list through the `GSettings` module **[device]**. It takes
+    effect at once, without a restart. The list itself is the record of
+    the choice; the app keeps none of its own. If the app is removed while
+    the switch is on, its name stays in the list, where it does nothing.
   - Advanced: clear the playback history, the stream history, and the
     progress and played marks, each after a question.
+  - Found on the way **[device]**: an app that is not frozen is never told
+    it was "suspended"; behind another app it is only "inactive", as it
+    also is for a moment under the system's panels. A video was therefore
+    no longer paused when the app was left (D10). With the switch on, the
+    app now counts as left once it has been inactive for three seconds.
+    So a video also pauses when the system's panel is held open that long.
   - Found on the way **[device]**: with resume off, a video still loaded in
     media-hub played on from where it had been paused, as "Play from
     start" once did. It is sent to its start the same way.
   - Not in it yet: the choice to be asked before resuming; rewind and
     forward buttons in the video player; picking a subtitle file and its
     encoding; separate skip lengths for audio and video, as VLC has them;
-    export and restore, which need a way to write a file; and staying
-    awake in the background for the sleep timer, which is a Discuss item
-    and Yenis's to decide.
+    export and restore, which need a way to write a file.
 - [ ] Library search across videos, artists, albums, tracks, genres and
       playlists.
 - [x] Incognito mode: dropped (D15). It was VLC's switch for leaving no

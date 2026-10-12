@@ -77,6 +77,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `bopen [path]`, `btap <index>`, `baction <index> <open\|playAll\|favourite>`, `bfav`, `bplay` | The Browse tab: enters a folder (no path: the overview), a tap on the row at that place, a folder's menu entries, the star of the folder shown, and its play button. `state` reports the folder as `browsing` |
 | `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
 | `aalbumgrid <0\|1>` | Albums as cards with covers, or as rows |
+| `exempt <0\|1>` | "Keep running in the background": puts the app on the system's list of apps that are not frozen, or takes it off. `state` reports it as `exempt`, and the window's visibility, `active` and `visible` as `win` |
 | `settings`, `sscroll <y>`, `pref <name> <value>`, `sclear <history\|streams\|progress> [now]` | Opens the Settings page and scrolls it; sets one setting by its name in `qml/Gem/Prefs.qml` (`1` and `0` for a switch); the question before clearing, or with `now` the clearing itself. `state` reports every setting under `prefs` |
 | `history`, `about`, `hkeep <0\|1>`, `hmenu <index>`, `haction <index> <play\|insertNext\|append\|addToPlaylist\|remove>`, `hclear [now]` | Opens the History or the About page; the "Keep a playback history" switch; an entry's menu and one choice from it; the question before clearing, or with `now` the clearing itself. `state` reports the switch as `keepHistory` |
 | `streams`, `sallow <0\|1>`, `sopen <address>`, `gate <allow\|cancel>` | Opens the Streams page; the "Allow streams" switch; opens an address; answers the question that comes when streams are off. `state` reports the switch as `streams`, the question's address as `gate`, and the backend's `hasVideo` |
@@ -200,7 +201,8 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | After a freeze, expect the playing item to be started again, and seek back | Qt's player answers every index change of the list with `setMedia` and `play`. The changes made while the app was frozen all arrive on waking |
 | Pause when the window closes | media-hub plays on after the app's process has gone |
 | Never store an empty text in the database | LocalStorage binds `""` as NULL |
-| Nothing in the app runs while it is in the background | The app is frozen a few seconds after it leaves the foreground; playback continues without it |
+| An app on the system's not-frozen list is never "suspended" | Behind another app `Qt.application.state` is `ApplicationInactive` and stays so; the window's `visibility` does not change and only `active` goes false. Anything that waited for "suspended" has to count a lasting "inactive" instead |
+| Nothing in the app runs while it is in the background, unless it is on that list | The app is frozen a few seconds after it leaves the foreground; playback continues without it |
 
 ## Reaching the system from QML
 
@@ -209,6 +211,7 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | Media library, thumbnails | `MediaScanner 0.1`, `Lomiri.Thumbnailer 0.1` | `qml/platform/MediaLibrary.qml` |
 | Files from other apps | `Lomiri.Content 1.3` | `qml/platform/ContentImport.qml` |
 | System volume, screen brightness | The sound and power indicators publish their sliders as actions on the session bus; `QMenuModel 1.0`'s `QDBusActionGroup` reads and sets them | `qml/platform/SystemVolume.qml`, `SystemBrightness.qml` |
+| Not being frozen in the background | `GSettings 1.0`, schema `com.canonical.qtmir`, key `lifecycle-exempt-appids`: a list of package names, read and written as `lifecycleExemptAppids` | `qml/platform/BackgroundRunning.qml` |
 | User folders | `Qt.labs.platform` `StandardPaths` | `qml/platform/Folders.qml` |
 | Listing a folder | `Qt.labs.folderlistmodel` | `qml/Gem/SubtitleTrack.qml` |
 | On-screen keyboard height | `Qt.inputMethod`, as GemTicker does; a plain Window does not make room for the keyboard itself | `qml/Gem/AppShell.qml` |
