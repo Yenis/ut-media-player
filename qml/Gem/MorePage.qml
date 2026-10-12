@@ -15,6 +15,7 @@ Item {
     property bool keepingHistory: true
 
     signal streamsRequested()
+    signal searchRequested()
     signal historyRequested()
     signal settingsRequested()
     signal aboutRequested()
@@ -40,6 +41,22 @@ Item {
         Column {
             id: content
             width: parent.width
+
+            SectionLabel { text: "Library" }
+            SettingRow {
+                title: "Search"
+                detail: "Videos, artists, albums, tracks, genres and playlists, all at once."
+                trailing: Glyph {
+                    width: Theme.u(2.2)
+                    name: "search"
+                    color: Theme.textDim
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: page.searchRequested()
+                }
+            }
 
             SectionLabel { text: "Network" }
             SettingRow {

@@ -43,8 +43,10 @@ FocusScope {
     readonly property alias streamGate: gate
 
     readonly property alias historyPage: historyView
+    readonly property alias searchPage: searchView
 
-    // What covers the More tab: "" for nothing, "streams", "history", "settings" or "about".
+    // What covers the More tab: "" for nothing, "search", "streams",
+    // "history", "settings" or "about".
     property string moreView: ""
     readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
@@ -149,6 +151,13 @@ FocusScope {
         var what = list.length === 1 ? "\u201c" + list[0].title + "\u201d"
                                      : list.length + (list[0].hasPicture ? " videos" : " tracks");
         notice.show(what + (next ? " will play next" : " added to the play queue"));
+    }
+
+    function openSearch() {
+        page = "home";
+        tab = "more";
+        moreView = "search";
+        searchView.open();
     }
 
     // "Add to playlist", from any page: the picker asks which one.
@@ -407,10 +416,34 @@ FocusScope {
                 streamsAllowed: core.streamsAllowed
                 keepingHistory: core.keepHistory
                 onStreamsRequested: shell.moreView = "streams"
+                onSearchRequested: shell.openSearch()
                 onSettingsRequested: shell.moreView = "settings"
                 onHistoryRequested: shell.moreView = "history"
                 onAboutRequested: shell.moreView = "about"
                 onDiagnosticsRequested: shell.page = "diagnostics"
+            }
+            SearchPage {
+                id: searchView
+                anchors.fill: parent
+                visible: shell.tab === "more" && shell.moreView === "search"
+                library: shell.library
+                store: playerStore
+                overlay: home
+                playingUrl: shell.audioActive ? core.url : ""
+                onCloseRequested: shell.moreView = ""
+                onPlayRequested: shell.playList(list, index, options)
+                onQueueRequested: shell.addToQueue(list, next)
+                onPlaylistRequested: shell.addToPlaylist(list)
+                // A result that is a list is opened where it lives. The
+                // search stays as it is behind the More tab, to come back to.
+                onGroupRequested: {
+                    shell.tab = "audio";
+                    audioTab.openGroup(listKey, key);
+                }
+                onPlaylistOpenRequested: {
+                    shell.tab = "playlists";
+                    playlistsTab.openId = playlistId;
+                }
             }
             HistoryPage {
                 id: historyView

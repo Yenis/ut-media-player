@@ -300,9 +300,14 @@ Item {
     // Opens the album or the artist a track belongs to, in that list. What
     // would hide it there, the filter or "only favourites", is switched off.
     function goTo(kind, track) {
-        var key = AudioLibrary.groupKey(kind, track);
+        openGroup(kind === "album" ? "albums" : "artists", AudioLibrary.groupKey(kind, track));
+    }
+
+    // Opens the artist, album or genre with this key in its list: for "Go
+    // to" above, and for a result of the library search.
+    function openGroup(tabKey, key) {
         closeFilter();
-        setTab(kind === "album" ? "albums" : "artists");
+        setTab(tabKey);
         if (!AudioLibrary.findGroup(topLevel, key))
             setOnlyFavourites(false);
         if (AudioLibrary.findGroup(topLevel, key))

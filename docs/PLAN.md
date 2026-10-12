@@ -10,8 +10,8 @@ gestures, a menu, shuffle and repeat; a mini-player; and a queue that moves
 on in the background, is kept between launches and can be searched, trimmed
 and put in order (0.0.12 to 0.0.24). Phase 4 is under way: version 0.0.25
 has the Browse tab, 0.0.26 the playlists, 0.0.27 the streams, 0.0.28 the
-playback history and About and 0.0.29 the settings, all four checked on the
-phone over adb on 12 October 2026. On 9 October 2026 the plan was put in order before the
+playback history and About, 0.0.29 the settings and 0.0.30 the library
+search, all five checked on the phone over adb on 12 October 2026. On 9 October 2026 the plan was put in order before the
 rest of Phase 4: the open checks were gathered in one list, and the
 questions of confinement, of streams without a network permission and of
 incognito mode were looked into and settled (D14, D15); see [Confinement](#confinement),
@@ -29,8 +29,8 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **Not confirmed by hand** | 102 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4: library search, then the rest of its list. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
+| **Not confirmed by hand** | 108 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | Phase 4, the rest of its list: Content Hub import, "open with" and sharing, with a link handed over by another app; landscape and tablet layouts; empty, error and unsupported-format states; tips for the gestures. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
 
 What the first day established, in the order it was found:
 
@@ -875,8 +875,22 @@ How it is built:
     forward buttons in the video player; picking a subtitle file and its
     encoding; separate skip lengths for audio and video, as VLC has them;
     export and restore, which need a way to write a file.
-- [ ] Library search across videos, artists, albums, tracks, genres and
-      playlists.
+- [x] Library search (version 0.0.30), under More,
+      `qml/Gem/SearchPage.qml`: one text across videos, artists, albums,
+      tracks, genres and playlists, the results in sections with their
+      counts, the first 20 of each and a line saying how many more. A
+      video plays; a track plays with the other tracks found, from it on,
+      as a filtered list does; an artist, album or genre opens in the
+      Audio tab and a playlist in its own, the search staying behind More
+      to come back to. Every result has a menu with play, "Insert next",
+      "Add to play queue" and "Add to playlist". It reuses the Audio tab's
+      grouping and filtering (`qml/js/AudioLibrary.js`), so an artist or
+      album is found by what the Audio tab lists it under. A track is
+      found by its title only: one whose artist or album matches is
+      reached through that artist or album. Where it differs from VLC: it
+      is a page under More and not an icon on every tab, where the
+      magnifying glass is each list's own filter; and it does not look
+      through the stream history or the Browse tab's folders.
 - [x] Incognito mode: dropped (D15). It was VLC's switch for leaving no
       trace of what is played: no progress, seen marker, history entry or
       last queue saved while it is on. Nothing to do with the network.

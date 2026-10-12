@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -27,11 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-102 checks are open. The rows themselves are in each section's "By hand"
+108 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [Library search, 0.0.30](#library-search-version-0030) | 6 | |
 | [Settings, 0.0.29](#settings-version-0029) | 10 | Subtitles on a bright picture for one |
 | [History and About, 0.0.28](#playback-history-and-about-version-0028) | 5 | |
 | [Streams, 0.0.27](#streams-version-0027) | 8 | Wi-Fi, and an address to open |
@@ -73,6 +74,45 @@ table, marked "Still to do" or "Not reported".
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Library search, version 0.0.30
+
+### Checked over adb, 12 October 2026
+
+On the phone's own 188 tracks and 12 videos, and a playlist made for it.
+
+| Check | Result |
+|---|---|
+| The page with nothing typed: the field, and what it looks through | Pass (layout) |
+| "souls": 7 albums, 18 tracks and the playlist "Souls mix", under "Albums • 7", "Tracks • 18", "Playlists • 1"; albums with their covers | Pass |
+| "720": the three videos with it in their name | Pass |
+| "zzzz": "Nothing in the library matches “zzzz”." | Pass |
+| "a": four videos; "Artists • 24" with 20 listed and "4 more. Type more to narrow it down."; "Albums • 33" with "13 more"; "Tracks • 133" with "113 more"; six genres | Pass |
+| A tap on an album: the Audio tab, that album open on its two tracks; `back` and More: the search is as it was left | Pass |
+| A tap on the second track found: it plays, "2 of 18", the queue being the tracks found; media-hub reads that track | Pass |
+| An album's menu, "Add to playlist": its 17 tracks are in the playlist | Pass |
+| A track's menu, "Insert next": the queue grows by one | Pass |
+| A tap on the playlist: the Playlists tab, that playlist open | Pass |
+| A tap on a video: the video player | Pass |
+| A result's menu: Open, Play all, Insert next, Add to play queue, Add to playlist | Pass (layout) |
+| No QML warnings in the log | Pass |
+
+All of it was run twice, the second time after Yenis said the screen had
+been off, with the lock screen asked before and after: not showing, and the
+app answering as the active one. Both runs gave the same results. The
+playlist and the history entries the tests left were removed from the phone
+afterwards.
+
+### By hand
+
+| Check | Result |
+|---|---|
+| More → Search: the keyboard comes up with it; typing narrows the results as it goes | Still to do |
+| Scrolling the results puts the keyboard away; the cross empties the field | Still to do |
+| A tap on each kind of result; the three dots on one | Still to do |
+| Back from an opened album to the search: is the way back clear enough, being two taps? | Still to do |
+| The header arrow and the back gesture leave the search | Still to do |
+| Is under More the right place for it, or should it be reachable from every tab? | Still to do |
 
 ## Settings, version 0.0.29
 

@@ -27,6 +27,7 @@ PlaylistPicker 1.0 PlaylistPicker.qml
 PlaylistsPage 1.0 PlaylistsPage.qml
 QueuePage 1.0 QueuePage.qml
 SearchField 1.0 SearchField.qml
+SearchPage 1.0 SearchPage.qml
 SectionLabel 1.0 SectionLabel.qml
 SeekBar 1.0 SeekBar.qml
 SegmentedChoice 1.0 SegmentedChoice.qml

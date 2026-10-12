@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.30 - unreleased
+
+- Search, under More: one text looked for across the whole library. The
+  results come in sections, videos, artists, albums, tracks, genres and
+  playlists, each with how many were found.
+- A video or a track found plays at a tap; an artist, an album, a genre or
+  a playlist is opened in its own tab, and the search is still there when
+  you come back to More.
+- Every result has a menu: play, insert next, add to the play queue, add
+  to a playlist.
+
 ## 0.0.29 - 12 October 2026
 
 - Settings, under More. Nothing changes until you switch something: every
