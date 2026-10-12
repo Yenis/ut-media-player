@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -27,11 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-87 checks are open. The rows themselves are in each section's "By hand"
+92 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [History and About, 0.0.28](#playback-history-and-about-version-0028) | 5 | |
 | [Streams, 0.0.27](#streams-version-0027) | 8 | Wi-Fi, and an address to open |
 | [Playlists, 0.0.26](#playlists-version-0026) | 8 | |
 | [Browse tab, 0.0.25](#browse-tab-version-0025) | 4 | An SD card or USB stick for one |
@@ -71,6 +72,38 @@ table, marked "Still to do" or "Not reported".
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Playback history and About, version 0.0.28
+
+### Checked over adb, 12 October 2026
+
+| Check | Result |
+|---|---|
+| The History page with nothing played: the switch, on, and "Nothing has been played yet." | Pass |
+| A music file, a video, then the fourth track of the track list and `next`: four entries, the latest first, each with "Today" and the time, the video with its picture, the one that plays in the accent colour | Pass |
+| A tap on the video's entry: the video player; on a track's: it plays behind the list, alone, "1 of 1", media-hub reads that track | Pass |
+| An entry played again moves to the top | Pass |
+| "Add to play queue" from an entry while music plays: the queue reads 2; "Remove from history": the entry is gone | Pass |
+| The switch off, then `next`: the next item plays and the history is as it was; More says "Off. Nothing new is listed." | Pass |
+| "Clear": "Clear the playback history?" with "Clear history" and "Cancel"; cleared, the list is empty | Pass |
+| Six 30 s tracks played with the calculator in front for 75 s: back in the app the history has the three that started, the third on top | Pass |
+| The About page: icon, "Version 0.0.28", five entries | Pass (layout) |
+| `back` leaves History and About for More | Pass |
+| No QML warnings in the log | Pass |
+
+The first build had a cross in the header for clearing, which beside the
+mini-player's cross read as "close"; it is the word "Clear" now. The test
+entries were cleared from the phone afterwards.
+
+### By hand
+
+| Check | Result |
+|---|---|
+| More → History and More → About; the header arrow and the back gesture lead back | Still to do |
+| A tap on an entry plays it; the three dots open its menu | Still to do |
+| The switch by touch; "Clear", and "Cancel" in its question | Still to do |
+| After a day of use: is "the latest 200, each item once" what a history should be? | Still to do |
+| The About page scrolls, and reads right | Still to do |
 
 ## Streams, version 0.0.27
 

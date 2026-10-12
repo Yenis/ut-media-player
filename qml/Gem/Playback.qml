@@ -91,6 +91,17 @@ Item {
         settings.sync();
     }
 
+    // What starts to play is noted in the playback history. On unless
+    // switched off, as in VLC.
+    property bool keepHistory: true
+
+    function setKeepHistory(on) {
+        _readAllowed();
+        keepHistory = !!on;
+        settings.setValue("keepHistory", keepHistory);
+        settings.sync();
+    }
+
     // Read on first use: who is ready first, this object or its owner, is
     // not laid down.
     property bool _allowedRead: false
@@ -100,6 +111,8 @@ Item {
         _allowedRead = true;
         var kept = settings.value("streamsAllowed", false);
         streamsAllowed = kept === true || kept === "true";
+        var noted = settings.value("keepHistory", true);
+        keepHistory = !(noted === false || noted === "false");
     }
 
     // What plays after what. `queue` holds media as `open` takes them.
@@ -797,6 +810,11 @@ Item {
                     playback.seekTo(0);
                 playback._pendingStart = 0;
                 playback._fromStart = false;
+                // It plays: that is what the history is a record of. An item
+                // the hub moved to while the app was frozen is noted when
+                // the app wakes and hears of it.
+                if (playback.keepHistory && playback.store && playback.queueIndex >= 0)
+                    playback.store.noteHistory(playback.queue[playback.queueIndex]);
                 return;
             }
 

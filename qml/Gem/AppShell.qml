@@ -42,7 +42,9 @@ FocusScope {
     readonly property alias streamsPage: streamsView
     readonly property alias streamGate: gate
 
-    // What covers the More tab: "" for nothing, or "streams".
+    readonly property alias historyPage: historyView
+
+    // What covers the More tab: "" for nothing, "streams", "history" or "about".
     property string moreView: ""
     readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
@@ -365,8 +367,30 @@ FocusScope {
                 anchors.fill: parent
                 visible: shell.tab === "more" && shell.moreView === ""
                 streamsAllowed: core.streamsAllowed
+                keepingHistory: core.keepHistory
                 onStreamsRequested: shell.moreView = "streams"
+                onHistoryRequested: shell.moreView = "history"
+                onAboutRequested: shell.moreView = "about"
                 onDiagnosticsRequested: shell.page = "diagnostics"
+            }
+            HistoryPage {
+                id: historyView
+                anchors.fill: parent
+                visible: shell.tab === "more" && shell.moreView === "history"
+                store: playerStore
+                overlay: home
+                keeping: core.keepHistory
+                playingUrl: core.loaded ? core.url : ""
+                onCloseRequested: shell.moreView = ""
+                onKeepRequested: core.setKeepHistory(on)
+                onPlayRequested: shell.playList(list, index, options)
+                onQueueRequested: shell.addToQueue(list, next)
+                onPlaylistRequested: shell.addToPlaylist(list)
+            }
+            AboutPage {
+                anchors.fill: parent
+                visible: shell.tab === "more" && shell.moreView === "about"
+                onCloseRequested: shell.moreView = ""
             }
             StreamsPage {
                 id: streamsView

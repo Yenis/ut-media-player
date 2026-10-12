@@ -9,8 +9,9 @@ filter, sorting, favourites and multiple selection; a player with our own
 gestures, a menu, shuffle and repeat; a mini-player; and a queue that moves
 on in the background, is kept between launches and can be searched, trimmed
 and put in order (0.0.12 to 0.0.24). Phase 4 is under way: version 0.0.25
-has the Browse tab, 0.0.26 the playlists and 0.0.27 the streams, both
-checked on the phone over adb on 12 October 2026. On 9 October 2026 the plan was put in order before the
+has the Browse tab, 0.0.26 the playlists, 0.0.27 the streams and 0.0.28
+the playback history and About, all three checked on the phone over adb on
+12 October 2026. On 9 October 2026 the plan was put in order before the
 rest of Phase 4: the open checks were gathered in one list, and the
 questions of confinement, of streams without a network permission and of
 incognito mode were looked into and settled (D14, D15); see [Confinement](#confinement),
@@ -28,8 +29,8 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **Not confirmed by hand** | 87 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4: playback history, settings and about in the More tab, then search. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
+| **Not confirmed by hand** | 92 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | Phase 4: settings, then search. Settings is where the choices put off since Phase 1 are made: see the open boxes of [Phase 1](#phase-1---video-player) and its Discuss table. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
 
 What the first day established, in the order it was found:
 
@@ -819,7 +820,24 @@ How it is built:
       started at any other item was not affected, which is how it went
       unseen. `Playback.qml` now steps the list off the item and asks for
       it again once the list has confirmed.
-- [ ] More tab, still to do: playback history, settings, about.
+- [x] Playback history (version 0.0.28), under More,
+      `qml/Gem/HistoryPage.qml`: what was played, the latest first, each
+      with when; a tap plays it again, alone; its menu has "Insert next",
+      "Add to play queue", "Add to playlist" and "Remove from history";
+      "Clear" empties the list after a question; a switch at the top stops
+      the noting, as VLC's "Playback history" setting does. The player
+      notes an item when it has started to play (`Playback.qml`), into a
+      table of its own, each item whole as in a playlist: music, videos and
+      streams alike, the latest 200. A track the hub moved to while the app
+      was frozen is noted when the app wakes **[device]**. Where it differs
+      from VLC: switching the history off there also hides progress and
+      seen marks; here those stay, being the videos' own. Clearing takes
+      only the list, not resume points, seen marks or the stream history.
+- [x] About (version 0.0.28), under More, `qml/Gem/AboutPage.qml`: icon,
+      version, what the app is, the credit to VLC for Android (D5), the
+      licence, where the source is, and what it does with the network. The
+      addresses are text: nothing is opened (D13).
+- [ ] More tab, still to do: settings.
 - [ ] Library search across videos, artists, albums, tracks, genres and
       playlists.
 - [x] Incognito mode: dropped (D15). It was VLC's switch for leaving no

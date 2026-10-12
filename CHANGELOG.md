@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.28 - unreleased
+
+- A playback history, under More: what you played, the latest first, with
+  when. A tap plays an item again; its menu inserts it next, adds it to the
+  play queue or to a playlist, or takes it out of the history. "Clear"
+  empties it, after a question.
+- "Keep a playback history" at the top of that page switches it off:
+  nothing new is listed, and what is there stays until you clear it.
+- An About page, under More: the version, the licence, the credit to VLC
+  for Android, where the source is, and what the app does with the network.
+
 ## 0.0.27 - 12 October 2026
 
 - Streams, under More: type the address of a stream and it plays, with its

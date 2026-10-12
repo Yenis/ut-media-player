@@ -19,6 +19,10 @@ QtObject {
     property int groupRevision: 0
     property int playlistRevision: 0
     property int streamRevision: 0
+    property int historyRevision: 0
+
+    // The playback history holds this many items; older ones drop out.
+    readonly property int historyLimit: 200
 
     // A file counts as finished this close to its end, and as not started this
     // close to its beginning. VLC decides this in its native media library,
@@ -49,6 +53,9 @@ QtObject {
             // playlist shows without the library and can hold a file the
             // library does not know.
             tx.executeSql("CREATE TABLE IF NOT EXISTS playlists(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL)");
+            // What was played, each item whole, as in a playlist.
+            tx.executeSql("CREATE TABLE IF NOT EXISTS history("
+                          + "url TEXT PRIMARY KEY, media TEXT NOT NULL, played_at INTEGER NOT NULL)");
             // The addresses of streams that were opened, with the names given them.
             tx.executeSql("CREATE TABLE IF NOT EXISTS streams("
                           + "url TEXT PRIMARY KEY, title TEXT NOT NULL, opened_at INTEGER NOT NULL DEFAULT 0)");
@@ -244,6 +251,47 @@ QtObject {
             tx.executeSql("DELETE FROM bookmarks WHERE url = ? AND position = ?", [url, position]);
         });
         bookmarkRevision++;
+    }
+
+    // ---- playback history -------------------------------------------------------------
+
+    // What was played, the latest first: [{ media, playedAt }].
+    function history() {
+        var list = [];
+        db().readTransaction(function(tx) {
+            var rows = tx.executeSql("SELECT media, played_at FROM history ORDER BY played_at DESC").rows;
+            for (var i = 0; i < rows.length; i++)
+                list.push({ media: JSON.parse(rows.item(i).media), playedAt: rows.item(i).played_at });
+        });
+        return list;
+    }
+
+    // An item has started to play. Played again, it moves to the top.
+    function noteHistory(media) {
+        if (!media || !media.url)
+            return;
+        var kept = _playlistMedia(media);
+        db().transaction(function(tx) {
+            tx.executeSql("INSERT OR REPLACE INTO history(url, media, played_at) VALUES(?, ?, ?)",
+                          [kept.url, JSON.stringify(kept), Date.now()]);
+            tx.executeSql("DELETE FROM history WHERE url NOT IN "
+                          + "(SELECT url FROM history ORDER BY played_at DESC LIMIT " + historyLimit + ")");
+        });
+        historyRevision++;
+    }
+
+    function removeHistory(url) {
+        db().transaction(function(tx) {
+            tx.executeSql("DELETE FROM history WHERE url = ?", [url]);
+        });
+        historyRevision++;
+    }
+
+    function clearHistory() {
+        db().transaction(function(tx) {
+            tx.executeSql("DELETE FROM history");
+        });
+        historyRevision++;
     }
 
     // ---- stream history ---------------------------------------------------------------
