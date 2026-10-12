@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.27 - unreleased
+## 0.0.27 - 12 October 2026
 
 - Streams, under More: type the address of a stream and it plays, with its
   picture if it has one and in the audio player if it has none. The
