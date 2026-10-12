@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.29 - unreleased
+## 0.0.29 - 12 October 2026
 
 - Settings, under More. Nothing changes until you switch something: every
   setting starts at how the app behaved before.

@@ -34,7 +34,14 @@ access", and the library came back empty. The record is in
 
 What the app does with its access: it reads media files, reads the media
 library, and writes only its own settings and database. It has no network use
-beyond opening the stream addresses the user enters.
+beyond opening the stream addresses the user enters, and that is off until
+the user allows it (D14).
+
+One thing outside its own data is written, and only when the user switches
+it on (D16): "Keep running in the background" adds the package name to the
+system setting `com.canonical.qtmir lifecycle-exempt-appids`, as the stock
+Music app is listed there, so that the sleep timer works with the screen
+off. Switching it off removes the name again.
 
 ### The confined alternative
 
