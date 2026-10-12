@@ -273,6 +273,7 @@ FocusScope {
                 anchors.fill: parent
                 visible: shell.tab === "playlists"
                 store: playerStore
+                picturesReady: shell.library !== null
                 overlay: home
                 playingUrl: shell.audioActive ? core.url : ""
                 onPlayRequested: shell.playList(list, index, options)

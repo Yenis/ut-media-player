@@ -64,8 +64,9 @@ Item {
                 return;
             }
         }
-        store.createPlaylist(name, items);
-        done(_what(items.length) + " added to the new playlist “" + name + "”");
+        // Counted by the store: what is in `items` twice goes in once.
+        var added = store.addToPlaylist(store.createPlaylist(name, []), items);
+        done(_what(added) + " added to the new playlist “" + name + "”");
         items = [];
     }
 

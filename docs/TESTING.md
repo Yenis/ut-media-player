@@ -32,7 +32,7 @@ table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
-| [Playlists, 0.0.26](#playlists-version-0026) | 8 | The whole layer has not run on the phone: see below |
+| [Playlists, 0.0.26](#playlists-version-0026) | 8 | |
 | [Browse tab, 0.0.25](#browse-tab-version-0025) | 4 | An SD card or USB stick for one |
 | [Queue page, 0.0.24](#queue-page-search-and-moving-version-0024) | 4 | A headset or Bluetooth buttons for one |
 | [Album cards, 0.0.23](#album-cards-and-an-artists-albums-version-0023) | 3 | |
@@ -62,7 +62,6 @@ table, marked "Still to do" or "Not reported".
 
 | Check | Where it comes from | State |
 |---|---|---|
-| Version 0.0.26, the playlists, on the phone at all | Built on 9 October 2026 with no phone connected | **Open, and first in line.** Its checks over adb are listed in [its section](#playlists-version-0026); until they pass, the layer is not ready for a release |
 | A video played as audio, 30 minutes in a pocket with the screen off | S6; run 5 reached 10 minutes | Open; part of the battle test |
 | Removable storage: `/media` lists, and its files play | S2, and the Browse tab | Open; no card has been in the phone |
 | Playback under other apps and behind the lock screen as one check of the audio side, with the sound indicator and headset buttons | [PLAN.md](PLAN.md), Phase 3, the one unticked box | Open; its parts are rows of 0.0.12, 0.0.13 and 0.0.24 |
@@ -74,8 +73,9 @@ table, marked "Still to do" or "Not reported".
 
 ## Playlists, version 0.0.26
 
-Built with no phone connected. What could be checked without one was; the
-rest waits, over adb first and then by hand.
+Built with no phone connected and checked on the computer first; run on
+the phone three days later, which found three faults the computer could
+not show. By hand is still to do.
 
 ### Checked on the computer, 9 October 2026
 
@@ -105,20 +105,26 @@ database is the real one, SQLite through LocalStorage.
 | `back`: closes "Add to playlist" first; leaves an open playlist; does nothing in the list of playlists | Pass |
 | The "Add to playlist" signal of the Audio tab reaches the picker | Pass. The Video tab's, the Browse tab's and the audio player's are wired the same way and were not fired: the libraries are empty in the image |
 
-### Over adb
+### Checked over adb, 12 October 2026
+
+On the phone's own 188 tracks and the test files. What plays was read from
+media-hub beside the app's own state.
 
 | Check | Result |
 |---|---|
-| The app starts after the update, with its earlier data, and the log has no QML warnings | Still to do |
-| `aaction <track> addToPlaylist`, then `picknew`: the playlist holds the track with its title, artist, length and cover | Still to do |
-| The same for an album, a selection of tracks, a video, a video group and a selection of videos | Still to do |
-| `baction <folder> addToPlaylist` on a folder that is not open: its music and videos, and not the folder asked for before | Still to do |
-| `savequeue` in the audio player: the queue as a playlist; with "repeat all" on, each item once | Still to do |
-| `ptap` on an item of a playlist of music: it plays from there, "n of m", the mini-player shows, the item turns to the accent colour | Still to do |
-| A mixed playlist plays as audio through a video; a playlist of videos only opens the video player and moves on | Still to do |
-| "Insert next" and "Add to play queue" from a playlist and from an item, while music plays | Still to do |
-| The playlists are there after a restart | Still to do |
-| The message above the mini-player after adding; in the audio player, over the cover after "Save playlist" | Still to do |
+| The app starts after the update from 0.0.25, with its earlier data, and the log has no QML warnings | Pass, after a fix: with playlists that hold videos, the Playlists tab asked for their pictures before the media library had loaded, and the log had "Invalid image provider: image://thumbnailer/…". The pictures now wait for the library |
+| "Add to playlist" on a track, then a new playlist: it holds the track with its title and length | Pass |
+| The same for an album of two tracks, for two selected tracks of which one was in it already, for a video, for a video group of two and for two selected videos | Pass: 2 added, 1 added with "1 item added to “Phone test”, 1 already there" above the tabs, 1, 2 and 2 |
+| "Add to playlist" on a folder of the Browse tab that is not open, then on another: each gives its own files, 6 tracks and 11 videos | Pass |
+| The list: each playlist with a picture from its first video or cover, "4 videos • 1:40", "6 tracks • 3:00", "5 items • 13:19" | Pass |
+| A tap on the third item of a playlist of music: it plays, "3 of 6", media-hub reads "Playing" with that title, the mini-player shows, the item turns to the accent colour | Pass |
+| "Insert next" on an item and "Add to play queue" on a playlist of five while that plays: the queue reads 12, the inserted item first; `next` plays it | Pass |
+| "Save playlist" in the audio player with "repeat all" on, the queue holding one track twice: a playlist of 11 | Pass, after two fixes. The message said 12, the number handed over and not the number that went in; and it was wider than the screen, cut off at both ends. It now counts what the database took, and the audio player's message breaks into a second line |
+| A playlist of four tracks and a video, from its fourth item: the track plays, `next` plays the video as audio, "5 of 5" | Pass |
+| "Play" on a playlist of videos only: the video player, "1 of 4"; `next` shows the second with its picture | Pass |
+| The playlists are there after a restart, with their pictures; the queue that played is back in the mini-player | Pass |
+
+The six playlists made for this were deleted again from the phone.
 
 ### By hand
 

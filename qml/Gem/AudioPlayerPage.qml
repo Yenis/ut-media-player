@@ -440,14 +440,18 @@ Item {
             property alias text: infoLabel.text
             visible: false
             anchors.centerIn: parent
-            width: infoLabel.implicitWidth + Theme.u(4)
-            height: infoLabel.implicitHeight + Theme.u(2)
+            width: infoLabel.width + Theme.u(4)
+            height: infoLabel.height + Theme.u(2)
             radius: Theme.u(1)
             color: Qt.rgba(0, 0, 0, 0.6)
 
             Text {
                 id: infoLabel
                 anchors.centerIn: parent
+                // A long message takes a second line and stays on the cover.
+                width: Math.min(implicitWidth, info.parent.width - Theme.u(6))
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
                 color: Theme.text
                 font.pixelSize: Theme.fontL
             }

@@ -18,6 +18,10 @@ Item {
     property var store: null            // PlayerStore: the playlists
     property var overlay: page          // what the sheets cover; the shell passes all of "home"
     property string playingUrl: ""      // what plays as audio now, to mark it
+    // The pictures are image://thumbnailer/ addresses, which mean nothing
+    // until the media library has loaded and registered that provider. The
+    // playlists are there sooner, coming from the app's own database.
+    property bool picturesReady: false
 
     property int openId: 0              // the playlist that is open; 0 for none
 
@@ -249,7 +253,7 @@ Item {
                 Image {
                     id: rowArt
                     anchors.fill: parent
-                    source: modelData.art || ""
+                    source: page.picturesReady ? (modelData.art || "") : ""
                     sourceSize: Qt.size(256, 256)
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
