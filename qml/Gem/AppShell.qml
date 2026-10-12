@@ -37,6 +37,8 @@ FocusScope {
     readonly property alias videoLibrary: videoTab
     readonly property alias audioLibrary: audioTab
     readonly property alias browser: browseTab
+    readonly property alias playlistsPage: playlistsTab
+    readonly property alias playlistPicker: picker
     readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
 
@@ -120,6 +122,19 @@ FocusScope {
         notice.show(what + (next ? " will play next" : " added to the play queue"));
     }
 
+    // "Add to playlist", from any page: the picker asks which one.
+    function addToPlaylist(list) {
+        picker.ask(list);
+    }
+
+    // A word about what was just done, wherever the user is looking.
+    function say(message) {
+        if (page === "audio" && audioPage)
+            audioPage.showInfo(message, 2500);
+        else
+            notice.show(message);
+    }
+
     // A file from outside the list: another app, or a path.
     function openUrl(url) {
         var path = decodeURIComponent(url.toString().replace("file://", ""));
@@ -156,7 +171,9 @@ FocusScope {
 
     // One step back; false when there is nowhere to go back to.
     function back() {
-        if (page === "video" && videoPage)
+        if (picker.open)
+            picker.close();
+        else if (page === "video" && videoPage)
             videoPage.back();
         else if (page === "audio" && audioPage)
             audioPage.back();
@@ -168,6 +185,8 @@ FocusScope {
             return audioTab.back();
         else if (page === "home" && tab === "browse")
             return browseTab.back();
+        else if (page === "home" && tab === "playlists")
+            return playlistsTab.back();
         else
             return false;
         return true;
@@ -223,6 +242,7 @@ FocusScope {
                 overlay: home
                 onPlayRequested: shell.playList(list, index, options)
                 onQueueRequested: shell.addToQueue(list, next)
+                onPlaylistRequested: shell.addToPlaylist(list)
             }
             AudioLibraryPage {
                 id: audioTab
@@ -234,6 +254,7 @@ FocusScope {
                 playingUrl: shell.audioActive ? core.url : ""
                 onPlayRequested: shell.playList(list, index, options)
                 onQueueRequested: shell.addToQueue(list, next)
+                onPlaylistRequested: shell.addToPlaylist(list)
             }
             BrowsePage {
                 id: browseTab
@@ -245,13 +266,17 @@ FocusScope {
                 homePath: foldersLoader.status === Loader.Ready ? foldersLoader.item.home : ""
                 playingUrl: shell.audioActive ? core.url : ""
                 onPlayRequested: shell.playList(list, index, options)
+                onPlaylistRequested: shell.addToPlaylist(list)
             }
-            PlaceholderPage {
+            PlaylistsPage {
+                id: playlistsTab
                 anchors.fill: parent
                 visible: shell.tab === "playlists"
-                title: "Playlists"
-                glyph: "playlist"
-                text: "Your playlists will be here."
+                store: playerStore
+                overlay: home
+                playingUrl: shell.audioActive ? core.url : ""
+                onPlayRequested: shell.playList(list, index, options)
+                onQueueRequested: shell.addToQueue(list, next)
             }
             MorePage {
                 anchors.fill: parent
@@ -349,8 +374,19 @@ FocusScope {
                 onCollapseRequested: shell.page = "home"
                 onStopRequested: shell.closePlayer()
                 onVideoRequested: shell.toVideo()
+                onPlaylistRequested: shell.addToPlaylist(list)
             }
         }
+    }
+
+    // "Add to playlist" is asked for from the lists and from the audio
+    // player alike, so its sheet and dialog lie over both.
+    PlaylistPicker {
+        id: picker
+        anchors.fill: parent
+        anchors.bottomMargin: shell.keyboardHeight
+        store: playerStore
+        onDone: shell.say(message)
     }
 
     // The Phase 0 spike, kept for checking the platform. It has players of its

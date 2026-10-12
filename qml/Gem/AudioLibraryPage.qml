@@ -75,6 +75,8 @@ Item {
     // Add `list` to what plays: after the current item if `next`, otherwise
     // at the end.
     signal queueRequested(var list, bool next)
+    // "Add to playlist" for `list`; the shell asks which playlist.
+    signal playlistRequested(var list)
 
     function keyOf(item) {
         return item.tracks ? item.key : item.url;
@@ -133,6 +135,8 @@ Item {
             play(list, 0);
         else if (key === "append" || key === "insertNext")
             queueRequested(list, key === "insertNext");
+        else if (key === "addToPlaylist")
+            playlistRequested(list);
     }
 
     function reload() {
@@ -283,6 +287,8 @@ Item {
             play(tracksOf(item), 0);
         else if (key === "append" || key === "insertNext")
             queueRequested(tracksOf(item), key === "insertNext");
+        else if (key === "addToPlaylist")
+            playlistRequested(tracksOf(item));
         else if (key === "favourite" && !item.tracks)
             store.setFavourite(item.url, !favourites[item.url]);
         else if (key === "info" && !item.tracks)
@@ -312,6 +318,7 @@ Item {
 
     function closeSheets() {
         itemMenu.close();
+        addSheet.close();
         displaySheet.close();
     }
 
@@ -431,7 +438,8 @@ Item {
             IconButton {
                 glyph: "add"
                 color: Theme.text
-                onClicked: page.selectionAction("append")
+                // To the play queue, or to a playlist.
+                onClicked: addSheet.show()
             }
             IconButton {
                 glyph: "star"
@@ -741,7 +749,8 @@ Item {
             var rows = [
                 { key: "play", label: item && item.tracks ? "Play all" : "Play", glyph: "play" },
                 { key: "insertNext", label: "Insert next", glyph: "next" },
-                { key: "append", label: "Add to play queue", glyph: "add" }
+                { key: "append", label: "Add to play queue", glyph: "add" },
+                { key: "addToPlaylist", label: "Add to playlist", glyph: "playlist" }
             ];
             if (item && !item.tracks && !item.section) {
                 rows.push({ key: "info", label: "Information", glyph: "info" });
@@ -760,6 +769,18 @@ Item {
             return rows;
         }
         onChosen: page.itemAction(page.menuItem, key)
+    }
+
+    // The selection bar's plus.
+    OptionSheet {
+        id: addSheet
+        parent: page.overlay
+        anchors.fill: parent
+        options: [
+            { key: "append", label: "Add to play queue", glyph: "add" },
+            { key: "addToPlaylist", label: "Add to playlist", glyph: "playlist" }
+        ]
+        onChosen: page.selectionAction(key)
     }
 
     MediaInfoPage {

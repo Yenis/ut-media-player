@@ -4,7 +4,8 @@ import "../js/DbHandle.js" as DbHandle
 
 /*
  * What the player remembers about each file: where it was left, whether it
- * was seen, its bookmarks, and whether it is a favourite. Kept in the app's SQLite database
+ * was seen, its bookmarks, and whether it is a favourite; and the playlists.
+ * Kept in the app's SQLite database
  * (~/.local/share/gemplayer.yenis/), opened on first use so nothing touches
  * storage before Main.qml has set the app identity.
  */
@@ -16,6 +17,7 @@ QtObject {
     property int bookmarkRevision: 0
     property int favouriteRevision: 0
     property int groupRevision: 0
+    property int playlistRevision: 0
 
     // A file counts as finished this close to its end, and as not started this
     // close to its beginning. VLC decides this in its native media library,
@@ -42,6 +44,12 @@ QtObject {
             tx.executeSql("CREATE TABLE IF NOT EXISTS video_group_members(url TEXT PRIMARY KEY, group_id INTEGER NOT NULL)");
             // Single values under a name: the audio queue to come back to.
             tx.executeSql("CREATE TABLE IF NOT EXISTS kept(name TEXT PRIMARY KEY, value TEXT NOT NULL)");
+            // Playlists. An item is kept whole, as the players take it, so a
+            // playlist shows without the library and can hold a file the
+            // library does not know.
+            tx.executeSql("CREATE TABLE IF NOT EXISTS playlists(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL)");
+            tx.executeSql("CREATE TABLE IF NOT EXISTS playlist_items("
+                          + "playlist_id INTEGER NOT NULL, place INTEGER NOT NULL, url TEXT NOT NULL, media TEXT NOT NULL)");
         });
         DbHandle.handle = opened;
         return opened;
@@ -232,5 +240,120 @@ QtObject {
             tx.executeSql("DELETE FROM bookmarks WHERE url = ? AND position = ?", [url, position]);
         });
         bookmarkRevision++;
+    }
+
+    // ---- playlists --------------------------------------------------------------------
+
+    // What is kept of an item: enough to list it and to play it.
+    function _playlistMedia(m) {
+        return { url: m.url.toString(), filename: m.filename || "", title: m.title || "", artist: m.artist || "",
+                 albumArtist: m.albumArtist || "", album: m.album || "", art: m.art ? m.art.toString() : "",
+                 duration: m.duration || 0, hasPicture: !!m.hasPicture };
+    }
+
+    // Every playlist, by name: [{ id, name, count, videos, duration, art }].
+    // `videos` is how many of its items have a picture; `art` is the first
+    // cover or picture among them.
+    function playlists() {
+        var list = [];
+        db().readTransaction(function(tx) {
+            var byId = {};
+            var rows = tx.executeSql("SELECT id, name FROM playlists ORDER BY name COLLATE NOCASE, id").rows;
+            for (var i = 0; i < rows.length; i++) {
+                var entry = { id: rows.item(i).id, name: rows.item(i).name, count: 0, videos: 0, duration: 0, art: "" };
+                byId[entry.id] = entry;
+                list.push(entry);
+            }
+            var items = tx.executeSql("SELECT playlist_id, media FROM playlist_items ORDER BY playlist_id, place").rows;
+            for (var k = 0; k < items.length; k++) {
+                var owner = byId[items.item(k).playlist_id];
+                if (!owner)
+                    continue;
+                var media = JSON.parse(items.item(k).media);
+                owner.count++;
+                owner.duration += media.duration || 0;
+                if (media.hasPicture)
+                    owner.videos++;
+                if (!owner.art && media.art)
+                    owner.art = media.art;
+            }
+        });
+        return list;
+    }
+
+    // A playlist's items, in its order.
+    function playlistItems(id) {
+        var list = [];
+        db().readTransaction(function(tx) {
+            var rows = tx.executeSql("SELECT media FROM playlist_items WHERE playlist_id = ? ORDER BY place", [id]).rows;
+            for (var i = 0; i < rows.length; i++)
+                list.push(JSON.parse(rows.item(i).media));
+        });
+        return list;
+    }
+
+    function _appendToPlaylist(tx, id, list) {
+        var rows = tx.executeSql("SELECT url, place FROM playlist_items WHERE playlist_id = ?", [id]).rows;
+        var there = {};
+        var place = 0;
+        for (var i = 0; i < rows.length; i++) {
+            there[rows.item(i).url] = true;
+            place = Math.max(place, rows.item(i).place + 1);
+        }
+        var added = 0;
+        for (var k = 0; k < list.length; k++) {
+            var media = _playlistMedia(list[k]);
+            // Once only: what is in the playlist already is passed over.
+            if (!media.url || there[media.url])
+                continue;
+            there[media.url] = true;
+            tx.executeSql("INSERT INTO playlist_items(playlist_id, place, url, media) VALUES(?, ?, ?, ?)",
+                          [id, place++, media.url, JSON.stringify(media)]);
+            added++;
+        }
+        return added;
+    }
+
+    // A new playlist holding `list`, which may be empty. Returns its id.
+    function createPlaylist(name, list) {
+        var id = 0;
+        db().transaction(function(tx) {
+            id = parseInt(tx.executeSql("INSERT INTO playlists(name) VALUES(?)", [name]).insertId);
+            _appendToPlaylist(tx, id, list || []);
+        });
+        playlistRevision++;
+        return id;
+    }
+
+    // Adds `list` at the end; returns how many were not in it yet.
+    function addToPlaylist(id, list) {
+        var added = 0;
+        db().transaction(function(tx) { added = _appendToPlaylist(tx, id, list); });
+        playlistRevision++;
+        return added;
+    }
+
+    // The playlist's items anew, in this order: for removing and moving.
+    function setPlaylistItems(id, list) {
+        db().transaction(function(tx) {
+            tx.executeSql("DELETE FROM playlist_items WHERE playlist_id = ?", [id]);
+            _appendToPlaylist(tx, id, list);
+        });
+        playlistRevision++;
+    }
+
+    function renamePlaylist(id, name) {
+        db().transaction(function(tx) {
+            tx.executeSql("UPDATE playlists SET name = ? WHERE id = ?", [name, id]);
+        });
+        playlistRevision++;
+    }
+
+    function deletePlaylist(id) {
+        db().transaction(function(tx) {
+            tx.executeSql("DELETE FROM playlist_items WHERE playlist_id = ?", [id]);
+            tx.executeSql("DELETE FROM playlists WHERE id = ?", [id]);
+        });
+        playlistRevision++;
     }
 }

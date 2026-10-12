@@ -77,6 +77,8 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `bopen [path]`, `btap <index>`, `baction <index> <open\|playAll\|favourite>`, `bfav`, `bplay` | The Browse tab: enters a folder (no path: the overview), a tap on the row at that place, a folder's menu entries, the star of the folder shown, and its play button. `state` reports the folder as `browsing` |
 | `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
 | `aalbumgrid <0\|1>` | Albums as cards with covers, or as rows |
+| `pnew <name>`, `ptap <index>`, `pmenu <index>`, `paction <index> <key> [name]` | The Playlists tab: a new playlist, a tap on the row at that place, that row's menu, and one choice from it. In the list of playlists the keys are `play`, `insertNext`, `append`, `rename <name>`, `delete` (asks) and `remove` (does not ask); inside a playlist `play`, `insertNext`, `append`, `up`, `down`, `remove`. `back` leaves a playlist; `state` reports it as `playlist` |
+| `pick <index>`, `picknew <name>` | Answers "Add to playlist" while it asks: the playlist at that place in the Playlists tab, or a new one. `state` reports how many items wait as `picking`. It is asked by `aaction <index> addToPlaylist`, `aselaction addToPlaylist`, `itemaction <index> addToPlaylist`, `selaction addToPlaylist`, `baction <index> addToPlaylist`, and in the audio player by `savequeue` |
 | `aselect <index>`, `aselaction <play\|insertNext\|append\|favourite>` | Adds a row of the Audio tab to the selection or takes it out, and the selection bar's buttons; `back` ends a selection. A heading counts as a row and cannot be selected |
 | `asort <key> [desc]`, `afavonly <0\|1>`, `adisplay` | The order of the Audio tab's list (`name`, and per list `album`, `artist`, `length`, `modified`, `date`), its favourites switch, and its display settings. `aaction <index> favourite` switches a track's mark; `info`, `goAlbum` and `goArtist` are a track's other menu entries |
 | `atab <artists\|albums\|tracks\|genres\|files>`, `atap <index>`, `amenu <index>`, `aaction <index> <play\|insertNext\|append>` | The Audio tab: its four lists, a tap on the row at that place, that row's menu, and one choice from it |
@@ -104,6 +106,26 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `info <text>`, `level <volume\|brightness>` | Shows an overlay for five seconds |
 | `shot <name>` | The app saves a picture of its own window. A page with a photograph on it takes longer to save than `tools/dev.sh shot` waits: send `cmd shot`, wait, and `adb pull` it |
 | `state` | Logs a line `REMOTE STATE {...}` with position, page, errors |
+
+### Without a phone
+
+The app starts in the Clickable build image, drawn in software, which is
+enough to load every page, drive it through its functions and photograph
+it. Playback does not work there, and the libraries are empty. The pages
+are reached through the shell, from a QML file of one's own that creates an
+`AppShell` and calls its functions on a timer:
+
+```bash
+docker run --rm -u $(id -u):$(id -g) -e HOME=/tmp/h -e XDG_RUNTIME_DIR=/tmp/h \
+  -e QT_QPA_PLATFORM=offscreen -e QT_QUICK_BACKEND=software \
+  -v $PWD/qml:/app/qml:ro -v <folder with Harness.qml>:/sp:ro -v <folder for pictures>:/out \
+  clickable/amd64-ut24.04-2.x-amd64 bash -c \
+  'mkdir -p /tmp/h && chmod 700 /tmp/h && cd /app && dbus-run-session -- qmlscene -I qml /sp/Harness.qml'
+```
+
+Without the session bus the platform's modules end the process; without
+the software backend there is no picture. A picture taken in the same
+moment a sheet is opened shows the page before the sheet has slid in.
 
 What it cannot do: touch gestures, the orientation sensor, the power button.
 Those are checked by hand; [TESTING.md](TESTING.md) lists them.

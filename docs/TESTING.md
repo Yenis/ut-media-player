@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -27,11 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-71 checks are open. The rows themselves are in each section's "By hand"
+79 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [Playlists, 0.0.26](#playlists-version-0026) | 8 | The whole layer has not run on the phone: see below |
 | [Browse tab, 0.0.25](#browse-tab-version-0025) | 4 | An SD card or USB stick for one |
 | [Queue page, 0.0.24](#queue-page-search-and-moving-version-0024) | 4 | A headset or Bluetooth buttons for one |
 | [Album cards, 0.0.23](#album-cards-and-an-artists-albums-version-0023) | 3 | |
@@ -61,6 +62,7 @@ table, marked "Still to do" or "Not reported".
 
 | Check | Where it comes from | State |
 |---|---|---|
+| Version 0.0.26, the playlists, on the phone at all | Built on 9 October 2026 with no phone connected | **Open, and first in line.** Its checks over adb are listed in [its section](#playlists-version-0026); until they pass, the layer is not ready for a release |
 | A video played as audio, 30 minutes in a pocket with the screen off | S6; run 5 reached 10 minutes | Open; part of the battle test |
 | Removable storage: `/media` lists, and its files play | S2, and the Browse tab | Open; no card has been in the phone |
 | Playback under other apps and behind the lock screen as one check of the audio side, with the sound indicator and headset buttons | [PLAN.md](PLAN.md), Phase 3, the one unticked box | Open; its parts are rows of 0.0.12, 0.0.13 and 0.0.24 |
@@ -69,6 +71,67 @@ table, marked "Still to do" or "Not reported".
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Playlists, version 0.0.26
+
+Built with no phone connected. What could be checked without one was; the
+rest waits, over adb first and then by hand.
+
+### Checked on the computer, 9 October 2026
+
+The whole app started in the Clickable build image, drawn in software
+([DEVELOPING.md](DEVELOPING.md), "Without a phone"), and driven through the
+shell's and the pages' own functions with made-up tracks and videos. The
+database is the real one, SQLite through LocalStorage.
+
+| Check | Result |
+|---|---|
+| The app loads with the new pages: no QML error or warning from them | Pass |
+| The tab with no playlists: the note that says how to make one, the plus in the header | Pass (layout) |
+| "Add to playlist" for three tracks, then "New playlist" named "Road trip": one playlist of 3, and "3 items added to the new playlist “Road trip”" | Pass |
+| Three more to the same playlist, one of them in it already: 5 items, "2 items added to “Road trip”, 1 already there" | Pass |
+| One that is in it, to a new playlist named "road TRIP": no second playlist, "Already in “Road trip”" | Pass |
+| The plus twice with the same name, in other capitals: one empty playlist | Pass |
+| The list: three playlists by name, "Empty", "2 videos • 15:10", "5 items • 15:25" | Pass (layout) |
+| Inside one: each item with its place, artist and length, "Video" on a video, headphones or a screen for its picture | Pass (layout) |
+| "Move down" on the first, "Move up" on the last: the order changes, and is kept | Pass |
+| "Remove from playlist" on the second: gone, the others close up | Pass |
+| A tap on the third item of a mixed playlist asks for all four from there, as audio behind the lists | Pass, at the page's signal. Nothing was played: there is no playback in the image |
+| "Play" on a playlist of videos only asks for it with its pictures | Pass, likewise |
+| "Insert next" on an item hands on that item; "Add to play queue" on a playlist all of it | Pass, likewise |
+| Rename; "Delete" asks "Delete “Films”?" with "Delete playlist" and "Cancel"; deleted, it is gone from the list | Pass |
+| The sheets: "Add to playlist" with "New playlist" and each playlist with its count; an item's menu; a playlist's menu | Pass (layout) |
+| The rename dialog, with the name selected, in the upper part of the page | Pass (layout) |
+| `back`: closes "Add to playlist" first; leaves an open playlist; does nothing in the list of playlists | Pass |
+| The "Add to playlist" signal of the Audio tab reaches the picker | Pass. The Video tab's, the Browse tab's and the audio player's are wired the same way and were not fired: the libraries are empty in the image |
+
+### Over adb
+
+| Check | Result |
+|---|---|
+| The app starts after the update, with its earlier data, and the log has no QML warnings | Still to do |
+| `aaction <track> addToPlaylist`, then `picknew`: the playlist holds the track with its title, artist, length and cover | Still to do |
+| The same for an album, a selection of tracks, a video, a video group and a selection of videos | Still to do |
+| `baction <folder> addToPlaylist` on a folder that is not open: its music and videos, and not the folder asked for before | Still to do |
+| `savequeue` in the audio player: the queue as a playlist; with "repeat all" on, each item once | Still to do |
+| `ptap` on an item of a playlist of music: it plays from there, "n of m", the mini-player shows, the item turns to the accent colour | Still to do |
+| A mixed playlist plays as audio through a video; a playlist of videos only opens the video player and moves on | Still to do |
+| "Insert next" and "Add to play queue" from a playlist and from an item, while music plays | Still to do |
+| The playlists are there after a restart | Still to do |
+| The message above the mini-player after adding; in the audio player, over the cover after "Save playlist" | Still to do |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| The plus, a name typed, Create; the playlist appears | Still to do |
+| "Add to playlist" from a track's and a video's menu: choose a playlist, and "New playlist" with a name typed | Still to do |
+| The Audio tab's selection bar: the plus now asks "Add to play queue" or "Add to playlist" | Still to do |
+| The Video tab's selection bar: "Add to playlist" behind the queue button | Still to do |
+| Inside a playlist: a tap plays, the three dots open the menu, "Move up" and "Move down" keep the menu open | Still to do |
+| Rename by typing; Delete, and Cancel in its question | Still to do |
+| "Save playlist" in the audio player's menu | Still to do |
+| The back gesture: out of a playlist, and out of "Add to playlist" | Still to do |
 
 ## Browse tab, version 0.0.25
 

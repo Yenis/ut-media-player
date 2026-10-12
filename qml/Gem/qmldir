@@ -17,10 +17,11 @@ MorePage 1.0 MorePage.qml
 NameDialog 1.0 NameDialog.qml
 OptionSheet 1.0 OptionSheet.qml
 PageHeader 1.0 PageHeader.qml
-PlaceholderPage 1.0 PlaceholderPage.qml
 Playback 1.0 Playback.qml
 PlayerControls 1.0 PlayerControls.qml
 PlayerStore 1.0 PlayerStore.qml
+PlaylistPicker 1.0 PlaylistPicker.qml
+PlaylistsPage 1.0 PlaylistsPage.qml
 QueuePage 1.0 QueuePage.qml
 SearchField 1.0 SearchField.qml
 SectionLabel 1.0 SectionLabel.qml

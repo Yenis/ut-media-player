@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.0.26 - unreleased
+
+- The Playlists tab: your own lists of music and videos. The plus at the
+  top makes one; inside a playlist a tap plays it from that item on, and an
+  item's menu moves it up or down or takes it out. A playlist is renamed and
+  deleted from its menu.
+- "Add to playlist" in the menu of a track, an artist, an album, a genre, a
+  video, a video group and a folder of the Browse tab, and for a selection:
+  behind the plus in the Audio tab's selection bar, and behind the queue
+  button in the Video tab's. It asks for a playlist, or makes a new one.
+  What a playlist holds already is not added twice.
+- "Save playlist" in the audio player's menu puts the play queue into a
+  playlist.
+- A new icon: the hexagon as a cut gem, with a faceted play triangle.
+
 ## 0.0.25 - 8 October 2026
 
 - The Browse tab: the phone's folders. It starts with the storages and your

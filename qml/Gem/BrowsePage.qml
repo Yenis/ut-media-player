@@ -33,6 +33,8 @@ Item {
 
     // Play `list` from its item `index`. options: { asAudio, background }.
     signal playRequested(var list, int index, var options)
+    // "Add to playlist" for `list`; the shell asks which playlist.
+    signal playlistRequested(var list)
 
     readonly property string removableRoot: homePath ? "/media/" + homePath.substring(homePath.lastIndexOf("/") + 1) : ""
 
@@ -199,11 +201,23 @@ Item {
         }
     }
 
-    // "Play all" on a folder that is not open: it is listed first.
+    // "Play all" and "Add to playlist" on a folder that is not open: it is
+    // listed first.
     property string pendingFolder: ""
+    property bool pendingForPlaylist: false
 
     function playFolder(folderPath) {
+        useFolder(folderPath, false);
+    }
+
+    // The folder's own music and videos, both kinds; not its subfolders'.
+    function addFolderToPlaylist(folderPath) {
+        useFolder(folderPath, true);
+    }
+
+    function useFolder(folderPath, forPlaylist) {
         pendingFolder = folderPath;
+        pendingForPlaylist = forPlaylist;
         // A listing arrives later, announced by the model's status. Only a
         // folder that is listed already can be played at once: asked too
         // early, the model still holds the folder before.
@@ -217,14 +231,20 @@ Item {
         if (pendingFolder === "" || other.status !== FolderListModel.Ready
                 || other.folder.toString() !== fileUrl(pendingFolder))
             return;
-        var music = [], videos = [];
+        var music = [], videos = [], all = [];
         for (var i = 0; i < other.count; i++) {
             if (other.get(i, "fileIsDir"))
                 continue;
             var media = mediaFor(other.get(i, "filePath"), other.get(i, "fileName"));
             (media.hasPicture ? videos : music).push(media);
+            all.push(media);
         }
         pendingFolder = "";
+        if (pendingForPlaylist) {
+            if (all.length > 0)
+                playlistRequested(all);
+            return;
+        }
         // Whichever the folder has more of; a folder of music plays as music.
         var list = music.length >= videos.length ? music : videos;
         if (list.length > 0)
@@ -238,6 +258,8 @@ Item {
             activate(row);
         else if (key === "playAll")
             playFolder(row.path);
+        else if (key === "addToPlaylist")
+            addFolderToPlaylist(row.path);
         else if (key === "favourite")
             setFavourite(row.path, favouriteFolders.indexOf(row.path) < 0);
     }
@@ -502,6 +524,7 @@ Item {
             return [
                 { key: "open", label: "Open", glyph: "folder" },
                 { key: "playAll", label: "Play all", glyph: "play" },
+                { key: "addToPlaylist", label: "Add to playlist", glyph: "playlist" },
                 { key: "favourite", glyph: "star", selected: favourite,
                   label: favourite ? "Remove from favourites" : "Add to favourites" }
             ];

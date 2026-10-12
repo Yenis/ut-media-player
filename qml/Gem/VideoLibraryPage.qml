@@ -79,6 +79,8 @@ Item {
     // Add `list` to what plays as audio: after the current item if `next`,
     // otherwise at the end. With nothing playing, it is played.
     signal queueRequested(var list, bool next)
+    // "Add to playlist" for `list`; the shell asks which playlist.
+    signal playlistRequested(var list)
 
     function reload() {
         videos = library ? library.videos() : [];
@@ -240,6 +242,8 @@ Item {
             playRequested(videos, 0, { asAudio: true });
         else if (key === "append" || key === "insertNext")
             queueRequested(videos, key === "insertNext");
+        else if (key === "addToPlaylist")
+            playlistRequested(videos);
     }
 
     function setGrouping(key) {
@@ -315,6 +319,8 @@ Item {
             playRequested([item], 0, { asAudio: true });
         } else if (key === "append" || key === "insertNext") {
             queueRequested(videos, key === "insertNext");
+        } else if (key === "addToPlaylist") {
+            playlistRequested(videos);
         } else if (key === "played" || key === "notPlayed") {
             for (var k = 0; k < videos.length; k++)
                 store.setSeen(videos[k].url, key === "played", videos[k].duration);
@@ -847,7 +853,8 @@ Item {
                 var all = page.allSeen(item.videos);
                 var groupRows = [{ key: "playAll", label: "Play all", glyph: "playlist" },
                                  { key: "insertNext", label: "Insert next", glyph: "next" },
-                                 { key: "append", label: "Add to play queue", glyph: "add" }];
+                                 { key: "append", label: "Add to play queue", glyph: "add" },
+                                 { key: "addToPlaylist", label: "Add to playlist", glyph: "playlist" }];
                 if (item.kind === "group") {
                     groupRows.push({ key: "rename", label: "Rename video group", glyph: "subtitles" });
                     groupRows.push({ key: "ungroup", label: "Ungroup", glyph: "clear" });
@@ -867,6 +874,7 @@ Item {
             rows.push({ key: "asAudio", label: "Play as audio", glyph: "audio" });
             rows.push({ key: "insertNext", label: "Insert next", glyph: "next" });
             rows.push({ key: "append", label: "Add to play queue", glyph: "add" });
+            rows.push({ key: "addToPlaylist", label: "Add to playlist", glyph: "playlist" });
             rows.push({ key: "info", label: "Information", glyph: "info" });
             rows.push({ key: "favourite", glyph: "star", selected: favourite,
                         label: favourite ? "Remove from favourites" : "Add to favourites" });
@@ -890,7 +898,8 @@ Item {
         anchors.fill: parent
         options: [
             { key: "insertNext", label: "Insert next", glyph: "next" },
-            { key: "append", label: "Add to play queue", glyph: "add" }
+            { key: "append", label: "Add to play queue", glyph: "add" },
+            { key: "addToPlaylist", label: "Add to playlist", glyph: "playlist" }
         ]
         onChosen: page.selectionAction(key)
     }

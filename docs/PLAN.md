@@ -9,7 +9,8 @@ filter, sorting, favourites and multiple selection; a player with our own
 gestures, a menu, shuffle and repeat; a mini-player; and a queue that moves
 on in the background, is kept between launches and can be searched, trimmed
 and put in order (0.0.12 to 0.0.24). Phase 4 is under way: version 0.0.25
-has the Browse tab. On 9 October 2026 the plan was put in order before the
+has the Browse tab and 0.0.26 the playlists, the latter built without the
+phone at hand and so not yet run on it. On 9 October 2026 the plan was put in order before the
 rest of Phase 4: the open checks were gathered in one list, and the
 questions of confinement, of streams without a network permission and of
 incognito mode were looked into and settled (D14, D15); see [Confinement](#confinement),
@@ -27,8 +28,8 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **Not confirmed by hand** | 71 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4: playlists, then streams (off until allowed, D14), settings and search. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
+| **Not confirmed by hand** | 79 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | First 0.0.26 on the phone: its checks over adb, in [TESTING.md](TESTING.md#playlists-version-0026). Then Phase 4: streams (off until allowed, D14), settings and search. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
 
 What the first day established, in the order it was found:
 
@@ -507,7 +508,7 @@ How it is built:
 | Order, filter, favourites, grouping | `qml/js/Library.js`, `qml/Gem/SearchField.qml`, `PlayerStore.qml`, `GroupThumb.qml` | What the list shows and in which order; folders and groups; the filter's text field; favourites in the app's database |
 | Queue | `qml/Gem/Playback.qml`, `PlayerControls.qml`, `VideoPlayerPage.qml` | The list of what plays after what, moved on by the app; previous, next and the queue's list in the player |
 | Video tab | `qml/Gem/VideoLibraryPage.qml`, `VideoThumb.qml` | The videos on the phone as a grid of cards or a list, after VLC's `video_grid_card.xml` and `video_list_card.xml`. The choice is remembered |
-| Tabs still to be built | `qml/Gem/PlaceholderPage.qml` | Audio (Phase 3), Browse and Playlists (Phase 4) say what will be there |
+| Tabs still to be built | `qml/Gem/PlaceholderPage.qml`, until 0.0.25 | Said what would be there. Gone with 0.0.26, every tab having its page |
 | More tab | `qml/Gem/MorePage.qml` | The version, and the way to the diagnostics page. Streams, history and settings join it in Phase 4 |
 
 - [x] The five tabs: Video, Audio, Browse, Playlists, More (version 0.0.4).
@@ -747,11 +748,39 @@ How it is built:
       (`qml/js/Format.js`), and what the library knows of one gives its
       title and length. Listing is `Qt.labs.folderlistmodel`, which given a
       folder that is not there lists the app's own instead **[device]**.
-- [ ] Browse, still to do: hidden files, "add folder to playlist" (with
-      playlists), a check with a card or stick.
-- [ ] Playlists tab: create, rename, delete, reorder; save the queue as a
-      playlist; add from any list, the video library's item menu and
-      selection bar included (carried over from Phase 2).
+- [ ] Browse, still to do: hidden files, a check with a card or stick.
+- [x] Playlists (version 0.0.26). `qml/Gem/PlaylistsPage.qml` is the tab:
+      the playlists by name, each with its number of items and its length;
+      the plus makes one; a playlist's menu plays it, inserts it next, adds
+      it to the play queue, renames and deletes it, deleting only after a
+      question. Inside, the items in their order: a tap plays from that
+      item on, and an item's menu has "Move up", "Move down" and "Remove
+      from playlist", where VLC drags, as in the play queue.
+      `qml/Gem/PlaylistPicker.qml` is "Add to playlist", one for the whole
+      app and owned by the shell: a sheet with "New playlist" and the
+      playlists there are. It is asked from the menu of a track, artist,
+      album, genre, video, video group and Browse folder, from both
+      selection bars, and by "Save playlist" in the audio player's menu,
+      which hands it the queue. Kept in the app's database
+      (`PlayerStore.qml`), each item whole, so that a playlist shows
+      without the library and holds files the library does not know.
+      Where it differs from VLC:
+  - An item is in a playlist once. VLC asks, when something is there
+    already, whether to add it again; here it is passed over and the
+    message says how many were.
+  - A new playlist named like an existing one is that playlist, as in
+    VLC's save dialog.
+  - A playlist of videos only plays with its pictures. Any other plays as
+    audio behind the lists, a video among it too; "Play as video" in the
+    audio player shows its picture.
+  - A folder adds its own music and videos, not its subfolders'; VLC
+    offers both.
+  - The video player's menu has no "Save playlist": naming needs a text
+    field, and that does not work in a turned player yet (see
+    [Phase 1](#phase-1---video-player), "Renaming a bookmark").
+  - Not built: a filter inside the Playlists tab, VLC's shuffle button on
+    a playlist (shuffle is in the player), and a mark on an item whose
+    file is gone.
 - [ ] More tab: streams (open by address, history), playback history, settings,
       about. Streams are off until allowed (D14): the "Allow streams"
       setting, the dialog, and the one check in `Playback.qml`.

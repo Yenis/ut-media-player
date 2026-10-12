@@ -30,6 +30,8 @@ Item {
     signal collapseRequested()
     signal stopRequested()
     signal videoRequested()
+    // "Save playlist": the queue, to be added to a playlist.
+    signal playlistRequested(var list)
 
     readonly property bool hasQueue: playback ? playback.queue.length > 1 : false
 
@@ -60,6 +62,13 @@ Item {
             closeSheets();
         else
             collapseRequested();
+    }
+
+    // The queue as it stands, into a playlist. With "repeat all" the queue
+    // is laid out several times over; a playlist takes each item once.
+    function savePlaylist() {
+        if (playback && playback.queue.length > 0)
+            playlistRequested(playback.queue.slice());
     }
 
     // For the development remote.
@@ -693,6 +702,7 @@ Item {
                         value: page.bookmarks.length > 0 ? "" + page.bookmarks.length : "" });
             list.push({ key: "ab", label: "A-B repeat", glyph: "repeat", selected: p && p.abStart >= 0,
                         value: !p || p.abStart < 0 ? "" : p.abEnd < 0 ? "set the end" : "on" });
+            list.push({ key: "save", label: "Save playlist", glyph: "playlist" });
             return list;
         }
         onChosen: {
@@ -706,6 +716,8 @@ Item {
                 bookmarkSheet.show();
             else if (key === "ab")
                 page.markAB();
+            else if (key === "save")
+                page.savePlaylist();
         }
     }
 
