@@ -9,8 +9,8 @@ filter, sorting, favourites and multiple selection; a player with our own
 gestures, a menu, shuffle and repeat; a mini-player; and a queue that moves
 on in the background, is kept between launches and can be searched, trimmed
 and put in order (0.0.12 to 0.0.24). Phase 4 is under way: version 0.0.25
-has the Browse tab and 0.0.26 the playlists, checked on the phone over
-adb on 12 October 2026. On 9 October 2026 the plan was put in order before the
+has the Browse tab, 0.0.26 the playlists and 0.0.27 the streams, both
+checked on the phone over adb on 12 October 2026. On 9 October 2026 the plan was put in order before the
 rest of Phase 4: the open checks were gathered in one list, and the
 questions of confinement, of streams without a network permission and of
 incognito mode were looked into and settled (D14, D15); see [Confinement](#confinement),
@@ -28,8 +28,8 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **Not confirmed by hand** | 79 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4: streams (off until allowed, D14), then settings and search. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
+| **Not confirmed by hand** | 87 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | Phase 4: playback history, settings and about in the More tab, then search. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
 
 What the first day established, in the order it was found:
 
@@ -122,7 +122,7 @@ What D13 rests on, and what is still to be shown:
 | A stream is fetched by media-hub, the system's playback service, not by the app. The app hands over an address and draws the picture | **[source]**, **[device]**: playback runs in media-hub (S5, S13) |
 | The app's own code opens no connection. QML's only way to is `XMLHttpRequest`; it is used twice, both times on a `file://` address: subtitles (`SubtitleTrack.qml`) and the development remote (`dev/Remote.qml`) | Checked by search, 3 October 2026. To be checked again before each release |
 | The diagnostics page played three test streams from the internet in its automatic run | Taken out on 3 October 2026 (version 0.0.11), its question being answered. No network address is left in the app's code |
-| Until streams are built (Phase 4, "open by address") | Nothing in the app touches the network at all, and nothing is to be added that does (Yenis, 3 October 2026) |
+| Streams, since 0.0.27 | The app's one use of the network, and off until allowed (D14). An address goes from the field or the history to `Playback.qml` and from there to media-hub; nothing in the app fetches anything. The address is kept in the app's database, in the stream history, and nowhere else |
 | No network permission | The package is unconfined today (D12), so the system enforces nothing: the rule is kept by what the code does. A confined build (Phase 6) would then be declared **without** the `networking` policy group, which makes it enforced. Streams should still play in that build: media-hub lets a confined click open any network address without looking at its groups **[source]**, see below. Not yet seen on the device |
 | Album art in Phase 3 | The system's thumbnailer may look covers up online for `image://albumart/` **[verify]**. If it does, the app shows only the art found in the files |
 
@@ -781,9 +781,45 @@ How it is built:
   - Not built: a filter inside the Playlists tab, VLC's shuffle button on
     a playlist (shuffle is in the player), and a mark on an item whose
     file is gone.
-- [ ] More tab: streams (open by address, history), playback history, settings,
-      about. Streams are off until allowed (D14): the "Allow streams"
-      setting, the dialog, and the one check in `Playback.qml`.
+- [x] Streams (version 0.0.27), under More. `qml/Gem/StreamsPage.qml` has
+      the switch, a field for an address and the history, where an address
+      is played again, renamed, copied, added to a playlist or deleted, as
+      in VLC. `qml/Gem/StreamGate.qml` is the question of D14, asked by the
+      shell whenever a stream is wanted while streams are off: from the
+      field, from the history, from a playlist that holds a stream, from
+      "Insert next" and "Add to play queue". The check itself is in
+      `Playback.qml`: `openQueue`, `_insert` and `restore` are the ways into
+      the queue, and each refuses a list with a stream in it while the
+      switch is off. What the phone taught **[device]**:
+  - An address says little of what is behind it. A stream is opened as a
+    video unless its address ends like a music file; one that turns out to
+    have no picture is moved to the audio player two seconds after it has
+    started. `hasVideo` is right for streams.
+  - A live stream has no length, so the player never saw it start and the
+    time limit would have called it dead. It counts as started once it has
+    played for a second and a half.
+  - An address that does not exist raises nothing; after 20 s the player
+    says "The stream did not start".
+  - Switched off while a stream plays, the stream is paused and its queue
+    closed. media-hub keeps the paused stream loaded until something else
+    is played: the one way found to make it let go, handing the player an
+    empty address, starts the stream again, the backend calling play by
+    itself when its video sink is reset.
+  - An address typed without `http://` or `https://` is taken for `https`.
+  - Not built: a link handed over by another app (with "Content Hub
+    import" below; `openUrl` in the shell already sends any address that
+    is not a file through the same check), "Live" in place of a length of
+    0:00, and a cover or station name from the stream's own data, which
+    media-hub has and QML cannot read.
+- [x] Found on the way (version 0.0.27) **[device]**, and by the look of the
+      code there since lists came with 0.0.13: a video played and closed, then the first track of a
+      list. The list filled anew stands at its first item already, so
+      asking for that item changed nothing, and media-hub played on what it
+      still had loaded: the video's sound, under the track's title. A list
+      started at any other item was not affected, which is how it went
+      unseen. `Playback.qml` now steps the list off the item and asks for
+      it again once the list has confirmed.
+- [ ] More tab, still to do: playback history, settings, about.
 - [ ] Library search across videos, artists, albums, tracks, genres and
       playlists.
 - [x] Incognito mode: dropped (D15). It was VLC's switch for leaving no

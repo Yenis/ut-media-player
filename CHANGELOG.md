@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.27 - unreleased
+
+- Streams, under More: type the address of a stream and it plays, with its
+  picture if it has one and in the audio player if it has none. The
+  addresses you open are kept in a history, where one can be played again,
+  renamed, copied, added to a playlist or deleted.
+- Streams are off until you allow them. Asking for one while they are off
+  brings a question that says what allowing means; "Cancel" leaves the app
+  offline. The switch is under More, Streams, and can be turned off again.
+- Fixed: after a video had been played and closed, the first track of an
+  album or a single song tapped next showed its own title but played the
+  sound of that video.
+
 ## 0.0.26 - 12 October 2026
 
 - The Playlists tab: your own lists of music and videos. The plus at the

@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -27,11 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-79 checks are open. The rows themselves are in each section's "By hand"
+87 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [Streams, 0.0.27](#streams-version-0027) | 8 | Wi-Fi, and an address to open |
 | [Playlists, 0.0.26](#playlists-version-0026) | 8 | |
 | [Browse tab, 0.0.25](#browse-tab-version-0025) | 4 | An SD card or USB stick for one |
 | [Queue page, 0.0.24](#queue-page-search-and-moving-version-0024) | 4 | A headset or Bluetooth buttons for one |
@@ -70,6 +71,59 @@ table, marked "Still to do" or "Not reported".
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Streams, version 0.0.27
+
+### Checked over adb, 12 October 2026
+
+With Wi-Fi on. What plays was read from media-hub beside the app's own
+state. The addresses used: an HLS test stream with a picture
+(`test-streams.mux.dev/x36xhzz/x36xhzz.m3u8`), an MP3 file on a web server
+(`www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3`), a live radio
+station whose address has no file ending (`ice1.somafm.com/groovesalad-128-mp3`)
+and an address that does not exist. All were removed from the phone's
+history afterwards, and the switch left off.
+
+| Check | Result |
+|---|---|
+| A new install's state: "Allow streams" off; More says "Off. GemPlayer is offline." | Pass |
+| An address opened while streams are off: the question, with the address in it; nothing plays, nothing is in the history | Pass |
+| "Cancel": the question goes, the switch stays off, media-hub was given nothing | Pass |
+| "Allow streams": the switch is on, the HLS stream plays in the video player with its picture, length 10:34; the address is in the history | Pass |
+| A seek to 2:00 in the stream | Pass |
+| `back` from the stream: paused, the Streams page again | Pass |
+| The MP3 on a web server: the audio player, length 6:12, media-hub reads "Playing" with that file | Pass, after the fix below: opened after a video, it showed its title over the video's sound |
+| The live radio station: starts in the video player, moves to the audio player by itself, mini-player behind the lists | Pass, after two fixes. With no length it never counted as started, so it stayed "starting" and would have been called dead after 20 s; and nothing moved it out of the video player |
+| The address that does not exist: after 20 s "The stream did not start. Check the address and the connection." | Pass |
+| The switch turned off while the radio plays: it stops, the mini-player goes, media-hub reads "Paused" | Pass, after a fix. A first attempt also made media-hub let go of the stream, by handing the player an empty address, and the radio **played on with the switch off**: the backend calls play by itself when its video sink is reset. That step was taken out; the stream stays loaded, paused |
+| With the switch off, a tap in the history: the question again | Pass |
+| History: rename, delete, "Add to playlist" into a new playlist | Pass. "Copy address" was called and raised nothing; what the clipboard then held was not read |
+| With the switch off, "Play" on a playlist that holds a stream, and "Add to play queue" of it while music plays: the question each time; cancelled, the queue is as it was | Pass |
+| The switch is kept across a restart, on and off | Pass |
+| `back`: closes the question first; leaves the Streams page for More | Pass |
+| No QML warnings in the log | Pass |
+
+### A video, then the first track of a list: the video's sound. Found and fixed
+
+| Check | Result |
+|---|---|
+| A local video played and left with `back`, then a single music file opened | **Fail**, and from the code most likely since 0.0.13, though earlier builds were not tried: the audio player shows "MP3 440 Hz", media-hub plays `hevc-1080p.mp4`, 0:20 long, as sound. The backend's log has no `setMedia` for the track: the list stood at index 0 already, and asking for index 0 was dropped before it reached the backend |
+| The same with the list stepped to -1 and back to 0 in one go | Fail: only the -1 arrived |
+| The same with 0 asked for once the list has reported -1 | Pass: `setMedia` with the track, media-hub plays it, length 0:30 |
+| A list started at its first item with nothing played before; at its sixth item; `next`; and at its first item after a video | Pass, each read from media-hub |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| More → Streams; the header arrow and the back gesture lead back | Still to do |
+| The address field: the keyboard comes with it, the enter key and the play button both open the address, a touch beside it puts the keyboard away | Still to do |
+| The question: "Cancel", a tap beside it, and "Allow streams" | Still to do |
+| The switch by touch, on and off; off while a stream plays | Still to do |
+| A stream with a picture: gestures, turning the phone, "Play as audio" and back | Still to do |
+| A radio station for half an hour with the screen off | Still to do |
+| History: a tap plays; the three dots: Rename by typing, Copy address and paste it elsewhere, Add to playlist, Delete | Still to do |
+| A stream when the phone has no connection: what is said, and after how long | Still to do |
 
 ## Playlists, version 0.0.26
 

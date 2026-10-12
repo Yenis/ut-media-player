@@ -40,6 +40,11 @@ import Gem 1.0
  * What plays as audio is kept in the store, queue and place, and is there
  * again when the app is next started: shown, but not loaded until it is
  * played. See `restore`.
+ *
+ * Streams are off until the user allows them (docs/PLAN.md, D13 and D14).
+ * While they are off, nothing but a file gets into the queue, and so
+ * nothing but a file reaches the backend: `openQueue`, `_insert` and
+ * `restore` are the ways in, and each asks `blocks`.
  */
 Item {
     id: playback
@@ -58,6 +63,44 @@ Item {
     property bool audioMode: false
 
     property string error: ""
+
+    // Streams are allowed. Off on a new install; kept from launch to launch.
+    property bool streamsAllowed: false
+
+    // Anything that is not a file on the phone.
+    function isStream(address) {
+        var text = address.toString();
+        return text.indexOf("file://") !== 0 && text.charAt(0) !== "/";
+    }
+
+    // True if `list` holds a stream while streams are off.
+    function blocks(list) {
+        _readAllowed();
+        if (streamsAllowed)
+            return false;
+        for (var i = 0; i < list.length; i++)
+            if (isStream(list[i].url))
+                return true;
+        return false;
+    }
+
+    function setStreamsAllowed(on) {
+        _readAllowed();
+        streamsAllowed = !!on;
+        settings.setValue("streamsAllowed", streamsAllowed);
+        settings.sync();
+    }
+
+    // Read on first use: who is ready first, this object or its owner, is
+    // not laid down.
+    property bool _allowedRead: false
+    function _readAllowed() {
+        if (_allowedRead)
+            return;
+        _allowedRead = true;
+        var kept = settings.value("streamsAllowed", false);
+        streamsAllowed = kept === true || kept === "true";
+    }
 
     // What plays after what. `queue` holds media as `open` takes them.
     property var queue: []
@@ -129,6 +172,7 @@ Item {
     property bool _listMode: false      // the hub's list is playing, not a single address
     property int _pendingIndex: -1      // the item to start with, until the hub has the list
     property int _askedIndex: -1        // the item asked of the hub, until it says so itself
+    property bool _steppedOff: false    // the list was sent off its item, to be asked for `_askedIndex` afresh
     property bool _fromStart: false     // go to 0 once started: the file may still be loaded, part-way
 
     // media: { url, title, artist, art, duration (ms), hasPicture }
@@ -137,8 +181,11 @@ Item {
     }
 
     // Plays `list` from its item `index`. `fromStart` ignores where that item
-    // was left; `asAudio` plays without the picture.
+    // was left; `asAudio` plays without the picture. False, with nothing
+    // done, if the list holds a stream and streams are off.
     function openQueue(list, index, fromStart, asAudio) {
+        if (blocks(list))
+            return false;
         saveNow();
         var at = Math.max(0, Math.min(index, list.length - 1));
         _ordered = list.slice();
@@ -155,6 +202,7 @@ Item {
         audioMode = !!asAudio;
         _start(fromStart, -1);
         _keepQueue();
+        return true;
     }
 
     // ---- kept from one launch to the next ---------------------------------------------
@@ -196,6 +244,9 @@ Item {
         } catch (e) {
             items = [];
         }
+        // A queue kept while streams were allowed, come back to with them off.
+        if (items && blocks(items))
+            items = items.filter(function(item) { return !isStream(item.url); });
         if (!items || items.length === 0)
             return;
         queue = items;
@@ -290,6 +341,7 @@ Item {
             _pendingStart = at;
         _pendingIndex = -1;
         _askedIndex = -1;
+        _steppedOff = false;
         _listMode = _wantsList();
         if (!_listMode) {
             // The list has to be emptied before an address is played
@@ -374,13 +426,25 @@ Item {
     function _goTo(index) {
         _askedIndex = _lapStart + index;
         askedLimit.restart();
+        // After an address has played, the list filled anew stands at its
+        // first item already, and asking for that item again is asking for
+        // nothing: the hub then plays on what it had loaded, the video from
+        // before, under the new title [device]. So the list is stepped off
+        // the item first, and the item asked for once the list says it has
+        // left it; asked for in the same breath, the second request is
+        // dropped. See `hubList.onCurrentIndexChanged`.
+        if (hubList.currentIndex === _lapStart + index) {
+            _steppedOff = true;
+            hubList.currentIndex = -1;
+            return;
+        }
         hubList.currentIndex = _lapStart + index;
         mediaPlayer.play();
     }
 
     // Puts media into the queue at `at` while it plays.
     function _insert(at, list) {
-        if (queueIndex < 0 || list.length === 0)
+        if (queueIndex < 0 || list.length === 0 || blocks(list))
             return;
         queue = queue.slice(0, at).concat(list, queue.slice(at));
         _ordered = _ordered.concat(list);
@@ -638,6 +702,7 @@ Item {
         // Settings hands a stored true back as the text "true".
         var mixed = settings.value("shuffle", false);
         shuffle = mixed === true || mixed === "true";
+        _readAllowed();
     }
 
     Playlist {
@@ -653,6 +718,12 @@ Item {
         onCurrentIndexChanged: {
             if (!playback._listMode)
                 return;
+            if (playback._steppedOff && currentIndex === -1) {
+                playback._steppedOff = false;
+                currentIndex = playback._askedIndex;
+                mediaPlayer.play();
+                return;
+            }
             if (playback._askedIndex >= 0) {
                 if (currentIndex === playback._askedIndex)
                     playback._askedIndex = -1;
@@ -715,7 +786,10 @@ Item {
             var step = now - playback._lastPosition;
             playback._lastPosition = now;
 
-            if (playback._awaitingStart && playbackState === MediaPlayer.PlayingState && duration > 0 && now >= 0) {
+            // A live stream has no length to wait for: it has started
+            // once it has played for a moment.
+            var live = duration <= 0 && now > 1500 && playback.isStream(playback.url);
+            if (playback._awaitingStart && playbackState === MediaPlayer.PlayingState && (duration > 0 || live) && now >= 0) {
                 playback._awaitingStart = false;
                 if (playback._pendingStart > 0)
                     playback.seekTo(playback._pendingStart);

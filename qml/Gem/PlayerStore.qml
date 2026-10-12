@@ -18,6 +18,7 @@ QtObject {
     property int favouriteRevision: 0
     property int groupRevision: 0
     property int playlistRevision: 0
+    property int streamRevision: 0
 
     // A file counts as finished this close to its end, and as not started this
     // close to its beginning. VLC decides this in its native media library,
@@ -48,6 +49,9 @@ QtObject {
             // playlist shows without the library and can hold a file the
             // library does not know.
             tx.executeSql("CREATE TABLE IF NOT EXISTS playlists(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL)");
+            // The addresses of streams that were opened, with the names given them.
+            tx.executeSql("CREATE TABLE IF NOT EXISTS streams("
+                          + "url TEXT PRIMARY KEY, title TEXT NOT NULL, opened_at INTEGER NOT NULL DEFAULT 0)");
             tx.executeSql("CREATE TABLE IF NOT EXISTS playlist_items("
                           + "playlist_id INTEGER NOT NULL, place INTEGER NOT NULL, url TEXT NOT NULL, media TEXT NOT NULL)");
         });
@@ -240,6 +244,44 @@ QtObject {
             tx.executeSql("DELETE FROM bookmarks WHERE url = ? AND position = ?", [url, position]);
         });
         bookmarkRevision++;
+    }
+
+    // ---- stream history ---------------------------------------------------------------
+
+    // The streams opened before, the latest first: [{ url, title }].
+    function streams() {
+        var list = [];
+        db().readTransaction(function(tx) {
+            var rows = tx.executeSql("SELECT url, title FROM streams ORDER BY opened_at DESC, url").rows;
+            for (var i = 0; i < rows.length; i++)
+                list.push({ url: rows.item(i).url, title: rows.item(i).title });
+        });
+        return list;
+    }
+
+    // A stream was opened. One that is known keeps the name it was given.
+    function noteStream(url, title) {
+        if (!url || !title)
+            return;
+        db().transaction(function(tx) {
+            tx.executeSql("INSERT OR IGNORE INTO streams(url, title) VALUES(?, ?)", [url, title]);
+            tx.executeSql("UPDATE streams SET opened_at = ? WHERE url = ?", [Date.now(), url]);
+        });
+        streamRevision++;
+    }
+
+    function renameStream(url, title) {
+        db().transaction(function(tx) {
+            tx.executeSql("UPDATE streams SET title = ? WHERE url = ?", [title, url]);
+        });
+        streamRevision++;
+    }
+
+    function removeStream(url) {
+        db().transaction(function(tx) {
+            tx.executeSql("DELETE FROM streams WHERE url = ?", [url]);
+        });
+        streamRevision++;
     }
 
     // ---- playlists --------------------------------------------------------------------

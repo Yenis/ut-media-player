@@ -39,6 +39,11 @@ FocusScope {
     readonly property alias browser: browseTab
     readonly property alias playlistsPage: playlistsTab
     readonly property alias playlistPicker: picker
+    readonly property alias streamsPage: streamsView
+    readonly property alias streamGate: gate
+
+    // What covers the More tab: "" for nothing, or "streams".
+    property string moreView: ""
     readonly property alias sleepTimer: sleeper
     readonly property var library: libraryLoader.status === Loader.Ready ? libraryLoader.item : null
 
@@ -93,8 +98,14 @@ FocusScope {
         if (list.length === 0)
             return;
         var first = list[Math.max(0, Math.min(index, list.length - 1))];
+        // A stream, while streams are off: the question first (D14).
+        if (core.blocks(list)) {
+            gate.ask(_firstStream(list), function() { shell.playList(list, index, options); });
+            return;
+        }
         var asAudio = !!options.asAudio || !first.hasPicture;
-        core.openQueue(list, index, !!options.fromStart, asAudio);
+        if (!core.openQueue(list, index, !!options.fromStart, asAudio))
+            return;
         if (asAudio) {
             if (!options.background)
                 page = "audio";
@@ -109,6 +120,10 @@ FocusScope {
     function addToQueue(list, next) {
         if (list.length === 0)
             return;
+        if (core.blocks(list)) {
+            gate.ask(_firstStream(list), function() { shell.addToQueue(list, next); });
+            return;
+        }
         if (!audioActive || core.queueIndex < 0) {
             playList(list, 0, { background: true });
             return;
@@ -135,8 +150,71 @@ FocusScope {
             notice.show(message);
     }
 
+    function _firstStream(list) {
+        for (var i = 0; i < list.length; i++)
+            if (core.isStream(list[i].url))
+                return list[i].url.toString();
+        return "";
+    }
+
+    // A stream as the players take it. Whether it has a picture is only
+    // known once it plays; until then its address is the guess.
+    function streamMedia(address, title) {
+        var url = Format.streamAddress(address);
+        return { url: url, title: title || Format.streamTitle(url), artist: "", art: "", duration: 0,
+                 hasPicture: !Format.isAudioAddress(url) };
+    }
+
+    // Plays a stream by its address, and notes it in the history once it
+    // is allowed to play.
+    function openStream(address, title) {
+        var media = streamMedia(address, title);
+        var play = function() {
+            playerStore.noteStream(media.url, media.title);
+            shell.playList([media], 0, {});
+        };
+        if (core.blocks([media]))
+            gate.ask(media.url, play);
+        else
+            play();
+    }
+
+    // The switch. Switched off, a stream that plays or waits in the queue
+    // goes with it: paused, and its queue closed. The system's player keeps
+    // the paused stream loaded until something else is played; making it
+    // let go by handing it an empty address starts the stream again, the
+    // backend calling play by itself when its video sink is reset [device].
+    function setStreamsAllowed(on) {
+        core.setStreamsAllowed(on);
+        if (!on && core.queue.some(function(media) { return core.isStream(media.url); })) {
+            closePlayer();
+        }
+    }
+
+    // A stream is opened as a video, its address saying nothing of what it
+    // is. One that turns out to have no picture goes to the audio player.
+    Timer {
+        id: pictureCheck
+        interval: 2000
+        onTriggered: {
+            if (shell.page === "video" && core.playing && core.isStream(core.url) && !core.player.hasVideo)
+                shell.toAudio();
+        }
+    }
+    Connections {
+        target: core
+        onStartingChanged: {
+            if (!core.starting && shell.page === "video" && core.isStream(core.url))
+                pictureCheck.restart();
+        }
+    }
+
     // A file from outside the list: another app, or a path.
     function openUrl(url) {
+        if (core.isStream(url)) {
+            openStream(url.toString(), "");
+            return;
+        }
         var path = decodeURIComponent(url.toString().replace("file://", ""));
         var known = library ? library.lookup(path) : null;
         openMedia(known || { url: url.toString(), title: Format.baseName(url), duration: 0,
@@ -171,7 +249,9 @@ FocusScope {
 
     // One step back; false when there is nowhere to go back to.
     function back() {
-        if (picker.open)
+        if (gate.open)
+            gate.close();
+        else if (picker.open)
             picker.close();
         else if (page === "video" && videoPage)
             videoPage.back();
@@ -187,6 +267,8 @@ FocusScope {
             return browseTab.back();
         else if (page === "home" && tab === "playlists")
             return playlistsTab.back();
+        else if (page === "home" && tab === "more" && moreView !== "")
+            moreView = "";
         else
             return false;
         return true;
@@ -281,8 +363,23 @@ FocusScope {
             }
             MorePage {
                 anchors.fill: parent
-                visible: shell.tab === "more"
+                visible: shell.tab === "more" && shell.moreView === ""
+                streamsAllowed: core.streamsAllowed
+                onStreamsRequested: shell.moreView = "streams"
                 onDiagnosticsRequested: shell.page = "diagnostics"
+            }
+            StreamsPage {
+                id: streamsView
+                anchors.fill: parent
+                visible: shell.tab === "more" && shell.moreView === "streams"
+                store: playerStore
+                overlay: home
+                allowed: core.streamsAllowed
+                playingUrl: core.loaded ? core.url : ""
+                onCloseRequested: shell.moreView = ""
+                onAllowRequested: shell.setStreamsAllowed(on)
+                onOpenRequested: shell.openStream(address, title)
+                onPlaylistRequested: shell.addToPlaylist([shell.streamMedia(address, title)])
             }
         }
 
@@ -388,6 +485,13 @@ FocusScope {
         anchors.bottomMargin: shell.keyboardHeight
         store: playerStore
         onDone: shell.say(message)
+    }
+
+    // The question before a stream, over whatever asked for one.
+    StreamGate {
+        id: gate
+        anchors.fill: parent
+        onAllowed: core.setStreamsAllowed(true)
     }
 
     // The Phase 0 spike, kept for checking the platform. It has players of its

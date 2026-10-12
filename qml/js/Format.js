@@ -65,6 +65,36 @@ function isAudioName(path) {
     return AUDIO_EXTENSIONS.indexOf(name.substring(name.lastIndexOf(".") + 1)) >= 0;
 }
 
+// The address of a stream as typed, made whole: without a scheme it is
+// taken for https.
+function streamAddress(text) {
+    var address = text.trim();
+    return address.indexOf("://") > 0 ? address : "https://" + address;
+}
+
+// A name for a stream, from its address: the last part of its path without
+// what follows a "?", or else its host.
+function streamTitle(address) {
+    var rest = address.substring(address.indexOf("://") + 3).split("?")[0].split("#")[0];
+    var parts = rest.split("/").filter(function(part) { return part.length > 0; });
+    var name = parts.length > 1 ? parts[parts.length - 1] : (parts[0] || address);
+    try {
+        name = decodeURIComponent(name);
+    } catch (e) {
+    }
+    // "film.mp4" is "film", as a file's name is shown; a host keeps its dots.
+    var dot = name.lastIndexOf(".");
+    if (parts.length > 1 && dot > 0)
+        name = name.substring(0, dot);
+    return name;
+}
+
+// Whether a stream is sound only, as far as its address says: by the end of
+// its path, before any "?".
+function isAudioAddress(address) {
+    return isAudioName(address.split("?")[0].split("#")[0]);
+}
+
 // Name patterns for a listing of a folder's media files, either case.
 function mediaNameFilters() {
     var all = AUDIO_EXTENSIONS.concat(VIDEO_EXTENSIONS);
