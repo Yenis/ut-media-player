@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.30 - unreleased
+## 0.0.30 - 12 October 2026
 
 - Search, under More: one text looked for across the whole library. The
   results come in sections, videos, artists, albums, tracks, genres and
