@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.32 - unreleased
+
+- A file that cannot be played says so in plain words: that it is not there
+  any more, or that it could not be played and why that may be. Before, a
+  missing video showed the system's own technical message, and a missing
+  or broken song said nothing for 20 seconds.
+- A file on the phone is given 8 seconds to start, where it was given 20;
+  a stream still has 20.
+- In a queue, an item that cannot be played is skipped after a moment, and
+  the next one plays, as in VLC. A queue where nothing plays stops trying,
+  even with "repeat all" on.
+- After a failure the play button shows "play", and the audio player's
+  message has a dark box behind it.
+
 ## 0.0.31 - 14 October 2026
 
 - Several files handed over at once by another app, through "Open with" or

@@ -184,6 +184,7 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | Treat a negative `position` as zero | It is a large negative number while nothing is loaded |
 | Expect a seek to land early and late | It goes to the keyframe before the target and takes 0.4 to 1.5 s; a seek before playback has started is ignored |
 | Do not trust `hasAudio`, `metaData` or `volume` | Wrong, empty, and ignored |
+| Expect no error for a file that cannot be played, or that is missing, in a list | media-hub reads "Stopped" and nothing is raised; on its own a missing file raises "Failed to open uri … can't be found", a broken one nothing. The app's time limit is the only sign: 8 s for a file, 20 s for a stream |
 | Set your own time limit when opening a stream | A dead address raises no error |
 | `tools/dev.sh restart` kills the app, so music it was playing plays on | The window's closing is what pauses; a killed process cannot. Stop the music before a restart, or play and stop something after it |
 | A file that is still loaded plays on from where it was paused | Opening the same address again does not rewind it; "Play from start" has to seek to 0 once playback has started |

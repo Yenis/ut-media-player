@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -27,11 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-113 checks are open. The rows themselves are in each section's "By hand"
+117 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [Files that cannot be played, 0.0.32](#files-that-cannot-be-played-version-0032) | 4 | A file deleted in the file manager for one |
 | [Content Hub, 0.0.31](#content-hub-version-0031) | 5 | Another app for each: the file manager, the browser, Messaging |
 | [Library search, 0.0.30](#library-search-version-0030) | 6 | |
 | [Settings, 0.0.29](#settings-version-0029) | 10 | Subtitles on a bright picture for one |
@@ -75,6 +76,41 @@ table, marked "Still to do" or "Not reported".
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Files that cannot be played, version 0.0.32
+
+### Before: what 0.0.31 did, 14 October 2026
+
+| Check | Result |
+|---|---|
+| A missing song, then a real one, handed over as a queue | The audio player, "Loading…" for 20 s, then "This file could not be played."; the queue stays on the missing song. media-hub reads "Stopped" and raised no error |
+| A missing video, then a real one | At once the backend's text: "Warning: Failed to open uri file:///…/gone.mp4 because it can't be found."; the queue stays there |
+| A text file named `broken.mp4`, and one named `broken.mp3` | 20 s of "Loading…" each, then "This file could not be played." |
+
+### Checked over adb, 14 October 2026
+
+| Check | Result |
+|---|---|
+| The missing song, then a real one: after 8 s "This file could not be played. It may have been moved or deleted, be damaged, or be in a format the phone cannot play."; 2.5 s later the real song plays, "2 of 2", media-hub reads it | Pass |
+| The missing video, then a real one: at once "This file is not there any more. It may have been moved or deleted."; then the real video plays with its picture | Pass |
+| `broken.mp4` alone: after 8 s the message, and it stays, there being nothing to move on to | Pass |
+| Two that fail, with "repeat all" on: both are tried once, the second's message stays, nothing goes round | Pass |
+| After a failure the play button shows "play"; the audio player's message has a dark box behind it, readable over the headphones | Pass |
+| A failed item is not put into the playback history | Pass |
+| Ordinary playing is undisturbed: a video resumes at its place, a track list plays from its fourth item and `next` moves on, with no message | Pass |
+| No QML warnings from the app | Pass. The thumbnailer complained about `broken.mp4` while it was in the library |
+
+The broken test files were deleted from the phone afterwards, and the test
+plays removed from the history.
+
+### By hand
+
+| Check | Result |
+|---|---|
+| A song deleted in the file manager, then played from a playlist: the message, then the next song | Still to do |
+| The same for a video in the playback history | Still to do |
+| A real file the phone cannot play, if one is at hand: the message after 8 s | Still to do |
+| A large video on a card or a slow stick: does it start within 8 s, or is it called failed? | Still to do |
 
 ## Content Hub, version 0.0.31
 

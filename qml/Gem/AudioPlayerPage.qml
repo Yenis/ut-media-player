@@ -464,7 +464,17 @@ Item {
             }
         }
 
+        // A dark box behind a message, so that it reads over a cover.
+        Rectangle {
+            visible: statusText.visible && page.playback && page.playback.error !== ""
+            anchors.centerIn: statusText
+            width: statusText.width + Theme.u(3)
+            height: statusText.contentHeight + Theme.u(2)
+            radius: Theme.u(1)
+            color: Qt.rgba(0, 0, 0, 0.75)
+        }
         Text {
+            id: statusText
             visible: !info.visible && level.kind === "" && (page.playback ? page.playback.error !== "" || page.playback.starting : false)
             anchors.centerIn: parent
             width: parent.width * 0.8

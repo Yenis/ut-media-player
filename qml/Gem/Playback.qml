@@ -106,6 +106,35 @@ Item {
         settings.sync();
     }
 
+    // ---- what cannot be played -------------------------------------------------------
+
+    // An item that fails is said to have failed, in words, and a queue moves
+    // on to the next, as VLC does; but not round and round a queue where
+    // nothing plays.
+    property int _failures: 0
+
+    // The words for what went wrong. The backend's own are technical, and
+    // for a file it cannot play it says nothing at all.
+    function _failed(raw) {
+        if (error !== "")
+            return;
+        var gone = /can't be found|not found|No such file/i.test(raw || "");
+        if (isStream(url))
+            error = raw ? "The stream could not be played. Check the address and the connection."
+                        : "The stream did not start. Check the address and the connection.";
+        else if (gone)
+            error = "This file is not there any more. It may have been moved or deleted.";
+        else
+            // The backend does not say why; in a list it does not even say
+            // that a file is missing [device].
+            error = "This file could not be played. It may have been moved or deleted, be damaged, or be in a format the phone cannot play.";
+        _awaitingStart = false;
+        startLimit.stop();
+        _failures++;
+        if (queue.length > 1 && _failures < queue.length && (hasNext || queueIndex < queue.length - 1))
+            skipFailed.restart();
+    }
+
     // Read on first use: who is ready first, this object or its owner, is
     // not laid down.
     property bool _allowedRead: false
@@ -150,7 +179,8 @@ Item {
 
     readonly property alias player: mediaPlayer
     readonly property bool loaded: url !== ""
-    readonly property bool playing: mediaPlayer.playbackState === MediaPlayer.PlayingState
+    // Not while an item that failed is shown: the backend says it plays.
+    readonly property bool playing: mediaPlayer.playbackState === MediaPlayer.PlayingState && error === ""
     // Played out, or never started. The state follows the status by a moment.
     readonly property bool _stopped: mediaPlayer.playbackState === MediaPlayer.StoppedState
                                      || mediaPlayer.status === MediaPlayer.EndOfMedia
@@ -204,6 +234,7 @@ Item {
         if (blocks(list))
             return false;
         saveNow();
+        _failures = 0;
         var at = Math.max(0, Math.min(index, list.length - 1));
         _ordered = list.slice();
         if (shuffle && list.length > 1) {
@@ -613,6 +644,8 @@ Item {
     }
 
     function clearQueue() {
+        skipFailed.stop();
+        _failures = 0;
         queue = [];
         _ordered = [];
         queueIndex = -1;
@@ -641,6 +674,10 @@ Item {
         // from start": still loaded, it would play on from where it was paused.
         _fromStart = !!fromStart || (!!media.hasPicture && !resumeVideos);
         _awaitingStart = true;
+        skipFailed.stop();
+        // A file on the phone starts within a second or two [device]; a
+        // stream may take a while to answer.
+        startLimit.interval = isStream(url) ? 20000 : 8000;
         startLimit.restart();
     }
 
@@ -796,14 +833,23 @@ Item {
             // and the backend complains that it cannot open nothing.
             if (/Failed to open uri\s+because/.test(errorString))
                 return;
-            playback.error = errorString || "This file could not be played.";
             console.warn("playback error", error, errorString);
+            playback._failed(errorString);
         }
 
         onPositionChanged: {
             var now = position;
             var step = now - playback._lastPosition;
             playback._lastPosition = now;
+
+            // Called failed, and playing after all, late: the message goes
+            // and the queue stays where it is.
+            if (playback.error !== "" && playbackState === MediaPlayer.PlayingState && now > 0 && step > 0 && step < 1000
+                    && !playback._awaitingStart && playback._failures > 0) {
+                playback.error = "";
+                playback._failures = 0;
+                skipFailed.stop();
+            }
 
             // A live stream has no length to wait for: it has started
             // once it has played for a moment.
@@ -816,6 +862,7 @@ Item {
                     playback.seekTo(0);
                 playback._pendingStart = 0;
                 playback._fromStart = false;
+                playback._failures = 0;
                 // It plays: that is what the history is a record of. An item
                 // the hub moved to while the app was frozen is noted when
                 // the app wakes and hears of it.
@@ -924,18 +971,23 @@ Item {
         onTriggered: playback._seekTarget = -1
     }
 
-    // The backend raises no error for an address that does not answer, or for
-    // some files it cannot play: it just never starts.
+    // The backend raises no error for an address that does not answer, for
+    // a file it cannot play, or for a missing file in a list: it just never
+    // starts [device]. The limit is set with each item, in `_adopt`.
     Timer {
         id: startLimit
-        interval: 20000
+        interval: 8000
         onTriggered: {
-            if (!playback._awaitingStart || playback.error !== "")
-                return;
-            playback.error = playback.url.indexOf("file://") === 0
-                ? "This file could not be played."
-                : "The stream did not start. Check the address and the connection.";
+            if (playback._awaitingStart && playback.error === "")
+                playback._failed("");
         }
+    }
+
+    // The message stays a moment before the queue moves on.
+    Timer {
+        id: skipFailed
+        interval: 2500
+        onTriggered: if (playback.error !== "" && playback.queueIndex >= 0) playback.next()
     }
 
     Timer {

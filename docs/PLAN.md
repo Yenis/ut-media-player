@@ -30,7 +30,7 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
 | **Not confirmed by hand** | 108 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4, the rest of its list: landscape and tablet layouts; empty, error and unsupported-format states; tips for the gestures. |
+| **To pick up next** | Phase 4, the rest of its list: tips for the gestures; landscape and tablet layouts, which cannot be checked over adb. |
 
 What the first day established, in the order it was found:
 
@@ -921,7 +921,22 @@ How it is built:
 - [ ] Settings, the rest: what the list under 0.0.29 above says is not in
       it yet; export and restore.
 - [ ] Landscape and tablet layouts.
-- [ ] Empty, error and unsupported-format states.
+- [x] Empty, error and unsupported-format states (version 0.0.32). The
+      empty states were there already, page by page. What was missing was
+      what happens when a file cannot be played, which the phone showed
+      to be worse than thought **[device]**: in a list given to media-hub
+      a missing or broken file raises no error at all, and on its own a
+      missing video raises the backend's technical text. Now, in
+      `Playback.qml`, a failure is put into words (`_failed`): "not there
+      any more" when the backend says so, otherwise "could not be played"
+      with the likely reasons, and for a stream to check the address and
+      the connection. A file on the phone is given 8 s to start, a stream
+      20. In a queue the item is skipped after 2.5 s, as VLC does; a queue
+      where every item fails stops instead of going round, "repeat all" or
+      not. If an item called failed starts after all, the message goes.
+      Not done: telling a missing file from a broken one when the backend
+      says nothing, which would take looking at the file first; and a mark
+      on a missing item in a playlist or the history before it is played.
 - [ ] Tips for the gestures; parental control.
 - Network shares, casting and remote access are dropped (D13). The Browse
   tab is local and removable storage only.
