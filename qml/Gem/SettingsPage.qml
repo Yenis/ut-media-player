@@ -25,6 +25,8 @@ Item {
     signal closeRequested()
     signal keepHistoryRequested(bool on)
     signal streamsRequested()
+    // The tips will come again: the shell says so.
+    signal tipsReset()
 
     readonly property var clearings: ({
         history: { title: "Clear the playback history?", label: "Clear history" },
@@ -146,6 +148,19 @@ Item {
                 trailing: Toggle {
                     checked: page.prefs ? page.prefs.gesturePinch : true
                     onToggled: page.prefs.set("gesturePinch", checked)
+                }
+            }
+            SettingRow {
+                title: "Show the gesture tips again"
+                detail: "They come with the next video, and the next time the audio player opens."
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        page.prefs.set("videoTipsShown", false);
+                        page.prefs.set("audioTipsShown", false);
+                        page.tipsReset();
+                    }
                 }
             }
             SettingRow {

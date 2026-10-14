@@ -55,7 +55,9 @@ Item {
     // One step: a sheet over the queue first, then the queue's filter, the
     // queue, and at last the page.
     function back() {
-        if (queueItemMenu.open)
+        if (tipsLayer.open)
+            tipsLayer.close();
+        else if (queueItemMenu.open)
             queueItemMenu.close();
         else if (queueSheet.open)
             queueSheet.back();
@@ -71,6 +73,49 @@ Item {
         if (playback && playback.queue.length > 0)
             playlistRequested(playback.queue.slice());
     }
+
+    // ---- gesture tips: the cover's gestures, which are this app's own ------------------
+
+    function tipSteps() {
+        var p = prefs;
+        var skip = p ? p.skipSeconds : 10;
+        var list = [{ title: "Pause", text: "Double tap in the middle of the cover to pause, and again to play.",
+                      zone: "middle", mark: "doubleTap" }];
+        if (!p || p.gestureDoubleTap)
+            list.push({ title: "Skip", text: "Double tap on the left or the right to go " + skip
+                                             + " seconds back or forward. Each tap more goes further.",
+                        zone: "sides", mark: "doubleTap" });
+        if (!p || p.gestureSwipeSeek)
+            list.push({ title: "Seek", text: "Swipe left or right on the cover, and let go where you want to be.",
+                        zone: "all", mark: "horizontal" });
+        if (!p || p.gestureBrightness)
+            list.push({ title: "Brightness", text: "Swipe up or down on the left half.", zone: "left", mark: "vertical" });
+        if (!p || p.gestureVolume)
+            list.push({ title: "Volume", text: "Swipe up or down on the right half.", zone: "right", mark: "vertical" });
+        list.push({ title: "Behind the lists", text: "Swipe the bar at the bottom to the left for the next track, "
+                                                     + "and to the right for the one before. A tap opens this player.",
+                    zone: "none", mark: "" });
+        list.push({ title: "Yours to change", text: "Each gesture can be switched off, and the skip length changed, "
+                                                    + "under More, Settings. These tips can be seen again from there.",
+                    zone: "none", mark: "" });
+        return list;
+    }
+
+    // For the development remote.
+    function tipsNext() { tipsLayer.next(); }
+    function tipsClose() { tipsLayer.close(); }
+    function tipsState() { return tipsLayer.open ? (tipsLayer.index + 1) + "/" + tipsLayer.steps.length + " " + tipsLayer.step.title : ""; }
+
+    function showTips() {
+        tipsLayer.start(tipSteps());
+    }
+
+    // The first time the player opens on something, the tips come, once.
+    // The music is not paused for them.
+    Component.onCompleted: Qt.callLater(function() {
+        if (page.prefs && !page.prefs.audioTipsShown && page.playback && page.playback.loaded)
+            page.showTips();
+    })
 
     // For the development remote.
     function setQueueFilter(text) { queueSheet.setFilter(text); }
@@ -354,6 +399,7 @@ Item {
         }
 
         GestureLayer {
+            id: coverGestures
             anchors.fill: parent
             seekable: page.playback ? page.playback.seekable : false
             volumeEnabled: page.prefs ? page.prefs.gestureVolume : true
@@ -797,5 +843,12 @@ Item {
             page.sleep.cancel();
             page.showInfo("Sleep timer off", 1000);
         }
+    }
+
+    GestureTips {
+        id: tipsLayer
+        anchors.fill: parent
+        area: coverGestures
+        onFinished: if (page.prefs) page.prefs.set("audioTipsShown", true)
     }
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.33 - unreleased
+
+- Gesture tips. The first video brings them, paused: each gesture in turn,
+  with the part of the screen it is made on lit, and "Next" to go on. The
+  audio player has its own, the first time it opens, for the gestures on
+  its cover and the swipes on the bar behind the lists; the music plays on.
+- Gestures switched off in the settings are left out of the tips, and the
+  skip length they name is the one set.
+- "Show the gesture tips again" under More, Settings.
+
 ## 0.0.32 - 14 October 2026
 
 - A file that cannot be played says so in plain words: that it is not there

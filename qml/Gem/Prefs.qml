@@ -44,9 +44,14 @@ Item {
     readonly property var subtitleColourNames: ["White", "Yellow"]
     property bool subtitleBackground: false
 
+    // The gesture tips were seen, in the video player and in the audio
+    // player. They come once, as in VLC, and again when asked for.
+    property bool videoTipsShown: false
+    property bool audioTipsShown: false
+
     readonly property var _flags: ["gestureVolume", "gestureBrightness", "gestureSwipeSeek", "gestureDoubleTap",
                                    "gesturePinch", "resumeVideos", "videoPlaysOnAsAudio", "restoreQueue",
-                                   "subtitleBackground"]
+                                   "subtitleBackground", "videoTipsShown", "audioTipsShown"]
 
     property bool _loaded: false
 

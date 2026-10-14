@@ -77,6 +77,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `bopen [path]`, `btap <index>`, `baction <index> <open\|playAll\|favourite>`, `bfav`, `bplay` | The Browse tab: enters a folder (no path: the overview), a tap on the row at that place, a folder's menu entries, the star of the folder shown, and its play button. `state` reports the folder as `browsing` |
 | `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
 | `aalbumgrid <0\|1>` | Albums as cards with covers, or as rows |
+| `tips <show\|next\|close>` | The gesture tips of the player that is open: shows them, leads on, closes them. `state` reports the step as `tips`, and whether they were seen under `prefs` (`videoTipsShown`, `audioTipsShown`), which `pref` sets |
 | `incoming <address> [<address>...]`, `share [path]` | Hands the app addresses as another app would, through the same function the hub's handler calls; opens the share picker for a file, or with no path closes it. `state` reports the picker as `sharing` |
 | `find [text]`, `ftap <index>`, `fmenu <index>`, `faction <index> <open\|play\|insertNext\|append\|addToPlaylist>` | The library search: opens it with that text; a tap on the result at that place, counting headings; its menu, and one choice from it. `state` lists the results as `shown` |
 | `exempt <0\|1>` | "Keep running in the background": puts the app on the system's list of apps that are not frozen, or takes it off. `state` reports it as `exempt`, and the window's visibility, `active` and `visible` as `win` |

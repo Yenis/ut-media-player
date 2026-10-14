@@ -30,7 +30,7 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
 | **Not confirmed by hand** | 108 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4, the rest of its list: tips for the gestures; landscape and tablet layouts, which cannot be checked over adb. |
+| **To pick up next** | Phase 4, the rest of its list: landscape and tablet layouts, which cannot be checked over adb; parental control, VLC's PIN, "build, low priority" in the survey, for Yenis to say whether it is wanted. Then Phase 5, the release of 0.1.0. |
 
 What the first day established, in the order it was found:
 
@@ -937,7 +937,21 @@ How it is built:
       Not done: telling a missing file from a broken one when the backend
       says nothing, which would take looking at the file first; and a mark
       on a missing item in a playlist or the history before it is played.
-- [ ] Tips for the gestures; parental control.
+- [x] Tips for the gestures (version 0.0.33), after VLC's
+      `VideoTipsDelegate.kt`: `qml/Gem/GestureTips.qml` lights the part of
+      the screen a gesture is made on, with a sign drawn from the app's own
+      icons, and says what it does on a card with "Next" and "Close"; a tap
+      anywhere also leads on. The video player brings them with the first
+      video that plays, paused as VLC does, and plays on after them, in
+      VLC's order: controls, brightness, volume, pause, skip, seek, and our
+      own pinch. The audio player has its own the first time it opens on
+      something, as VLC has audio tips, for the gestures on its cover,
+      which are this app's own, and the mini-player's swipes; the music is
+      not paused for them. Gestures switched off are left out, and the skip
+      length named is the one set. "Show the gesture tips again" in
+      Settings brings both back. Found on the way **[device]**: an arrow
+      written as text, ↕, is drawn as a coloured emoji on the phone.
+- [ ] Parental control: VLC's PIN, "build, low priority" in the survey.
 - Network shares, casting and remote access are dropped (D13). The Browse
   tab is local and removable storage only.
 

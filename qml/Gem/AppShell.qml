@@ -530,6 +530,7 @@ FocusScope {
                 onCloseRequested: shell.moreView = ""
                 onKeepHistoryRequested: core.setKeepHistory(on)
                 onStreamsRequested: shell.moreView = "streams"
+                onTipsReset: notice.show("The tips will come with the next video")
             }
             AboutPage {
                 anchors.fill: parent

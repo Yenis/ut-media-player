@@ -334,10 +334,67 @@ Item {
     }
 
     function back() {
-        if (sheetOpen)
+        if (tipsLayer.open)
+            tipsLayer.close();
+        else if (sheetOpen)
             closeSheets();
         else if (!locked)
             closeRequested();
+    }
+
+    // ---- gesture tips --------------------------------------------------------------
+
+    // The steps, without what the settings switched off.
+    function tipSteps() {
+        var p = prefs;
+        var skip = p ? p.skipSeconds : 10;
+        var list = [{ title: "Controls", text: "Tap once to show the controls, and again to hide them.",
+                      zone: "all", mark: "tap" }];
+        if (!p || p.gestureBrightness)
+            list.push({ title: "Brightness", text: "Swipe up or down on the left half.", zone: "left", mark: "vertical" });
+        if (!p || p.gestureVolume)
+            list.push({ title: "Volume", text: "Swipe up or down on the right half.", zone: "right", mark: "vertical" });
+        list.push({ title: "Pause", text: "Double tap in the middle to pause, and again to play.",
+                    zone: "middle", mark: "doubleTap" });
+        if (!p || p.gestureDoubleTap)
+            list.push({ title: "Skip", text: "Double tap on the left or the right to go " + skip
+                                             + " seconds back or forward. Each tap more goes further.",
+                        zone: "sides", mark: "doubleTap" });
+        if (!p || p.gestureSwipeSeek)
+            list.push({ title: "Seek", text: "Swipe left or right, and let go where you want to be.",
+                        zone: "all", mark: "horizontal" });
+        if (!p || p.gesturePinch)
+            list.push({ title: "Picture size", text: "Pinch out to fill the screen, and in to fit the picture again.",
+                        zone: "all", mark: "pinch" });
+        list.push({ title: "Yours to change", text: "Each gesture can be switched off, and the skip length changed, "
+                                                    + "under More, Settings. These tips can be seen again from there.",
+                    zone: "none", mark: "" });
+        return list;
+    }
+
+    property bool _pausedForTips: false
+
+    // For the development remote.
+    function tipsNext() { tipsLayer.next(); }
+    function tipsClose() { tipsLayer.close(); }
+    function tipsState() { return tipsLayer.open ? (tipsLayer.index + 1) + "/" + tipsLayer.steps.length + " " + tipsLayer.step.title : ""; }
+
+    function showTips() {
+        _pausedForTips = playback && playback.playing;
+        if (_pausedForTips)
+            playback.pause();
+        controlsShown = false;
+        tipsLayer.start(tipSteps());
+    }
+
+    // The first video that plays brings the tips, once.
+    Connections {
+        target: page.playback
+        onStartingChanged: {
+            if (!page.playback.starting && page.visible && !page.playback.audioMode && page.playback.error === ""
+                    && page.prefs && !page.prefs.videoTipsShown && !tipsLayer.open)
+                page.showTips();
+        }
     }
 
     // The controls go away after four seconds, but stay while the video is
@@ -590,6 +647,20 @@ Item {
             text: !page.playback ? "" : page.playback.error !== "" ? page.playback.error : "Loading\u2026"
             color: page.playback && page.playback.error !== "" ? Theme.text : Theme.textDim
             font.pixelSize: Theme.fontM
+        }
+
+        // Over everything else on the stage, so that it turns with the picture.
+        GestureTips {
+            id: tipsLayer
+            z: 10
+            anchors.fill: parent
+            onFinished: {
+                if (page.prefs)
+                    page.prefs.set("videoTipsShown", true);
+                if (page._pausedForTips && page.playback)
+                    page.playback.play();
+                page._pausedForTips = false;
+            }
         }
 
         PlayerControls {
