@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.34 - unreleased
+## 0.0.34 - 14 October 2026
 
 - The audio player in landscape, and on any wide screen: the cover on the
   left, the title, timeline and buttons beside it, where before the cover
