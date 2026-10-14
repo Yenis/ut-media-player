@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.32 - unreleased
+## 0.0.32 - 14 October 2026
 
 - A file that cannot be played says so in plain words: that it is not there
   any more, or that it could not be played and why that may be. Before, a
