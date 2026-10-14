@@ -77,6 +77,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `bopen [path]`, `btap <index>`, `baction <index> <open\|playAll\|favourite>`, `bfav`, `bplay` | The Browse tab: enters a folder (no path: the overview), a tap on the row at that place, a folder's menu entries, the star of the folder shown, and its play button. `state` reports the folder as `browsing` |
 | `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
 | `aalbumgrid <0\|1>` | Albums as cards with covers, or as rows |
+| `incoming <address> [<address>...]`, `share [path]` | Hands the app addresses as another app would, through the same function the hub's handler calls; opens the share picker for a file, or with no path closes it. `state` reports the picker as `sharing` |
 | `find [text]`, `ftap <index>`, `fmenu <index>`, `faction <index> <open\|play\|insertNext\|append\|addToPlaylist>` | The library search: opens it with that text; a tap on the result at that place, counting headings; its menu, and one choice from it. `state` lists the results as `shown` |
 | `exempt <0\|1>` | "Keep running in the background": puts the app on the system's list of apps that are not frozen, or takes it off. `state` reports it as `exempt`, and the window's visibility, `active` and `visible` as `win` |
 | `settings`, `sscroll <y>`, `pref <name> <value>`, `sclear <history\|streams\|progress> [now]` | Opens the Settings page and scrolls it; sets one setting by its name in `qml/Gem/Prefs.qml` (`1` and `0` for a switch); the question before clearing, or with `now` the clearing itself. `state` reports every setting under `prefs` |
@@ -210,7 +211,9 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | Need | How | File |
 |---|---|---|
 | Media library, thumbnails | `MediaScanner 0.1`, `Lomiri.Thumbnailer 0.1` | `qml/platform/MediaLibrary.qml` |
-| Files from other apps | `Lomiri.Content 1.3` | `qml/platform/ContentImport.qml` |
+| Files and links from other apps | `Lomiri.Content 1.3`: `ContentHub.onImportRequested` for "Open with", `onShareRequested` for "Share" | `qml/platform/ContentImport.qml` |
+| Giving files to other apps | `Lomiri.Content 1.3` `ContentPeerPicker` with `ContentHandler.Share`; the transfer's items are `ContentItem`s made in the app, then the transfer is charged | `qml/platform/ContentShare.qml` |
+| What the hub has registered | `gsettings list-recursively com.lomiri.content.hub.destination` and `.share` | |
 | System volume, screen brightness | The sound and power indicators publish their sliders as actions on the session bus; `QMenuModel 1.0`'s `QDBusActionGroup` reads and sets them | `qml/platform/SystemVolume.qml`, `SystemBrightness.qml` |
 | Not being frozen in the background | `GSettings 1.0`, schema `com.canonical.qtmir`, key `lifecycle-exempt-appids`: a list of package names, read and written as `lifecycleExemptAppids` | `qml/platform/BackgroundRunning.qml` |
 | User folders | `Qt.labs.platform` `StandardPaths` | `qml/platform/Folders.qml` |

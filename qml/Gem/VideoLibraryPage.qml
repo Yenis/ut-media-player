@@ -81,6 +81,8 @@ Item {
     signal queueRequested(var list, bool next)
     // "Add to playlist" for `list`; the shell asks which playlist.
     signal playlistRequested(var list)
+    // "Share": `list` to another app; the shell asks which.
+    signal shareRequested(var list)
 
     function reload() {
         videos = library ? library.videos() : [];
@@ -321,6 +323,8 @@ Item {
             queueRequested(videos, key === "insertNext");
         } else if (key === "addToPlaylist") {
             playlistRequested(videos);
+        } else if (key === "share") {
+            shareRequested([item]);
         } else if (key === "played" || key === "notPlayed") {
             for (var k = 0; k < videos.length; k++)
                 store.setSeen(videos[k].url, key === "played", videos[k].duration);
@@ -876,6 +880,7 @@ Item {
             rows.push({ key: "append", label: "Add to play queue", glyph: "add" });
             rows.push({ key: "addToPlaylist", label: "Add to playlist", glyph: "playlist" });
             rows.push({ key: "info", label: "Information", glyph: "info" });
+            rows.push({ key: "share", label: "Share", glyph: "forward" });
             rows.push({ key: "favourite", glyph: "star", selected: favourite,
                         label: favourite ? "Remove from favourites" : "Add to favourites" });
             if (page.canGroup) {

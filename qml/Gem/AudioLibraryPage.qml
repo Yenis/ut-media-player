@@ -77,6 +77,8 @@ Item {
     signal queueRequested(var list, bool next)
     // "Add to playlist" for `list`; the shell asks which playlist.
     signal playlistRequested(var list)
+    // "Share": `list` to another app; the shell asks which.
+    signal shareRequested(var list)
 
     function keyOf(item) {
         return item.tracks ? item.key : item.url;
@@ -289,6 +291,8 @@ Item {
             queueRequested(tracksOf(item), key === "insertNext");
         else if (key === "addToPlaylist")
             playlistRequested(tracksOf(item));
+        else if (key === "share" && !item.tracks)
+            shareRequested([item]);
         else if (key === "favourite" && !item.tracks)
             store.setFavourite(item.url, !favourites[item.url]);
         else if (key === "info" && !item.tracks)
@@ -759,6 +763,7 @@ Item {
             ];
             if (item && !item.tracks && !item.section) {
                 rows.push({ key: "info", label: "Information", glyph: "info" });
+                rows.push({ key: "share", label: "Share", glyph: "forward" });
                 if (page.store) {
                     var favourite = !!page.favourites[item.url];
                     rows.push({ key: "favourite", glyph: "star", selected: favourite,

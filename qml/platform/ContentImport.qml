@@ -2,21 +2,37 @@ import QtQuick 2.12
 import Lomiri.Content 1.3
 
 /*
- * Files that other apps hand over ("Open with"). Content Hub puts each one in
- * ~/.cache/gemplayer.yenis/HubIncoming/ as a hard link to the original.
- * Loaded by URL, since Lomiri.Content only exists on the device.
+ * What other apps hand over: files through "Open with", and files or links
+ * through "Share". Content Hub puts a file in
+ * ~/.cache/gemplayer.yenis/HubIncoming/ as a hard link to the original; a
+ * link arrives as its address. The two ways in are two signals of the hub,
+ * taken alike here. Loaded by URL, since Lomiri.Content only exists on the
+ * device.
  */
 Item {
-    signal incoming(string url)
+    // The addresses handed over, in the order given.
+    signal incoming(var urls)
+
+    function _take(transfer) {
+        if (transfer.state !== ContentTransfer.Charged)
+            return;
+        var urls = [];
+        for (var i = 0; i < transfer.items.length; i++) {
+            var item = transfer.items[i];
+            var address = item.url ? item.url.toString() : "";
+            // A link can come as text instead of an address.
+            if (!address && item.text)
+                address = item.text.toString().trim();
+            if (address)
+                urls.push(address);
+        }
+        if (urls.length > 0)
+            incoming(urls);
+    }
 
     Connections {
         target: ContentHub
-        onImportRequested: {
-            if (transfer.state !== ContentTransfer.Charged)
-                return;
-            // One file is played; a queue of several comes with Phase 2.
-            if (transfer.items.length > 0)
-                incoming(transfer.items[0].url.toString());
-        }
+        onImportRequested: _take(transfer)
+        onShareRequested: _take(transfer)
     }
 }

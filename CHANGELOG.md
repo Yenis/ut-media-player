@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.31 - unreleased
+
+- Several files handed over at once by another app, through "Open with" or
+  "Share", play as a queue in the order given, where before only the first
+  was taken.
+- A link shared from another app, the browser for one, plays as a stream,
+  after the question if streams are off.
+- "Share" in a video's and a track's menu hands the file to another app,
+  from the system's own list of the apps that take it.
+
 ## 0.0.30 - 12 October 2026
 
 - Search, under More: one text looked for across the whole library. The

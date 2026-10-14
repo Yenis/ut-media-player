@@ -1,6 +1,12 @@
 {
     "destination": [
         "videos",
-        "music"
+        "music",
+        "links"
+    ],
+    "share": [
+        "videos",
+        "music",
+        "links"
     ]
 }

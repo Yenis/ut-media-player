@@ -30,7 +30,7 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
 | **Not confirmed by hand** | 108 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4, the rest of its list: Content Hub import, "open with" and sharing, with a link handed over by another app; landscape and tablet layouts; empty, error and unsupported-format states; tips for the gestures. Read [DEVELOPING.md](DEVELOPING.md) first: it has the build loop, the remote control for checking changes on the phone, and the rules the backend imposes. Mind D13: nothing over the network |
+| **To pick up next** | Phase 4, the rest of its list: landscape and tablet layouts; empty, error and unsupported-format states; tips for the gestures. |
 
 What the first day established, in the order it was found:
 
@@ -894,7 +894,30 @@ How it is built:
 - [x] Incognito mode: dropped (D15). It was VLC's switch for leaving no
       trace of what is played: no progress, seen marker, history entry or
       last queue saved while it is on. Nothing to do with the network.
-- [ ] Content Hub import, "open with" and sharing.
+- [x] Content Hub (version 0.0.31): taking files and links from other apps,
+      and giving files to them. `gemplayer.content-hub.json` declares the
+      app a destination ("Open with") and a share target for videos, music
+      and links, which the hub registered **[device]**.
+      `qml/platform/ContentImport.qml` takes what arrives through either,
+      every item, and the shell plays it: files as a queue in the order
+      given, with their pictures if they are all videos and as audio
+      otherwise, as a playlist does; a link as a stream, through the
+      question of D14. With files and a link together, the files play.
+      `qml/platform/ContentShare.qml` is "Share" in a video's and a
+      track's menu: the system's own picker (`ContentPeerPicker`, the one
+      use of Lomiri's toolkit beyond units), loaded the first time it is
+      asked for, which offers File Manager and Messaging for a video on
+      this phone **[device]**. The receiving app gets a copy.
+  - What could not be tried from the computer: a real hand-over. The
+    system's `lomiri-content-hub-send` sends links but would not run over
+    adb, and sends no files. The app's side was tried with the same
+    addresses the hub hands over; the hub's side waits for a tap in the
+    browser, the file manager and the share picker.
+  - The picker draws, but logs one error from inside Lomiri's own
+    `ResponsiveGridView.qml`; the app has no `MainView`, which the toolkit
+    expects. It is left as it is while the picker works.
+  - Not built: "Share" for a selection, a group, an album or a stream's
+    address, and VLC's "Go to folder".
 - [ ] Settings, the rest: what the list under 0.0.29 above says is not in
       it yet; export and restore.
 - [ ] Landscape and tablet layouts.

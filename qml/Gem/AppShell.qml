@@ -96,8 +96,24 @@ FocusScope {
     readonly property var backgroundRunning: backgroundLoader.status === Loader.Ready ? backgroundLoader.item : null
     Loader {
         source: "../platform/ContentImport.qml"
-        onLoaded: item.incoming.connect(shell.openUrl)
+        onLoaded: item.incoming.connect(shell.openIncoming)
     }
+    // "Share", loaded the first time it is asked for: it brings in the
+    // system's toolkit, which nothing else needs.
+    Loader {
+        id: shareLoader
+        z: 3
+        anchors.fill: parent
+        active: false
+        source: "../platform/ContentShare.qml"
+        property var pending: null
+        onLoaded: {
+            item.closed.connect(function() { shareLoader.pending = null; });
+            if (pending)
+                item.ask(pending.urls, pending.videos);
+        }
+    }
+    readonly property bool sharing: shareLoader.status === Loader.Ready && shareLoader.item.open
     Loader {
         source: "../dev/Remote.qml"
         onLoaded: item.shell = shell
@@ -232,16 +248,54 @@ FocusScope {
         }
     }
 
-    // A file from outside the list: another app, or a path.
-    function openUrl(url) {
-        if (core.isStream(url)) {
-            openStream(url.toString(), "");
-            return;
-        }
+    // A file from outside the lists, as the players take it: what the
+    // library knows of it, or else its name and the kind its ending says.
+    function fileMedia(url) {
         var path = decodeURIComponent(url.toString().replace("file://", ""));
         var known = library ? library.lookup(path) : null;
-        openMedia(known || { url: url.toString(), title: Format.baseName(url), duration: 0,
-                             hasPicture: !Format.isAudioName(url) });
+        return known || { url: url.toString(), title: Format.baseName(url), duration: 0,
+                          hasPicture: !Format.isAudioName(url) };
+    }
+
+    // A file or a stream from outside the lists: another app, or a path.
+    function openUrl(url) {
+        openIncoming([url.toString()]);
+    }
+
+    // What another app handed over. Files play as a queue in the order
+    // given, with their pictures if they are all videos and as audio
+    // otherwise, as a playlist does. A link plays as a stream, through the
+    // question if streams are off; with files beside it, the files play.
+    function openIncoming(urls) {
+        var files = [];
+        var stream = "";
+        for (var i = 0; i < urls.length; i++) {
+            if (core.isStream(urls[i]))
+                stream = stream || urls[i];
+            else
+                files.push(fileMedia(urls[i]));
+        }
+        if (files.length > 0) {
+            var videosOnly = files.every(function(media) { return media.hasPicture; });
+            playList(files, 0, videosOnly ? {} : { asAudio: true });
+        } else if (stream) {
+            openStream(stream, "");
+        }
+    }
+
+    // "Share" on library items: the system's list of apps that take them.
+    function shareMedia(list) {
+        var urls = list.filter(function(media) { return !core.isStream(media.url); })
+                       .map(function(media) { return media.url.toString(); });
+        if (urls.length === 0)
+            return;
+        var request = { urls: urls, videos: list[0].hasPicture };
+        if (shareLoader.status === Loader.Ready) {
+            shareLoader.item.ask(request.urls, request.videos);
+        } else {
+            shareLoader.pending = request;
+            shareLoader.active = true;
+        }
     }
 
     function openPath(path) {
@@ -272,7 +326,9 @@ FocusScope {
 
     // One step back; false when there is nowhere to go back to.
     function back() {
-        if (gate.open)
+        if (sharing)
+            shareLoader.item.close();
+        else if (gate.open)
             gate.close();
         else if (picker.open)
             picker.close();
@@ -374,6 +430,7 @@ FocusScope {
                 onPlayRequested: shell.playList(list, index, options)
                 onQueueRequested: shell.addToQueue(list, next)
                 onPlaylistRequested: shell.addToPlaylist(list)
+                onShareRequested: shell.shareMedia(list)
             }
             AudioLibraryPage {
                 id: audioTab
@@ -386,6 +443,7 @@ FocusScope {
                 onPlayRequested: shell.playList(list, index, options)
                 onQueueRequested: shell.addToQueue(list, next)
                 onPlaylistRequested: shell.addToPlaylist(list)
+                onShareRequested: shell.shareMedia(list)
             }
             BrowsePage {
                 id: browseTab
