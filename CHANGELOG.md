@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.33 - unreleased
+## 0.0.33 - 14 October 2026
 
 - Gesture tips. The first video brings them, paused: each gesture in turn,
   with the part of the screen it is made on lit, and "Next" to go on. The
