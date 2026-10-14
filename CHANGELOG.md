@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.31 - unreleased
+## 0.0.31 - 14 October 2026
 
 - Several files handed over at once by another app, through "Open with" or
   "Share", play as a queue in the order given, where before only the first
