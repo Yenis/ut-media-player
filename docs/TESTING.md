@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -27,11 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-121 checks are open. The rows themselves are in each section's "By hand"
+124 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [Landscape, 0.0.34](#landscape-version-0034) | 3 | Turning the phone |
 | [Gesture tips, 0.0.33](#gesture-tips-version-0033) | 4 | |
 | [Files that cannot be played, 0.0.32](#files-that-cannot-be-played-version-0032) | 4 | A file deleted in the file manager for one |
 | [Content Hub, 0.0.31](#content-hub-version-0031) | 5 | Another app for each: the file manager, the browser, Messaging |
@@ -78,6 +79,32 @@ table, marked "Still to do" or "Not reported".
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
 
+## Landscape, version 0.0.34
+
+### Checked over adb, 14 October 2026
+
+Laid out with the remote's `landscape`, which gives the app a window of
+2145 by 1080 turned a quarter, and photographed.
+
+| Check | Result |
+|---|---|
+| Video tab: four cards to a row; as a list, rows the width of the screen | Pass (layout) |
+| Audio tab: four album cards to a row; the track list | Pass (layout) |
+| Browse, Playlists, More, Settings, About, the display sheet, the stream question | Pass (layout) |
+| The mini-player above the tabs | Pass (layout) |
+| The video player, held level with `angle 0`: controls along the bottom, the tips fit | Pass (layout). Without it the player turns its content to the real phone, which stood upright |
+| The audio player | **Failed at first:** the cover shrank to a small square above the title, timeline and buttons, and the area for its gestures with it. Now the cover is on the left and the controls beside it |
+| The audio player turned to landscape and back, twice | **Failed at first:** back upright, the cover was gone and the controls stood under the header; the layout was switched by bindings. With a state the pictures are the same each time, byte for byte |
+| No QML warnings in the log | Pass, after a fix: the first side-by-side layout placed the controls from the cover, which in the upright layout is placed from them, and Qt warned of an anchor loop |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Turn the phone with each tab in front: nothing is cut off, and turning back restores it | Still to do |
+| The audio player on its side: the cover's gestures, and the buttons | Still to do |
+| A tablet, if one is at hand | Still to do |
+
 ## Gesture tips, version 0.0.33
 
 ### Checked over adb, 14 October 2026
@@ -96,8 +123,14 @@ The first build drew the up-and-down sign as the text ↕, which the phone
 drew as a coloured emoji in a box; the signs are the app's own icons now,
 and "Skip" on the card, which read like the "Skip" step, is "Close". Both
 tips were set to come again afterwards, for Yenis to see as a new user
-would. "Show the gesture tips again" in Settings was not pressed: the same
-two settings were changed through the remote.
+would.
+
+Checked again on 14 October 2026, as Yenis asked, with the phone unlocked:
+the row's own function, `tipsagain`, sets both tips to come again and
+shows "The tips will come with the next video"; the next video brings
+them. The tips laid out as landscape fit, the card below the signs. And
+the system's link-sending tool, tried again for the Content Hub checks of
+0.0.31, still ends without sending anything.
 
 ### By hand
 
@@ -106,7 +139,7 @@ two settings were changed through the remote.
 | The first video: the tips by touch, "Next" and a tap anywhere lead on, "Close" ends them, the video plays after | Still to do |
 | Turned on its side: the tips turn with the picture and fit | Still to do |
 | The audio player's tips, and then the gestures they describe | Still to do |
-| "Show the gesture tips again" in Settings, then a video | Still to do |
+| "Show the gesture tips again" in Settings, then a video | Still to do by touch; its function passed over adb |
 
 ## Files that cannot be played, version 0.0.32
 

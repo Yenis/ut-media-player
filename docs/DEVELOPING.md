@@ -77,6 +77,8 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `bopen [path]`, `btap <index>`, `baction <index> <open\|playAll\|favourite>`, `bfav`, `bplay` | The Browse tab: enters a folder (no path: the overview), a tap on the row at that place, a folder's menu entries, the star of the folder shown, and its play button. `state` reports the folder as `browsing` |
 | `afilter [text]` | Filters the Audio tab's list; without text, closes the filter |
 | `aalbumgrid <0\|1>` | Albums as cards with covers, or as rows |
+| `landscape <0\|1>` | Lays the whole app out as if its window were on its side, and back; `shot` photographs it the right way up. The video player follows the real phone unless held with `angle 0` |
+| `tipsagain` | "Show the gesture tips again", through the same function as the row in Settings |
 | `tips <show\|next\|close>` | The gesture tips of the player that is open: shows them, leads on, closes them. `state` reports the step as `tips`, and whether they were seen under `prefs` (`videoTipsShown`, `audioTipsShown`), which `pref` sets |
 | `incoming <address> [<address>...]`, `share [path]` | Hands the app addresses as another app would, through the same function the hub's handler calls; opens the share picker for a file, or with no path closes it. `state` reports the picker as `sharing` |
 | `find [text]`, `ftap <index>`, `fmenu <index>`, `faction <index> <open\|play\|insertNext\|append\|addToPlaylist>` | The library search: opens it with that text; a tap on the result at that place, counting headings; its menu, and one choice from it. `state` lists the results as `shown` |
@@ -195,6 +197,7 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | Add to a list with `addItems` at the end and `insertItem` before an existing item | `insertItems` is not implemented, and `insertItem` at the end is refused |
 | Ignore "Failed to open uri  because it can't be found" | Giving the player its list empties its address for a moment |
 | Starting a list at the item it already stands at: step it to -1, wait for the list to say so, then ask for the item | Asked for directly, nothing reaches the backend and media-hub plays on what it had loaded, the video from before; asked for in the same breath as the -1, the second request is dropped |
+| Switch a layout with a `State` and `AnchorChanges`, not with anchors bound to a condition | Anchors set to `undefined` by a binding are not put back when the condition turns again: the audio player lost its cover on turning upright [device] |
 | Never hand the player an empty address to make it let go of something | The backend stops, resets its video sink, and on getting the sink back calls play by itself: what was paused plays again |
 | A live stream has no length | `duration` stays 0, and media-hub's own length is a number near the largest there is. "Started" cannot wait for a length |
 | Empty the list before playing an address again | With tracks left in the list, the next video is drawn upside down and reports the last track's length |

@@ -86,6 +86,8 @@ Item {
         else if (name === "baction") shell.browser.itemAction(shell.browser.shown[parseInt(argument.split(" ")[0])], argument.split(" ")[1]);
         else if (name === "bfav") shell.browser.setFavourite(shell.browser.path, !shell.browser.isFavourite);
         else if (name === "bplay") shell.browser.playHere(null);
+        else if (name === "tipsagain") shell.settingsPage.showTipsAgain();
+        else if (name === "landscape") landscape(argument === "1");
         else if (name === "tips") {
             var tp = shell.page === "audio" ? shell.audioPage : shell.videoPage;
             if (argument === "show") tp.showTips();
@@ -206,6 +208,27 @@ Item {
             angle: v ? v.contentAngle : null, window: shell.width + "x" + shell.height,
             sensor: v ? v.Screen.orientation : null, app: Qt.application.state, wall: Date.now()
         }));
+    }
+
+    // Lays the app out as if its window were turned on its side: the shell
+    // is given the window's height as its width and turned a quarter. For
+    // looking at the landscape layout without turning the phone, which adb
+    // cannot do. `shot` then photographs it the right way up.
+    function landscape(on) {
+        var holder = shell.parent;
+        var win = holder.parent;
+        if (on) {
+            holder.anchors.fill = undefined;
+            holder.width = win.height;
+            holder.height = win.width;
+            holder.x = (win.width - win.height) / 2;
+            holder.y = (win.height - win.width) / 2;
+            holder.rotation = 90;
+        } else {
+            holder.rotation = 0;
+            holder.anchors.fill = win;
+        }
+        console.log("REMOTE landscape " + holder.width + "x" + holder.height);
     }
 
     function shot(name) {

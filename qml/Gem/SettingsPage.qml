@@ -54,6 +54,13 @@ Item {
         clearSheet.close();
     }
 
+    // "Show the gesture tips again".
+    function showTipsAgain() {
+        prefs.set("videoTipsShown", false);
+        prefs.set("audioTipsShown", false);
+        tipsReset();
+    }
+
     // For the development remote: how far down the page is shown.
     function scrollTo(y) {
         flick.contentY = Math.max(0, Math.min(y, flick.contentHeight - flick.height));
@@ -156,11 +163,7 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: {
-                        page.prefs.set("videoTipsShown", false);
-                        page.prefs.set("audioTipsShown", false);
-                        page.tipsReset();
-                    }
+                    onClicked: page.showTipsAgain()
                 }
             }
             SettingRow {

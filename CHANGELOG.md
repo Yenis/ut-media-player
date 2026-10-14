@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.34 - unreleased
+
+- The audio player in landscape, and on any wide screen: the cover on the
+  left, the title, timeline and buttons beside it, where before the cover
+  shrank to a small square above them, and its gestures with it.
+
 ## 0.0.33 - 14 October 2026
 
 - Gesture tips. The first video brings them, paused: each gesture in turn,

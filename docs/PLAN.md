@@ -30,7 +30,7 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
 | **Not confirmed by hand** | 108 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4, the rest of its list: landscape and tablet layouts, which cannot be checked over adb; parental control, VLC's PIN, "build, low priority" in the survey, for Yenis to say whether it is wanted. Then Phase 5, the release of 0.1.0. |
+| **To pick up next** | Phase 4: parental control, VLC's PIN, "build, low priority" in the survey, for Yenis to say whether it is wanted. Then Phase 5, the release of 0.1.0. |
 
 What the first day established, in the order it was found:
 
@@ -920,7 +920,21 @@ How it is built:
     address, and VLC's "Go to folder".
 - [ ] Settings, the rest: what the list under 0.0.29 above says is not in
       it yet; export and restore.
-- [ ] Landscape and tablet layouts.
+- [x] Landscape and wide layouts (version 0.0.34). The phone cannot be
+      turned over adb, so the development remote got `landscape`, which
+      lays the whole app out in a window of the phone's height by its
+      width, turned a quarter, and photographs it the right way up. Every
+      page was looked at that way **[device]**. What already held: the
+      video grid and the album cards take four to a row, lists, sheets,
+      dialogs, the stream question and the tips fit, and the video player
+      turns its own content as before. What did not: the full audio
+      player stacked cover and controls, so the cover, and the area of its
+      gestures, shrank to a small square. On a wide window it now has the
+      cover on the left and the controls beside it, switched by a state;
+      switched by bindings, the upright layout was not put back when the
+      window turned again **[device]**. A tablet was not seen: what a wide
+      window does here is what it would do there, but nothing larger than
+      the phone was tried.
 - [x] Empty, error and unsupported-format states (version 0.0.32). The
       empty states were there already, page by page. What was missing was
       what happens when a file cannot be played, which the phone showed

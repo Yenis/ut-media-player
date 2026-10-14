@@ -366,6 +366,39 @@ Item {
         }
     }
 
+    // On a wide window, the phone on its side or a tablet, the cover and
+    // the controls stand side by side: stacked, the cover would shrink to a
+    // small square, and its gestures with it.
+    readonly property bool wide: width > height * 1.2
+
+    // A state, not anchors bound to `wide`: anchors switched by bindings are
+    // not put back when the window turns upright again [device]. The
+    // controls are placed from the page, not from the cover, which is
+    // placed from them when stacked.
+    states: State {
+        name: "wide"
+        when: page.wide
+        AnchorChanges {
+            target: coverArea
+            anchors.right: undefined
+            anchors.bottom: page.bottom
+        }
+        PropertyChanges {
+            target: coverArea
+            width: page.width * 0.45
+        }
+        AnchorChanges {
+            target: details
+            anchors.bottom: undefined
+            anchors.verticalCenter: page.verticalCenter
+        }
+        PropertyChanges {
+            target: details
+            anchors.verticalCenterOffset: header.height / 2
+            anchors.leftMargin: page.width * 0.45 + Theme.u(2)
+        }
+    }
+
     // The cover, and on it the seek gestures.
     Item {
         id: coverArea
