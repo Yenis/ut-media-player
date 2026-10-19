@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.37 - unreleased
+## 0.0.37 - 19 October 2026
 
 - "Subtitle file" in the player's subtitles menu: VLC's "Select subtitle
   file", a list of folders and subtitle files that starts in the video's
