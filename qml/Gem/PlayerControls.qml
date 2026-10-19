@@ -11,7 +11,8 @@ import "../js/Format.js" as Format
  * length in one row; under it the orientation button on the left, play in the
  * middle, resize and "more" on the right. With more than one item in the
  * queue, previous and next sit beside play and the queue button joins the
- * title bar.
+ * title bar. Rewind and forward, VLC's seek buttons, sit next to play when
+ * the settings ask for them and there is room.
  */
 Item {
     id: hud
@@ -22,6 +23,11 @@ Item {
     property bool subtitlesOn: true
     property var markers: []            // for the timeline
     property var chips: []              // [{ key, label }]: what is switched on, VLC's "quick actions"
+    property bool seekButtons: false    // rewind and forward are wanted
+
+    // Five buttons in the middle do not fit between the sides of an upright
+    // phone; there previous and next keep their place.
+    readonly property bool showSeekButtons: seekButtons && (!hasQueue || buttons.width >= Theme.u(60))
 
     readonly property bool dragging: seekBar.dragging
     readonly property bool hasQueue: playback ? playback.queue.length > 1 : false
@@ -34,6 +40,8 @@ Item {
     signal orientationTapped()
     signal subtitlesTapped()
     signal chipTapped(string key)
+    // Rewind or forward: "back" or "forward", as a double tap on a side.
+    signal seekTapped(string side)
     signal interacted()
 
     // ---- top ----
@@ -138,8 +146,28 @@ Item {
         }
 
         IconButton {
-            visible: hud.hasQueue
+            id: rewindButton
+            visible: hud.showSeekButtons
             anchors { right: playButton.left; verticalCenter: parent.verticalCenter }
+            glyph: "rewind"
+            color: Theme.text
+            enabled: hud.playback ? hud.playback.seekable : false
+            onClicked: { hud.seekTapped("back"); hud.interacted(); }
+        }
+
+        IconButton {
+            id: forwardButton
+            visible: hud.showSeekButtons
+            anchors { left: playButton.right; verticalCenter: parent.verticalCenter }
+            glyph: "fastforward"
+            color: Theme.text
+            enabled: hud.playback ? hud.playback.seekable : false
+            onClicked: { hud.seekTapped("forward"); hud.interacted(); }
+        }
+
+        IconButton {
+            visible: hud.hasQueue
+            anchors { right: rewindButton.visible ? rewindButton.left : playButton.left; verticalCenter: parent.verticalCenter }
             glyph: "previous"
             color: Theme.text
             onClicked: { hud.playback.previous(); hud.interacted(); }
@@ -147,7 +175,7 @@ Item {
 
         IconButton {
             visible: hud.hasQueue
-            anchors { left: playButton.right; verticalCenter: parent.verticalCenter }
+            anchors { left: forwardButton.visible ? forwardButton.right : playButton.right; verticalCenter: parent.verticalCenter }
             glyph: "next"
             color: Theme.text
             enabled: hud.playback ? hud.playback.hasNext : false

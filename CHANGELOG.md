@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.35 - unreleased
+
+- Two skip lengths under More, Settings: one for the video player and one
+  for the audio player, as VLC has them. The audio player's starts at the
+  one length there was before.
+- "Rewind and forward buttons" under More, Settings, off at first as in
+  VLC: buttons beside play in the video player that skip back and forward
+  by the video's skip length. With a queue on an upright phone there is
+  no room for them, and previous and next keep their place.
+
 ## 0.0.34 - 14 October 2026
 
 - The audio player in landscape, and on any wide screen: the cover on the

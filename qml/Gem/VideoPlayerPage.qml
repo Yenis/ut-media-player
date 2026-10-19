@@ -307,13 +307,14 @@ Item {
         infoHide.restart();
     }
 
+    readonly property int skipLength: (prefs ? prefs.skipSeconds : 10) * 1000
+
     function tapSeek(side) {
         if (!playback.seekable)  {
             showInfo("Unseekable stream", 1000);
             return;
         }
-        var length = (prefs ? prefs.skipSeconds : 10) * 1000;
-        var step = side === "forward" ? length : -length;
+        var step = side === "forward" ? skipLength : -skipLength;
         if (tapSeekSide !== side)
             tapSeekTotal = 0;
         tapSeekSide = side;
@@ -668,6 +669,8 @@ Item {
             anchors.fill: parent
             playback: page.playback
             orientationLocked: page.orientationLocked
+            seekButtons: page.prefs ? page.prefs.seekButtons : false
+            onSeekTapped: page.tapSeek(side)
             subtitlesAvailable: subtitles.available
             subtitlesOn: subtitles.enabled
             markers: page.timelineMarkers

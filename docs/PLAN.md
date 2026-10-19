@@ -29,8 +29,8 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **Not confirmed by hand** | 108 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4: parental control, VLC's PIN, "build, low priority" in the survey, for Yenis to say whether it is wanted. Then Phase 5, the release of 0.1.0. |
+| **Not confirmed by hand** | 127 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | Phase 4, the rest of the settings: VLC's "ask before resuming" (0.0.36), then a subtitle file and its encoding chosen by hand (0.0.37). Then Phase 5, the release of 0.1.0. Hidden files, export and restore, and parental control are dropped (D17) |
 
 What the first day established, in the order it was found:
 
@@ -109,8 +109,8 @@ Facts are marked:
 | D13 | Network | **Nothing over the network except playing streams** (decided by Yenis, 3 October 2026). The aim is an app that needs no network permission and cannot connect anywhere by itself. Dropped for good: network shares, casting, remote access, subtitle download, film metadata. Kept: opening a stream by address, stream history, and a link handed over by another app, since each is playing a stream. See [Network](#network) |
 | D14 | Streams | **Off until the user allows them** (decided by Yenis, 9 October 2026). A setting, "Allow streams", is off on a new install; while it is off the player refuses every address that is not a file, and asking for a stream brings a dialog that says the app is offline and what allowing means. The system has no network permission to grant at run time, so the switch is the app's own. See [Network](#network) |
 | D15 | Incognito mode | **Dropped** (Yenis, 9 October 2026): not needed. With it go VLC's "Persistent incognito mode" and its header icon |
-
 | D16 | Running in the background | **The app may add itself to the system's list of apps that are not frozen, when the user switches that on** (decided by Yenis, 12 October 2026). Off by default. It is the setting `com.canonical.qtmir lifecycle-exempt-appids`, which holds the stock Music app; an unconfined app can write it. With it on, the sleep timer and A-B repeat work behind the lock screen and other apps. Switching off takes the app out of the list again. A confined build could not do this |
+| D17 | Left out of 0.1.0 | **Dropped** (Yenis, 19 October 2026): hidden files in the Browse tab, export and restore of the settings, and parental control with VLC's PIN. What is left of Phase 4 is built one layer at a time, then 0.1.0 |
 
 ### Still open
 
@@ -277,7 +277,7 @@ Touch, is in [VLC-FEATURES.md](VLC-FEATURES.md). In short:
 | **Build** | Gestures, player controls and menu, lock, aspect modes, resume and seen marker, sleep timer, jump to time, A-B repeat, bookmarks, queue, repeat and shuffle, playlists, favourites, history, video grouping, sorting, multiple selection, stream history, subtitle styling, settings |
 | **Spike** | Everything that touches the system: playback itself, background audio, play as audio, library models and thumbnails, direct file access, external subtitles, system controls, orientation, keep-screen-on, opening from other apps, network streams |
 | **Discuss** | Playback speed, equalizer, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters, replay gain, decoder settings, 360° video, pop-up player |
-| **Dropped** | By D13: network shares, casting, remote access, subtitle download, film metadata. Not needed: choosing library folders, incognito mode (D15) |
+| **Dropped** | By D13: network shares, casting, remote access, subtitle download, film metadata. Not needed: choosing library folders, incognito mode (D15), hidden files, export and restore of the settings, parental control (D17) |
 | **N/A** | Android widgets, Android Auto, Android TV, ringtone, launcher shortcuts, permission onboarding |
 
 ### How Discuss items are handled
@@ -454,9 +454,13 @@ hidden.
       backlight; the phone's own brightness returns when the player is left.
 - [x] A setting for each gesture, and for the skip length (version 0.0.29):
       one length for the double tap, the buttons and the keys, in both
-      players.
-- [ ] Optional rewind and forward buttons in the video player. Not in the
-      settings of 0.0.29: it needs room in the control bar first.
+      players. Since 0.0.35 each player has its own, as in VLC.
+- [x] Optional rewind and forward buttons in the video player (version
+      0.0.35), VLC's "seek buttons": off at first, as there; beside play,
+      by the video player's skip length. With a queue on an upright phone
+      five buttons do not fit between the sides, and previous and next
+      keep their place; turned, all five fit **[device]**. VLC's 20 s on a
+      long press is left out, as in the audio player.
 - [x] Lock with slide to unlock.
 - [x] Orientation: the player turns its own content to follow the phone, and
       the button locks it.
@@ -755,7 +759,8 @@ How it is built:
       (`qml/js/Format.js`), and what the library knows of one gives its
       title and length. Listing is `Qt.labs.folderlistmodel`, which given a
       folder that is not there lists the app's own instead **[device]**.
-- [ ] Browse, still to do: hidden files, a check with a card or stick.
+- [ ] Browse, still to do: a check with a card or stick. Hidden files are
+      dropped (D17).
 - [x] Playlists (version 0.0.26). `qml/Gem/PlaylistsPage.qml` is the tab:
       the playlists by name, each with its number of items and its length;
       the plus makes one; a playlist's menu plays it, inserts it next, adds
@@ -871,10 +876,10 @@ How it is built:
   - Found on the way **[device]**: with resume off, a video still loaded in
     media-hub played on from where it had been paused, as "Play from
     start" once did. It is sent to its start the same way.
-  - Not in it yet: the choice to be asked before resuming; rewind and
-    forward buttons in the video player; picking a subtitle file and its
-    encoding; separate skip lengths for audio and video, as VLC has them;
-    export and restore, which need a way to write a file.
+  - Not in it yet: the choice to be asked before resuming; picking a
+    subtitle file and its encoding. Separate skip lengths and the rewind
+    and forward buttons came in 0.0.35. Export and restore, which needed a
+    way to write a file, are dropped (D17).
 - [x] Library search (version 0.0.30), under More,
       `qml/Gem/SearchPage.qml`: one text across videos, artists, albums,
       tracks, genres and playlists, the results in sections with their
@@ -918,8 +923,17 @@ How it is built:
     expects. It is left as it is while the picker works.
   - Not built: "Share" for a selection, a group, an album or a stream's
     address, and VLC's "Go to folder".
-- [ ] Settings, the rest: what the list under 0.0.29 above says is not in
-      it yet; export and restore.
+- [x] Skip lengths and seek buttons (version 0.0.35). `Prefs.qml` has
+      `audioSkipSeconds` beside `skipSeconds`, which the audio player and
+      its tips now read; an update starts it at the one length there was.
+      `seekButtons` puts rewind and forward beside play in
+      `PlayerControls.qml`; they skip as a double tap on that side does,
+      by `tapSeek`. Checked over adb **[device]**: the rows, the values
+      kept, each player's tips naming its own length, the buttons alone
+      and with a queue, upright and turned, and a skip in each player by
+      its own length. A tap on the buttons themselves waits for a finger.
+- [ ] Settings, the rest: the choice to be asked before resuming (0.0.36),
+      and a subtitle file and its encoding (0.0.37).
 - [x] Landscape and wide layouts (version 0.0.34). The phone cannot be
       turned over adb, so the development remote got `landscape`, which
       lays the whole app out in a window of the phone's height by its
@@ -965,7 +979,8 @@ How it is built:
       length named is the one set. "Show the gesture tips again" in
       Settings brings both back. Found on the way **[device]**: an arrow
       written as text, ↕, is drawn as a coloured emoji on the phone.
-- [ ] Parental control: VLC's PIN, "build, low priority" in the survey.
+- [x] Parental control: VLC's PIN, "build, low priority" in the survey.
+      Dropped (D17).
 - Network shares, casting and remote access are dropped (D13). The Browse
   tab is local and removable storage only.
 

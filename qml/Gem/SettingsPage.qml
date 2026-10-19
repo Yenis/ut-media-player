@@ -167,13 +167,33 @@ Item {
                 }
             }
             SettingRow {
-                title: "Skip length"
+                title: "Skip length in the video player"
                 detail: "How far a double tap, the rewind and forward buttons and the arrow keys go."
                 below: SegmentedChoice {
                     width: parent.width
                     options: page.prefs ? page.prefs.skipChoices.map(function(s) { return s + " s"; }) : []
                     currentIndex: page.prefs ? page.prefs.skipChoices.indexOf(page.prefs.skipSeconds) : 0
                     onChosen: page.prefs.set("skipSeconds", page.prefs.skipChoices[index])
+                }
+            }
+            SettingRow {
+                title: "Skip length in the audio player"
+                detail: "The same, for music and for a video played as audio."
+                below: SegmentedChoice {
+                    width: parent.width
+                    options: page.prefs ? page.prefs.skipChoices.map(function(s) { return s + " s"; }) : []
+                    currentIndex: page.prefs ? page.prefs.skipChoices.indexOf(page.prefs.audioSkipSeconds) : 0
+                    onChosen: page.prefs.set("audioSkipSeconds", page.prefs.skipChoices[index])
+                }
+            }
+            SettingRow {
+                title: "Rewind and forward buttons"
+                detail: page.prefs && page.prefs.seekButtons
+                        ? "Beside play in the video player. With a queue on an upright phone there is no room, and previous and next keep their place."
+                        : "The video player has play, previous and next; rewind and forward are a double tap away."
+                trailing: Toggle {
+                    checked: page.prefs ? page.prefs.seekButtons : false
+                    onToggled: page.prefs.set("seekButtons", checked)
                 }
             }
 

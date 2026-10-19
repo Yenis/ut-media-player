@@ -125,7 +125,7 @@ Source: `res/layout/player_hud.xml`, `player_hud_right.xml`,
 | Auto-hiding controls | Hide after 4 s by default, adjustable | Build |
 | Title, time, length, seek bar | As expected | Build |
 | Play, previous, next | Previous and next act on the queue | Build |
-| Rewind and forward buttons | Optional. 10 s on tap, 20 s on long press, both adjustable | Build |
+| Rewind and forward buttons | Optional. 10 s on tap, 20 s on long press, both adjustable | Build, on tap only, by the video player's skip length (0.0.35). The long press is dropped, as in the audio player. With a queue on an upright phone there is no room, and previous and next keep their place |
 | Lock | Hides the controls and ignores touches until unlocked by a swipe | Build |
 | Orientation button | Locks to the current orientation; a setting chooses automatic, portrait, landscape, reverse landscape or last locked | Build, by rotating the player's own content. The system's rotation follows the user's rotation lock **[device]**, which a video player has to override |
 | Aspect button | Tap cycles the main modes, long press lists all twelve | Build |
@@ -159,7 +159,7 @@ audio player with a different set of entries.
 | A-B repeat | Mark A, mark B, loop; markers on the seek bar; reset | Build |
 | Save playlist | Saves the current queue as a playlist | Build |
 | Digital audio passthrough | For external receivers | Discuss |
-| Lock or unlock with PIN | Part of parental control | Build, low priority |
+| Lock or unlock with PIN | Part of parental control | Dropped (D17) |
 | Control settings | Shortcut to the gesture and button settings | Build |
 | Share track info | Audio only | Spike S12 |
 | Tips | Guided tour of the gestures and controls | Build, low priority |
@@ -275,7 +275,7 @@ Source: `src/gui/browser/`.
 | Local storage browser | Folders and files with a path bar; play a file or a whole folder | Build. The app being unconfined (D12), it reads any folder |
 | Removable storage | SD card and USB | Build: what is mounted under `/media/<user>`. Not yet seen with a card |
 | Favourite folders | Pinned at the top of the tab | Build |
-| Show hidden files, folders first | Display options | Build |
+| Show hidden files, folders first | Display options | Folders first: build. Hidden files: dropped (D17) |
 | Add folder to playlist | This folder, or with subfolders | Build |
 | Network shares | SMB, NFS, FTP, FTPS, SFTP, UPnP discovery; saved servers with login | Dropped (D13) |
 
@@ -303,9 +303,9 @@ behind them:
 | Language | Per-app language | Build if translations ship; otherwise the system language |
 | Long titles | Default, cut left, right or middle, or scroll | Build |
 | Show video thumbnails, show seen marker, show headers | Display toggles | Build |
-| Export and restore settings | To a file | Spike S2 |
+| Export and restore settings | To a file | Dropped (D17) |
 | Clear history, clear app data | Yes | Build |
-| Parental control | PIN. "Safe mode" blocks deleting files and changing playlists without the PIN; access to the settings can be restricted too | Build, low priority |
+| Parental control | PIN. "Safe mode" blocks deleting files and changing playlists without the PIN; access to the settings can be restricted too | Dropped (D17) |
 | Debug log | Viewer and export | Build, low priority |
 
 ---

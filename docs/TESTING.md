@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the skip lengths and seek buttons (version 0.0.35), landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -27,11 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-124 checks are open. The rows themselves are in each section's "By hand"
+127 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [Skip lengths and seek buttons, 0.0.35](#skip-lengths-and-seek-buttons-version-0035) | 3 | Turning the phone for one |
 | [Landscape, 0.0.34](#landscape-version-0034) | 3 | Turning the phone |
 | [Gesture tips, 0.0.33](#gesture-tips-version-0033) | 4 | |
 | [Files that cannot be played, 0.0.32](#files-that-cannot-be-played-version-0032) | 4 | A file deleted in the file manager for one |
@@ -78,6 +79,33 @@ table, marked "Still to do" or "Not reported".
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Skip lengths and seek buttons, version 0.0.35
+
+### Checked over adb, 19 October 2026
+
+| Check | Result |
+|---|---|
+| Settings: "Skip length in the video player", "Skip length in the audio player" and "Rewind and forward buttons" | Pass. After the update the audio length showed 10 s, the one length there was |
+| Set over the remote to 5 s, 30 s and on: shown on the page and kept | Pass |
+| The video tips name 5 s, the audio tips 30 s | Pass |
+| One video, buttons on: rewind, play, forward in the middle | Pass |
+| A queue of two videos on the upright phone: previous, play, next, no rewind or forward | Pass |
+| The same queue turned with `angle 90`: previous, rewind, play, forward, next | Pass |
+| A skip in the video player by its length | Pass, told by keyframes: from 16.67 s in `h264-1080p30.mp4`, whose keyframes are 8.33 s apart, 5 s landed on 16.67 and 10 s asked for 26.67 and landed on 25. In `long-35min.mp4`, a keyframe every 10 s, a 5 s skip forward does not move at all |
+| A skip in the audio player by its length | Pass: 1:00 to 1:30 with 30 s |
+| No QML warnings in the log | Pass |
+
+The settings were put back as they were afterwards, the tips marked as not
+seen.
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Tap rewind and forward: each skips by the video length, and "−10 s" or "+10 s" shows on its side; taps in a row add up | Still to do |
+| Turn the phone with a queue and the buttons on: five buttons, none over another; turn back: three | Still to do |
+| Change each skip length: a double tap in that player follows it, the other player's does not | Still to do |
 
 ## Landscape, version 0.0.34
 

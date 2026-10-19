@@ -21,9 +21,16 @@ Item {
     property bool gesturePinch: true
 
     // How far a double tap, the rewind and forward buttons and the arrow
-    // keys go, in seconds.
+    // keys go, in seconds: in the video player, and in the audio player, as
+    // VLC has the two apart. Until 0.0.35 there was one length for both;
+    // the audio one starts at what that was.
     property int skipSeconds: 10
+    property int audioSkipSeconds: 10
     readonly property var skipChoices: [5, 10, 15, 30]
+
+    // Rewind and forward buttons in the video player, beside play: VLC's
+    // "Seek buttons", off by default as there.
+    property bool seekButtons: false
 
     // A video carries on where it was left, or starts from its beginning.
     property bool resumeVideos: true
@@ -51,7 +58,7 @@ Item {
 
     readonly property var _flags: ["gestureVolume", "gestureBrightness", "gestureSwipeSeek", "gestureDoubleTap",
                                    "gesturePinch", "resumeVideos", "videoPlaysOnAsAudio", "restoreQueue",
-                                   "subtitleBackground", "videoTipsShown", "audioTipsShown"]
+                                   "subtitleBackground", "videoTipsShown", "audioTipsShown", "seekButtons"]
 
     property bool _loaded: false
 
@@ -73,6 +80,8 @@ Item {
         }
         var skip = parseInt(settings.value("skipSeconds", skipSeconds));
         skipSeconds = skipChoices.indexOf(skip) >= 0 ? skip : 10;
+        var audioSkip = parseInt(settings.value("audioSkipSeconds", skipSeconds));
+        audioSkipSeconds = skipChoices.indexOf(audioSkip) >= 0 ? audioSkip : skipSeconds;
         var scale = parseFloat(settings.value("subtitleScale", subtitleScale));
         subtitleScale = subtitleScales.indexOf(scale) >= 0 ? scale : 1.0;
         var colour = "" + settings.value("subtitleColour", subtitleColour);
@@ -92,7 +101,7 @@ Item {
     function setFromText(name, text) {
         if (_flags.indexOf(name) >= 0)
             set(name, text === "1" || text === "true");
-        else if (name === "skipSeconds")
+        else if (name === "skipSeconds" || name === "audioSkipSeconds")
             set(name, skipChoices.indexOf(parseInt(text)) >= 0 ? parseInt(text) : 10);
         else if (name === "subtitleScale")
             set(name, subtitleScales.indexOf(parseFloat(text)) >= 0 ? parseFloat(text) : 1.0);
@@ -101,7 +110,7 @@ Item {
     }
 
     function summary() {
-        var all = { skipSeconds: skipSeconds, subtitleScale: subtitleScale, subtitleColour: subtitleColour };
+        var all = { skipSeconds: skipSeconds, audioSkipSeconds: audioSkipSeconds, subtitleScale: subtitleScale, subtitleColour: subtitleColour };
         for (var i = 0; i < _flags.length; i++)
             all[_flags[i]] = prefs[_flags[i]];
         return all;

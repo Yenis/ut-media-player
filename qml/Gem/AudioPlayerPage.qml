@@ -78,7 +78,7 @@ Item {
 
     function tipSteps() {
         var p = prefs;
-        var skip = p ? p.skipSeconds : 10;
+        var skip = p ? p.audioSkipSeconds : 10;
         var list = [{ title: "Pause", text: "Double tap in the middle of the cover to pause, and again to play.",
                       zone: "middle", mark: "doubleTap" }];
         if (!p || p.gestureDoubleTap)
@@ -245,7 +245,7 @@ Item {
         showLevel("brightness", playerBrightness);
     }
 
-    readonly property int skipLength: (prefs ? prefs.skipSeconds : 10) * 1000
+    readonly property int skipLength: (prefs ? prefs.audioSkipSeconds : 10) * 1000
 
     function tapSeek(side) {
         if (!playback.seekable) {
