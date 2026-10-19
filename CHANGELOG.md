@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.35 - unreleased
+## 0.0.35 - 19 October 2026
 
 - Two skip lengths under More, Settings: one for the video player and one
   for the audio player, as VLC has them. The audio player's starts at the
