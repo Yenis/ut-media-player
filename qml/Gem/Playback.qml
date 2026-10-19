@@ -66,7 +66,12 @@ Item {
 
     // A video carries on where it was left. The owner sets it from the
     // settings; off, every video starts from its beginning.
-    property bool resumeVideos: true
+    property string resumeMode: "always"   // "always", "ask" or "never": where a video starts
+
+    // "Ask": a video waits, unloaded, for `answerResume`. `askingFrom` is
+    // where it was left.
+    property bool asking: false
+    property int askingFrom: 0
 
     // Streams are allowed. Off on a new install; kept from launch to launch.
     property bool streamsAllowed: false
@@ -221,6 +226,8 @@ Item {
     property int _askedIndex: -1        // the item asked of the hub, until it says so itself
     property bool _steppedOff: false    // the list was sent off its item, to be asked for `_askedIndex` afresh
     property bool _fromStart: false     // go to 0 once started: the file may still be loaded, part-way
+    property string _queueResume: ""    // "always" or "never", answered for the rest of the queue
+    property string _answer: ""         // the answer, for the one start that follows it
 
     // media: { url, title, artist, art, duration (ms), hasPicture }
     function open(media) {
@@ -247,6 +254,7 @@ Item {
         }
         stopAfter = -1;
         _resumeAt = -1;
+        _queueResume = "";
         audioMode = !!asAudio;
         _start(fromStart, -1);
         _keepQueue();
@@ -375,6 +383,32 @@ Item {
         return audioMode && (queue.length > 1 || !queue[queueIndex].hasPicture);
     }
 
+    // What the question was answered with, or the setting.
+    function _resumeModeNow() {
+        return _answer !== "" ? _answer : _queueResume !== "" ? _queueResume : resumeMode;
+    }
+
+    // Nothing is loaded while the question is open; what played before is
+    // paused, and stays loaded behind it.
+    function _hold() {
+        askingFrom = _pendingStart;
+        asking = true;
+        startLimit.stop();
+        if (mediaPlayer.playbackState === MediaPlayer.PlayingState)
+            mediaPlayer.pause();
+    }
+
+    // The answer: from where it was left, or from the start. `forQueue`
+    // makes it hold for the rest of the queue, without asking again.
+    function answerResume(resume, forQueue) {
+        if (!asking || queueIndex < 0)
+            return;
+        _answer = resume ? "always" : "never";
+        if (forQueue)
+            _queueResume = _answer;
+        _start(false, -1);
+    }
+
     function _restart() {
         var at = _awaitingStart ? _pendingStart : position;
         saveNow();
@@ -387,6 +421,15 @@ Item {
         _adopt(queue[queueIndex], fromStart);
         if (at >= 0)
             _pendingStart = at;
+        // Asked only of a video with its picture, as VLC asks in its video
+        // player; played as audio, a video resumes.
+        var ask = at < 0 && !audioMode && _pendingStart > 0 && _resumeModeNow() === "ask";
+        _answer = "";
+        if (ask) {
+            _hold();
+            return;
+        }
+        asking = false;
         _pendingIndex = -1;
         _askedIndex = -1;
         _steppedOff = false;
@@ -645,6 +688,8 @@ Item {
 
     function clearQueue() {
         skipFailed.stop();
+        asking = false;
+        _queueResume = "";
         _failures = 0;
         queue = [];
         _ordered = [];
@@ -669,10 +714,11 @@ Item {
         _seekTarget = -1;
         // A video carries on where it was left. Music starts at its start, as
         // in VLC: a song tapped again is not wanted from its middle.
-        _pendingStart = store && resumeVideos && !fromStart && media.hasPicture ? store.resumePoint(url) : 0;
+        var mode = _resumeModeNow();
+        _pendingStart = store && mode !== "never" && !fromStart && media.hasPicture ? store.resumePoint(url) : 0;
         // With resume switched off a video is sent to its start like "Play
         // from start": still loaded, it would play on from where it was paused.
-        _fromStart = !!fromStart || (!!media.hasPicture && !resumeVideos);
+        _fromStart = !!fromStart || (!!media.hasPicture && mode === "never");
         _awaitingStart = true;
         skipFailed.stop();
         // A file on the phone starts within a second or two [device]; a
@@ -699,7 +745,8 @@ Item {
     }
 
     function play() {
-        if (!loaded)
+        // The question decides what plays.
+        if (!loaded || asking)
             return;
         // What has played out, or was only brought back from the last
         // launch, has to be loaded to play.

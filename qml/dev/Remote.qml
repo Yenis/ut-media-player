@@ -87,6 +87,7 @@ Item {
         else if (name === "bfav") shell.browser.setFavourite(shell.browser.path, !shell.browser.isFavourite);
         else if (name === "bplay") shell.browser.playHere(null);
         else if (name === "tipsagain") shell.settingsPage.showTipsAgain();
+        else if (name === "resume") p.answerResume(argument.split(" ")[0] === "yes", argument.split(" ")[1] === "all");
         else if (name === "landscape") landscape(argument === "1");
         else if (name === "tips") {
             var tp = shell.page === "audio" ? shell.audioPage : shell.videoPage;
@@ -203,7 +204,7 @@ Item {
             page: shell.page, tab: shell.tab, title: p.title, queue: (p.queueIndex + 1) + "/" + p.queue.length, repeat: p.repeat, shuffle: p.shuffle, stopAfter: p.stopAfter, upcoming: p.queue.slice(p.queueIndex + 1, p.queueIndex + 6).map(function(m) { return m.title; }), grid: shell.videoLibrary.grid, selected: shell.tab === "audio" ? shell.audioLibrary.selectionCount : shell.videoLibrary.selectionCount, shown: shell.tab === "audio" ? shell.audioLibrary.shownTitles() : shell.tab === "browse" ? shell.browser.shownTitles() : shell.tab === "playlists" ? shell.playlistsPage.shownTitles() : shell.tab === "more" ? (shell.moreView === "search" ? shell.searchPage.shownTitles() : shell.moreView === "history" ? shell.historyPage.shownTitles() : shell.streamsPage.shownTitles()) : shell.videoLibrary.shownTitles(), playlist: shell.playlistsPage.current ? shell.playlistsPage.current.name : "", picking: shell.playlistPicker.open ? shell.playlistPicker.items.length : 0, streams: p.streamsAllowed, keepHistory: p.keepHistory, prefs: shell.prefs.summary(), tips: shell.page === "audio" && shell.audioPage ? shell.audioPage.tipsState() : shell.videoPage.tipsState(), sharing: shell.sharing, exempt: shell.backgroundRunning ? shell.backgroundRunning.exempt : null, win: shell.appWindow ? [shell.appWindow.visibility, shell.appWindow.active, shell.appWindow.visible] : null, gate: shell.streamGate.open ? shell.streamGate.address : "", more: shell.moreView, hasVideo: p.player.hasVideo, browsing: shell.browser.path, keyboard: shell.keyboardHeight, url: p.url, artist: p.artist, art: p.art, mini: shell.audioActive, playing: p.playing, position: p.position,
             raw: p.player.position, duration: p.duration, audioMode: p.audioMode,
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
-            error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd],
+            error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd], asking: p.asking ? p.askingFrom : null,
             sleep: shell.sleepTimer.remaining,
             angle: v ? v.contentAngle : null, window: shell.width + "x" + shell.height,
             sensor: v ? v.Screen.orientation : null, app: Qt.application.state, wall: Date.now()

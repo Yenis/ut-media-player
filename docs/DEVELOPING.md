@@ -79,6 +79,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `aalbumgrid <0\|1>` | Albums as cards with covers, or as rows |
 | `landscape <0\|1>` | Lays the whole app out as if its window were on its side, and back; `shot` photographs it the right way up. The video player follows the real phone unless held with `angle 0` |
 | `tipsagain` | "Show the gesture tips again", through the same function as the row in Settings |
+| `resume <yes\|no> [all]` | Answers the question before resuming: "Resume" or "From the start", and with `all` for the rest of the queue. `state` shows `asking` with the time it asks about, or `null` |
 | `tips <show\|next\|close>` | The gesture tips of the player that is open: shows them, leads on, closes them. `state` reports the step as `tips`, and whether they were seen under `prefs` (`videoTipsShown`, `audioTipsShown`), which `pref` sets |
 | `incoming <address> [<address>...]`, `share [path]` | Hands the app addresses as another app would, through the same function the hub's handler calls; opens the share picker for a file, or with no path closes it. `state` reports the picker as `sharing` |
 | `find [text]`, `ftap <index>`, `fmenu <index>`, `faction <index> <open\|play\|insertNext\|append\|addToPlaylist>` | The library search: opens it with that text; a tap on the result at that place, counting headings; its menu, and one choice from it. `state` lists the results as `shown` |

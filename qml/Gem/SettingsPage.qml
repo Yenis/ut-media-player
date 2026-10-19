@@ -95,12 +95,15 @@ Item {
 
             SectionLabel { text: "Video" }
             SettingRow {
-                title: "Resume where a video was left"
-                detail: page.prefs && page.prefs.resumeVideos ? "A video carries on from where it was stopped."
-                                                              : "Every video starts from its beginning."
-                trailing: Toggle {
-                    checked: page.prefs ? page.prefs.resumeVideos : true
-                    onToggled: page.prefs.set("resumeVideos", checked)
+                title: "Resume played videos"
+                detail: !page.prefs || page.prefs.resumeMode === "always" ? "A video carries on from where it was stopped."
+                        : page.prefs.resumeMode === "ask" ? "A video that was stopped part-way asks whether to carry on or start again."
+                        : "Every video starts from its beginning."
+                below: SegmentedChoice {
+                    width: parent.width
+                    options: page.prefs ? page.prefs.resumeModeNames : []
+                    currentIndex: page.prefs ? page.prefs.resumeModes.indexOf(page.prefs.resumeMode) : 0
+                    onChosen: page.prefs.set("resumeMode", page.prefs.resumeModes[index])
                 }
             }
             SettingRow {

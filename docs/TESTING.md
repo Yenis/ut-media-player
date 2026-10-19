@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the skip lengths and seek buttons (version 0.0.35), landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is asking before resuming (version 0.0.36), the skip lengths and seek buttons (version 0.0.35), landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -27,11 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-127 checks are open. The rows themselves are in each section's "By hand"
+130 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [Ask before resuming, 0.0.36](#ask-before-resuming-version-0036) | 3 | |
 | [Skip lengths and seek buttons, 0.0.35](#skip-lengths-and-seek-buttons-version-0035) | 3 | Turning the phone for one |
 | [Landscape, 0.0.34](#landscape-version-0034) | 3 | Turning the phone |
 | [Gesture tips, 0.0.33](#gesture-tips-version-0033) | 4 | |
@@ -79,6 +80,36 @@ table, marked "Still to do" or "Not reported".
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Ask before resuming, version 0.0.36
+
+### Checked over adb, 19 October 2026
+
+| Check | Result |
+|---|---|
+| The stored switch, on, comes back as "Always"; off, as "Never" | Pass. "Off" was tried by editing the settings file with the app stopped |
+| Settings: "Resume played videos", Always, Ask, Never, with a line for each | Pass |
+| "Ask", a video left at 0:50: "long-35min", "Resume from 0:50?", the two buttons; no switch for a queue of one | Pass. Nothing was loaded: media-hub still held the song it had, paused |
+| "Resume" | Pass: 0:52 two seconds later |
+| "From the start", the same file still loaded at 1:00 | Pass: 0:03.8 four seconds later |
+| A queue of two videos, both with a place: the switch shows; "Resume" without it, then next: asked again, the first paused behind it | Pass |
+| "Resume" with the switch, then back to the first: no question, resumed | Pass: 0:18 two seconds later, from a point at about 0:16.7 |
+| A new queue asks again | Pass |
+| The question with the player turned, `angle 90` | Pass (layout) |
+| Back while it asks: the player closes, nothing plays | Pass |
+| "Never": from 0:00, no question; "Always": from where it was, no question | Pass |
+| The tips, not yet seen: they wait for the answer, then come | Pass |
+| No QML warnings in the log | Pass |
+
+The settings were put back as they were afterwards.
+
+### By hand
+
+| Check | Result |
+|---|---|
+| Tap "Resume" and "From the start"; the switch for the rest of a queue | Still to do |
+| Turn the phone while it asks: the question turns with the player and stays usable | Still to do |
+| The back gesture while it asks closes the player | Still to do |
 
 ## Skip lengths and seek buttons, version 0.0.35
 

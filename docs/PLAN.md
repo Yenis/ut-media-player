@@ -29,8 +29,8 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **Not confirmed by hand** | 127 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4, the rest of the settings: VLC's "ask before resuming" (0.0.36), then a subtitle file and its encoding chosen by hand (0.0.37). Then Phase 5, the release of 0.1.0. Hidden files, export and restore, and parental control are dropped (D17) |
+| **Not confirmed by hand** | 130 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | Phase 4, the last of the settings: a subtitle file and its encoding chosen by hand (0.0.37). Then Phase 5, the release of 0.1.0. Hidden files, export and restore, and parental control are dropped (D17) |
 
 What the first day established, in the order it was found:
 
@@ -467,8 +467,8 @@ hidden.
 - [x] The twelve picture sizes: tap steps through six, long press lists all.
 - [x] Player menu in VLC's order.
 - [x] Resume where the file was left: always, or never, by a setting since
-      0.0.29. VLC's third choice, to ask each time, is not built: the
-      question would have to be put in a turned player. Seen marker when a file is played to the end.
+      0.0.29, and VLC's third choice, to ask, since 0.0.36. Seen marker
+      when a file is played to the end.
 - [x] Jump to time, on a keypad of its own.
 - [x] A-B repeat, with marks on the timeline.
 - [x] Sleep timer, with VLC's two options. Limited by the platform, see below.
@@ -852,7 +852,8 @@ How it is built:
       values, one object for the app, and `qml/Gem/SettingsPage.qml` shows
       them in VLC's grouping as far as there is something to set. Every
       default is how the app behaved before, so an update changes nothing.
-  - Video: resume where a video was left; play on as audio when the app is
+  - Video: resume where a video was left (always, ask or never since
+    0.0.36); play on as audio when the app is
     left (VLC's "Background/PiP mode", without the PiP).
   - Gestures in the players: volume, brightness, swipe to seek, double tap
     to seek, pinch; and the skip length, 5, 10, 15 or 30 s.
@@ -876,9 +877,9 @@ How it is built:
   - Found on the way **[device]**: with resume off, a video still loaded in
     media-hub played on from where it had been paused, as "Play from
     start" once did. It is sent to its start the same way.
-  - Not in it yet: the choice to be asked before resuming; picking a
-    subtitle file and its encoding. Separate skip lengths and the rewind
-    and forward buttons came in 0.0.35. Export and restore, which needed a
+  - Not in it yet: picking a subtitle file and its encoding. Separate
+    skip lengths and the rewind and forward buttons came in 0.0.35, the
+    choice to be asked before resuming in 0.0.36. Export and restore, which needed a
     way to write a file, are dropped (D17).
 - [x] Library search (version 0.0.30), under More,
       `qml/Gem/SearchPage.qml`: one text across videos, artists, albums,
@@ -932,8 +933,22 @@ How it is built:
       kept, each player's tips naming its own length, the buttons alone
       and with a queue, upright and turned, and a skip in each player by
       its own length. A tap on the buttons themselves waits for a finger.
-- [ ] Settings, the rest: the choice to be asked before resuming (0.0.36),
-      and a subtitle file and its encoding (0.0.37).
+- [x] Ask before resuming (version 0.0.36), after VLC's
+      `video_confirm_resume` and `dialog_video_resume.xml`. The switch
+      `resumeVideos` became `resumeMode`, "always", "ask" or "never", read
+      from the switch the first time. With "ask", `Playback._start` holds
+      a video with a resume point before loading it, pauses what played,
+      and waits for `answerResume`; `qml/Gem/ResumeQuestion.qml` asks on
+      the video player's turned stage: the title, "Resume from 12:34?",
+      "From the start" and "Resume", and with more of the queue to come
+      VLC's "Apply for all the play queue", here "The same for the rest of
+      the queue", kept until another queue is opened. As in VLC it cannot
+      be tapped away, and back closes the player. It asks in the video
+      player only: a video played as audio resumes, as VLC's own audio
+      setting does by default. Checked over adb **[device]**: each answer,
+      each setting, a queue with and without the switch, turned, back,
+      the tips after it, and an old "off" read as "never".
+- [ ] Settings, the rest: a subtitle file and its encoding (0.0.37).
 - [x] Landscape and wide layouts (version 0.0.34). The phone cannot be
       turned over adb, so the development remote got `landscape`, which
       lays the whole app out in a window of the phone's height by its

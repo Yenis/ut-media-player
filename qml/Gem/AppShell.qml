@@ -77,7 +77,7 @@ FocusScope {
     Playback {
         id: core
         store: playerStore
-        resumeVideos: settingsStore.resumeVideos
+        resumeMode: settingsStore.resumeMode
         onEnded: if (shell.page === "video" || core.audioMode) shell.closePlayer()
         onMediaChanged: if (shell.page === "video") videoView.reset()
     }

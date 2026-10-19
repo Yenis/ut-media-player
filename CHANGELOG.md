@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.36 - unreleased
+
+- "Resume played videos" under More, Settings, with VLC's three choices:
+  always, ask, never. It was a switch; what it was set to carries over.
+- With "Ask", a video that was stopped part-way asks "Resume from 12:34?"
+  before it starts, with "From the start" and "Resume". With more of the
+  queue to come, a switch makes the answer hold for the rest of it. The
+  question turns with the player, and back closes the player, as in VLC.
+
 ## 0.0.35 - 19 October 2026
 
 - Two skip lengths under More, Settings: one for the video player and one

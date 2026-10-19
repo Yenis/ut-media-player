@@ -392,8 +392,8 @@ Item {
     Connections {
         target: page.playback
         onStartingChanged: {
-            if (!page.playback.starting && page.visible && !page.playback.audioMode && page.playback.error === ""
-                    && page.prefs && !page.prefs.videoTipsShown && !tipsLayer.open)
+            if (!page.playback.starting && !page.playback.asking && page.visible && !page.playback.audioMode
+                    && page.playback.error === "" && page.prefs && !page.prefs.videoTipsShown && !tipsLayer.open)
                 page.showTips();
         }
     }
@@ -640,7 +640,7 @@ Item {
         }
 
         Text {
-            visible: page.playback ? page.playback.error !== "" || page.playback.starting : false
+            visible: page.playback ? !page.playback.asking && (page.playback.error !== "" || page.playback.starting) : false
             anchors.centerIn: parent
             width: parent.width * 0.8
             horizontalAlignment: Text.AlignHCenter
@@ -968,6 +968,13 @@ Item {
                 page.sleep.cancel();
                 page.showInfo("Sleep timer off", 1000);
             }
+        }
+
+        // VLC's question before resuming, when the settings say "Ask".
+        ResumeQuestion {
+            z: 20
+            anchors.fill: parent
+            playback: page.playback
         }
     }
 }

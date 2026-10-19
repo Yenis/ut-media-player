@@ -32,8 +32,12 @@ Item {
     // "Seek buttons", off by default as there.
     property bool seekButtons: false
 
-    // A video carries on where it was left, or starts from its beginning.
-    property bool resumeVideos: true
+    // VLC's "Resume played videos": a video carries on where it was left
+    // ("always"), starts from its beginning ("never"), or asks ("ask").
+    // Until 0.0.36 this was a switch, `resumeVideos`, read once to start it.
+    property string resumeMode: "always"
+    readonly property var resumeModes: ["always", "ask", "never"]
+    readonly property var resumeModeNames: ["Always", "Ask", "Never"]
 
     // What happens to a video on screen when the app is left: it is paused,
     // or plays on as audio. VLC's "Background/PiP mode", without the PiP.
@@ -57,7 +61,7 @@ Item {
     property bool audioTipsShown: false
 
     readonly property var _flags: ["gestureVolume", "gestureBrightness", "gestureSwipeSeek", "gestureDoubleTap",
-                                   "gesturePinch", "resumeVideos", "videoPlaysOnAsAudio", "restoreQueue",
+                                   "gesturePinch", "videoPlaysOnAsAudio", "restoreQueue",
                                    "subtitleBackground", "videoTipsShown", "audioTipsShown", "seekButtons"]
 
     property bool _loaded: false
@@ -82,6 +86,12 @@ Item {
         skipSeconds = skipChoices.indexOf(skip) >= 0 ? skip : 10;
         var audioSkip = parseInt(settings.value("audioSkipSeconds", skipSeconds));
         audioSkipSeconds = skipChoices.indexOf(audioSkip) >= 0 ? audioSkip : skipSeconds;
+        var mode = "" + settings.value("resumeMode", "");
+        if (resumeModes.indexOf(mode) < 0) {
+            var resumed = settings.value("resumeVideos", true);
+            mode = resumed === false || resumed === "false" ? "never" : "always";
+        }
+        resumeMode = mode;
         var scale = parseFloat(settings.value("subtitleScale", subtitleScale));
         subtitleScale = subtitleScales.indexOf(scale) >= 0 ? scale : 1.0;
         var colour = "" + settings.value("subtitleColour", subtitleColour);
@@ -107,10 +117,12 @@ Item {
             set(name, subtitleScales.indexOf(parseFloat(text)) >= 0 ? parseFloat(text) : 1.0);
         else if (name === "subtitleColour")
             set(name, subtitleColours.indexOf(text) >= 0 ? text : "white");
+        else if (name === "resumeMode")
+            set(name, resumeModes.indexOf(text) >= 0 ? text : "always");
     }
 
     function summary() {
-        var all = { skipSeconds: skipSeconds, audioSkipSeconds: audioSkipSeconds, subtitleScale: subtitleScale, subtitleColour: subtitleColour };
+        var all = { resumeMode: resumeMode, skipSeconds: skipSeconds, audioSkipSeconds: audioSkipSeconds, subtitleScale: subtitleScale, subtitleColour: subtitleColour };
         for (var i = 0; i < _flags.length; i++)
             all[_flags[i]] = prefs[_flags[i]];
         return all;

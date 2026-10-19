@@ -26,6 +26,7 @@ PlayerStore 1.0 PlayerStore.qml
 Prefs 1.0 Prefs.qml
 PlaylistPicker 1.0 PlaylistPicker.qml
 PlaylistsPage 1.0 PlaylistsPage.qml
+ResumeQuestion 1.0 ResumeQuestion.qml
 QueuePage 1.0 QueuePage.qml
 SearchField 1.0 SearchField.qml
 SearchPage 1.0 SearchPage.qml

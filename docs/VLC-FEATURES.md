@@ -168,7 +168,7 @@ audio player with a different set of entries.
 
 | Feature | Behaviour in VLC | Source | Verdict |
 |---|---|---|---|
-| Resume position | Saved per file. Setting: always, never, or ask. The prompt reads "Resume from last position?" with a "do this for all" box | `src/media/PlaylistManager.kt`, `VideoPlayerActivity.kt` | Build |
+| Resume position | Saved per file. Setting: always, never, or ask. The prompt reads "Resume from last position?" with a "do this for all" box | `src/media/PlaylistManager.kt`, `VideoPlayerActivity.kt` | Build. All three choices since 0.0.36; the question names the time, "Resume from 12:34?", and asks in the video player only |
 | Seen marker | A file played to the end is marked seen, its play count goes up and its position resets | `PlaylistManager.kt` `saveMediaMeta` | Build |
 | When the app is left | Setting with three choices: stop (default), play as audio in background, picture-in-picture | `arrays.xml` `video_app_switch_action_titles` | Stop and play as audio: Spike S5, S6. PiP: Discuss |
 | Restore video from background | Returning to the app reopens the video screen | `res/xml/preferences_video.xml` | Build |
