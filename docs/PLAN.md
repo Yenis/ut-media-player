@@ -30,7 +30,7 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
 | **Not confirmed by hand** | 133 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 5, the release of 0.1.0: the development aids out, `clickable review`, a clean install, the battle test. Phase 4 is done. Hidden files, export and restore, and parental control are dropped (D17) |
+| **To pick up next** | Phase 5, the release of 0.1.0. `clickable review` and a clean install were checked on 0.0.37 (19 October 2026). Left: the README, `docs/INSTALL.md` and `CHANGELOG.md` for 0.1.0; the development aids out, at the very end (Yenis, 19 October 2026), with the review and the clean install again after it; the battle test. Phase 4 is done. Hidden files, export and restore, and parental control are dropped (D17) |
 
 What the first day established, in the order it was found:
 
@@ -1031,10 +1031,20 @@ How it is built:
 
 - [ ] README, `docs/INSTALL.md`, `CHANGELOG.md`, in the style of GemTicker's.
 - [ ] Remove the development aids: `qml/dev/` (remote control) and `qml/spike/`
-      (diagnostics page), and the entry that opens it.
-- [ ] `clickable review` clean, or every exception written down in
-      `docs/STORE.md`.
-- [ ] Verified on the Pixel 3a from a clean install.
+      (diagnostics page), and the entry that opens it. The very last step
+      before 0.1.0 (Yenis, 19 October 2026): until then the app can still
+      be driven over adb. The review and the clean install below are done
+      again after it, by hand, as the remote is then gone.
+- [x] `clickable review` clean, or every exception written down in
+      `docs/STORE.md`. On the 0.0.37 release click, 19 October 2026: one
+      finding, the unconfined template, written down there; no warnings.
+- [x] Verified on the Pixel 3a from a clean install (0.0.37, 19 October
+      2026, over adb). The app's data was backed up and moved aside, the
+      app removed and the release click installed with the commands in
+      `docs/INSTALL.md`; started first without the remote, then with it.
+      The defaults held, and the first video, song and restart did what
+      they should; see [TESTING.md](TESTING.md#clean-install-version-0037).
+      The data was put back afterwards, byte for byte.
 - [ ] **Battle test: a few weeks of daily use on the Pixel 3a.** Problems go
       into `docs/TESTING.md` and are fixed in 0.1.x releases.
 

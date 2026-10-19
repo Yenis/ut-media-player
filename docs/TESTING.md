@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is subtitle files and encodings (version 0.0.37), asking before resuming (version 0.0.36), the skip lengths and seek buttons (version 0.0.35), landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the clean install and subtitle files and encodings (version 0.0.37), asking before resuming (version 0.0.36), the skip lengths and seek buttons (version 0.0.35), landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -81,6 +81,36 @@ table, marked "Still to do" or "Not reported".
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Clean install, version 0.0.37
+
+### Checked over adb, 19 October 2026
+
+For Phase 5 of [PLAN.md](PLAN.md). The app's data was copied to the
+computer (`build/phone-backup-2026-10-19/`, outside git) and moved aside on
+the phone; the app was removed and the release click installed, both with
+the commands in [INSTALL.md](INSTALL.md).
+
+| Check | Result |
+|---|---|
+| `click-review` on the release click | One finding, the unconfined template ([STORE.md](STORE.md)); no warnings |
+| Removed with the documented command: gone from `click list` | Pass |
+| Installed with the documented commands: 0.0.37, and the file's SHA-256 is the one in the release notes | Pass |
+| First start, without the remote: it runs, makes its database, writes no settings until one changes; nothing in the log but the system's own lines | Pass |
+| The defaults: streams off, history on, no queue, not on the not-frozen list, every setting as documented | Pass |
+| Video tab: the 11 videos, no progress or played marks; Playlists, History and the stream history empty, each with its text | Pass |
+| A stream asked for: the question, nothing loaded | Pass |
+| The first video brings the tips, paused; closed, it plays | Pass |
+| Left at 5:00 and opened again: 5:03, no tips | Pass |
+| A track from the Audio tab plays its list, 3 of 188; after a restart, back paused at the same place | Pass |
+| The history lists both | Pass |
+| No QML warnings in the log | Pass. The one line from media-hub, "Failed to open uri  because it can't be found", is the known one (DEVELOPING.md) |
+| The data put back: the database the same as the copy, byte for byte | Pass |
+
+### By hand
+
+Nothing new: the same check comes again by hand for 0.1.0, after the
+development aids are removed (PLAN.md, Phase 5).
 
 ## Subtitle files and encodings, version 0.0.37
 

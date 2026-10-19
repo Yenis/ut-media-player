@@ -8,7 +8,9 @@ for, why, and what `click-review` says about each.
 ## Confinement
 
 GemPlayer is **unconfined** (decision D12 in [PLAN.md](PLAN.md)). Checked with
-`click-review` in the Clickable 24.04 build image on 2 October 2026:
+`click-review` in the Clickable 24.04 build image on 2 October 2026, and
+again on the 0.0.37 release click on 19 October 2026, with the same single
+finding and no warnings:
 
 | Setting | `click-review` |
 |---|---|
