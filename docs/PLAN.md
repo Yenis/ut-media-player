@@ -30,7 +30,7 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
 | **Not confirmed by hand** | 133 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 5, the release of 0.1.0. `clickable review` and a clean install were checked on 0.0.37 (19 October 2026). Left: the README, `docs/INSTALL.md` and `CHANGELOG.md` for 0.1.0; the development aids out, at the very end (Yenis, 19 October 2026), with the review and the clean install again after it; the battle test. Phase 4 is done. Hidden files, export and restore, and parental control are dropped (D17) |
+| **To pick up next** | Phase 5, the release of 0.1.0. `clickable review` and a clean install were checked on 0.0.37 (19 October 2026). The README, `docs/INSTALL.md` and `CHANGELOG.md` are rewritten for it. Left: Yenis's check of the Browse tab with a USB stick and a card adapter; the development aids out, at the very end (Yenis, 19 October 2026), with the review and the clean install again after it; the battle test. Phase 4 is done. Hidden files, export and restore, and parental control are dropped (D17) |
 
 What the first day established, in the order it was found:
 
@@ -123,7 +123,7 @@ What D13 rests on, and what is still to be shown:
 | Point | State |
 |---|---|
 | A stream is fetched by media-hub, the system's playback service, not by the app. The app hands over an address and draws the picture | **[source]**, **[device]**: playback runs in media-hub (S5, S13) |
-| The app's own code opens no connection. QML's only way to is `XMLHttpRequest`; it is used twice, both times on a `file://` address: subtitles (`SubtitleTrack.qml`) and the development remote (`dev/Remote.qml`) | Checked by search, 3 October 2026. To be checked again before each release |
+| The app's own code opens no connection. QML's only way to is `XMLHttpRequest`; every use opens a `file://` address: the subtitle file and the encoding tables (`SubtitleTrack.qml`), and, until they are removed, the development remote (`dev/Remote.qml`) and the diagnostics page's command file and test subtitle (`spike/SpikeShell.qml`). The one network address in the code is the `https://` put before a stream address typed without one (`Format.js`), which goes to media-hub | Checked by search, 3 October 2026, and again on 19 October 2026 (0.0.37). To be checked again before each release |
 | The diagnostics page played three test streams from the internet in its automatic run | Taken out on 3 October 2026 (version 0.0.11), its question being answered. No network address is left in the app's code |
 | Streams, since 0.0.27 | The app's one use of the network, and off until allowed (D14). An address goes from the field or the history to `Playback.qml` and from there to media-hub; nothing in the app fetches anything. The address is kept in the app's database, in the stream history, and nowhere else |
 | No network permission | The package is unconfined today (D12), so the system enforces nothing: the rule is kept by what the code does. A confined build (Phase 6) would then be declared **without** the `networking` policy group, which makes it enforced. Streams should still play in that build: media-hub lets a confined click open any network address without looking at its groups **[source]**, see below. Not yet seen on the device |
@@ -1029,7 +1029,15 @@ How it is built:
 
 ## Phase 5 - Release 0.1.0, self-installed
 
-- [ ] README, `docs/INSTALL.md`, `CHANGELOG.md`, in the style of GemTicker's.
+- [x] README, `docs/INSTALL.md`, `CHANGELOG.md`, in the style of GemTicker's
+      (19 October 2026): the README with its feature table, privacy,
+      architecture and roadmap; INSTALL with a ready-made route and a build
+      route, updating, removing and troubleshooting from what was met on
+      the phone; the changelog with ISO dates and a 0.1.0 entry, unreleased
+      until the release. At the release, the version in the README's status
+      line and install commands, and in INSTALL's commands, is set, and the
+      README's status line and the development section lose what is said
+      of the development aids.
 - [ ] Remove the development aids: `qml/dev/` (remote control) and `qml/spike/`
       (diagnostics page), and the entry that opens it. The very last step
       before 0.1.0 (Yenis, 19 October 2026): until then the app can still

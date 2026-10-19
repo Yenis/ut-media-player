@@ -1,6 +1,53 @@
 # Changelog
 
-## 0.0.37 - 19 October 2026
+All notable changes to GemPlayer. Versions follow
+[semantic versioning](https://semver.org/). The 0.0.x versions were test
+builds, one for each step of [the plan](docs/PLAN.md); their notes are in
+[docs/releases/](docs/releases/).
+
+## 0.1.0 - unreleased
+
+First release.
+
+### Added
+
+- **A video library**: the videos on the phone as a grid or a list, with
+  thumbnails, resolution and progress; sorting, a filter, groups by name or
+  folder and groups of your own, favourites, multiple selection.
+- **A video player with VLC's gestures**: tap, double tap to skip or pause,
+  swipe to seek, volume and brightness, pinch to fill; twelve picture sizes,
+  a lock and its own rotation; tips the first time.
+- **Play as audio**, with the screen off and under other apps, and back to
+  the picture.
+- **Resume**, always, never or after asking; **bookmarks**, **A-B repeat**,
+  a **sleep timer**, **jump to time** and a **screenshot**.
+- **Subtitles** from a `.srt` or `.vtt` file beside the video or chosen by
+  hand, in any of 36 of VLC's encodings, styled and with a delay control.
+- **A music library** by artist, album, track, genre and file, with an
+  **audio player**, a **mini-player** above the tabs and a **queue** that
+  plays on in the background, shuffle, repeat and "stop after this track";
+  the queue comes back when the app opens.
+- **Browse**, through the phone's folders and removable storage, with
+  favourite folders.
+- **Playlists** of music and videos, in your own order.
+- **Streams** from an address, off until you allow them, with a history.
+- **A playback history**, **one search** across the whole library, and
+  files and links **from other apps**, and shared to them.
+- **Settings** for resume, gestures, skip lengths, subtitles, the queue,
+  the history and running in the background.
+
+### Notes
+
+- One package for every device, for Ubuntu Touch 20.04 and 24.04. Tried on
+  a Pixel 3a with 24.04-1.x.
+- Unconfined: the system lets no sandboxed third-party player open the
+  files in Music and Videos. See [docs/STORE.md](docs/STORE.md).
+- Offline until streams are allowed; no accounts, no tracking. What the app
+  stores stays on the phone.
+- No playback speed, audio track choice or embedded subtitles: the
+  system's playback service does not offer them.
+
+## 0.0.37 - 2026-10-19
 
 - "Subtitle file" in the player's subtitles menu: VLC's "Select subtitle
   file", a list of folders and subtitle files that starts in the video's
@@ -14,7 +61,7 @@
 - The subtitles button is there for every video on the phone, dimmed when
   there are none, so that a file can be chosen.
 
-## 0.0.36 - 19 October 2026
+## 0.0.36 - 2026-10-19
 
 - "Resume played videos" under More, Settings, with VLC's three choices:
   always, ask, never. It was a switch; what it was set to carries over.
@@ -23,7 +70,7 @@
   queue to come, a switch makes the answer hold for the rest of it. The
   question turns with the player, and back closes the player, as in VLC.
 
-## 0.0.35 - 19 October 2026
+## 0.0.35 - 2026-10-19
 
 - Two skip lengths under More, Settings: one for the video player and one
   for the audio player, as VLC has them. The audio player's starts at the
@@ -33,13 +80,13 @@
   by the video's skip length. With a queue on an upright phone there is
   no room for them, and previous and next keep their place.
 
-## 0.0.34 - 14 October 2026
+## 0.0.34 - 2026-10-14
 
 - The audio player in landscape, and on any wide screen: the cover on the
   left, the title, timeline and buttons beside it, where before the cover
   shrank to a small square above them, and its gestures with it.
 
-## 0.0.33 - 14 October 2026
+## 0.0.33 - 2026-10-14
 
 - Gesture tips. The first video brings them, paused: each gesture in turn,
   with the part of the screen it is made on lit, and "Next" to go on. The
@@ -49,7 +96,7 @@
   skip length they name is the one set.
 - "Show the gesture tips again" under More, Settings.
 
-## 0.0.32 - 14 October 2026
+## 0.0.32 - 2026-10-14
 
 - A file that cannot be played says so in plain words: that it is not there
   any more, or that it could not be played and why that may be. Before, a
@@ -63,7 +110,7 @@
 - After a failure the play button shows "play", and the audio player's
   message has a dark box behind it.
 
-## 0.0.31 - 14 October 2026
+## 0.0.31 - 2026-10-14
 
 - Several files handed over at once by another app, through "Open with" or
   "Share", play as a queue in the order given, where before only the first
@@ -73,7 +120,7 @@
 - "Share" in a video's and a track's menu hands the file to another app,
   from the system's own list of the apps that take it.
 
-## 0.0.30 - 12 October 2026
+## 0.0.30 - 2026-10-12
 
 - Search, under More: one text looked for across the whole library. The
   results come in sections, videos, artists, albums, tracks, genres and
@@ -84,7 +131,7 @@
 - Every result has a menu: play, insert next, add to the play queue, add
   to a playlist.
 
-## 0.0.29 - 12 October 2026
+## 0.0.29 - 2026-10-12
 
 - Settings, under More. Nothing changes until you switch something: every
   setting starts at how the app behaved before.
@@ -105,7 +152,7 @@
 - Advanced: clear the playback history, clear the stream history, and
   forget where videos were left and which were played.
 
-## 0.0.28 - 12 October 2026
+## 0.0.28 - 2026-10-12
 
 - A playback history, under More: what you played, the latest first, with
   when. A tap plays an item again; its menu inserts it next, adds it to the
@@ -116,7 +163,7 @@
 - An About page, under More: the version, the licence, the credit to VLC
   for Android, where the source is, and what the app does with the network.
 
-## 0.0.27 - 12 October 2026
+## 0.0.27 - 2026-10-12
 
 - Streams, under More: type the address of a stream and it plays, with its
   picture if it has one and in the audio player if it has none. The
@@ -129,7 +176,7 @@
   album or a single song tapped next showed its own title but played the
   sound of that video.
 
-## 0.0.26 - 12 October 2026
+## 0.0.26 - 2026-10-12
 
 - The Playlists tab: your own lists of music and videos. The plus at the
   top makes one; inside a playlist a tap plays it from that item on, and an
@@ -144,7 +191,7 @@
   playlist.
 - A new icon: the hexagon as a cut gem, with a faceted play triangle.
 
-## 0.0.25 - 8 October 2026
+## 0.0.25 - 2026-10-08
 
 - The Browse tab: the phone's folders. It starts with the storages and your
   favourite folders; inside, it lists folders and the music and videos among
@@ -155,7 +202,7 @@
 - The star at the top of a folder, or "Add to favourites" in its menu, puts
   it on the Browse tab's first page.
 
-## 0.0.24 - 8 October 2026
+## 0.0.24 - 2026-10-08
 
 - The audio player's queue is a page of its own: every item with its place
   in the queue and its artist, the one that plays marked, opening at that
@@ -163,7 +210,7 @@
 - Holding an item still to come now also offers "Play next", "Move up" and
   "Move down".
 
-## 0.0.23 - 8 October 2026
+## 0.0.23 - 2026-10-08
 
 - Albums are shown as cards with their covers, two or more to a row.
   "Display albums in list" in the display settings brings the rows back.
@@ -171,7 +218,7 @@
   where before an artist opened to one long list of tracks. The play button
   at the top still plays everything by the artist.
 
-## 0.0.22 - 8 October 2026
+## 0.0.22 - 2026-10-08
 
 - Several at once in the music lists: a long press on a track, artist,
   album or genre selects it, and taps add more or take them out again. A
@@ -179,7 +226,7 @@
   play queue, or adds it to the favourites or removes it from them. The
   cross and the back key end the selection.
 
-## 0.0.21 - 8 October 2026
+## 0.0.21 - 2026-10-08
 
 - "Information" in a track's menu opens a page about it: its cover and
   title, a button to play it, what its tags say (artist, album, track
@@ -188,7 +235,7 @@
 - "Go to album" and "Go to artist" in a track's menu open the album or the
   artist the track belongs to.
 
-## 0.0.20 - 8 October 2026
+## 0.0.20 - 2026-10-08
 
 - Sorting for the music lists, behind the sliders at the top of the Audio
   tab. Tracks by name, album, artist, length or how recently they were
@@ -199,7 +246,7 @@
   out, and a star marks it. "Show only favourites" in the same sheet leaves
   every list with the favourites only.
 
-## 0.0.19 - 8 October 2026
+## 0.0.19 - 2026-10-08
 
 - A filter for the music lists: the magnifying glass at the top of the
   Audio tab narrows the list you are in as you type. Artists, albums and
@@ -208,7 +255,7 @@
 - The audio player shows the cover, blurred and darkened, behind the whole
   page.
 
-## 0.0.18 - 7 October 2026
+## 0.0.18 - 2026-10-07
 
 - What was playing as audio is there again when the app is opened: the queue
   and the track, paused in the mini-player at the place it was left.
@@ -221,7 +268,7 @@
 - Closing the app stops what it plays. Before, the music could play on with
   the app gone.
 
-## 0.0.17 - 7 October 2026
+## 0.0.17 - 2026-10-07
 
 - Volume and brightness by swipe in the audio player, as in the video
   player: swipe up or down on the right side of the cover for the volume, on
@@ -230,7 +277,7 @@
 - The brightness set there holds while the audio player is open. The phone
   gets its own brightness back when you leave the page or the app.
 
-## 0.0.16 - 7 October 2026
+## 0.0.16 - 2026-10-07
 
 - The audio player has a menu, behind the three dots at the top: Sleep
   timer, Jump to time, Bookmarks and A-B repeat, as in the video player.
@@ -239,7 +286,7 @@
   player's timeline. A running sleep timer and an A-B repeat show under the
   title bar; a tap on either goes to its setting.
 
-## 0.0.15 - 7 October 2026
+## 0.0.15 - 2026-10-07
 
 - Fixed: after music had played, or a queue played as audio, the next video
   could appear upside down and show the length of the last track. In 0.0.13
@@ -256,7 +303,7 @@
 - Music starts at its beginning when it is tapped. Only videos carry on
   where they were left.
 
-## 0.0.14 - 7 October 2026
+## 0.0.14 - 2026-10-07
 
 - The Audio tab lists the music on the phone under Artists, Albums, Tracks,
   Genres and Files. An artist, album or genre opens to its tracks; an
@@ -273,7 +320,7 @@
 - A long title at the top of a page no longer runs under the buttons beside
   it.
 
-## 0.0.13 - 7 October 2026
+## 0.0.13 - 2026-10-07
 
 - A queue played as audio now moves on by itself with the screen off or
   another app in front. Before, it stopped at the end of the current item
@@ -288,7 +335,7 @@
 - The install instructions used a command that Ubuntu Touch 20.04 and later
   do not have.
 
-## 0.0.12 - 7 October 2026
+## 0.0.12 - 2026-10-07
 
 - An audio player. Music, and a video played as audio, show on a page with
   the cover, title and artist, the timeline, and buttons for previous,
@@ -304,7 +351,7 @@
 - A music file opened from another app now opens in the audio player, not in
   the video player with an empty picture.
 
-## 0.0.11 - 3 October 2026
+## 0.0.11 - 2026-10-03
 
 - "Information" in a video's menu opens a page about it: its picture and
   name, a button to play or resume it, its length, file size, resolution,
@@ -316,7 +363,7 @@
 - A video's menu is now in VLC's order: Information and the favourite switch
   come before the group entries, and "Mark as played" is last.
 
-## 0.0.10 - 3 October 2026
+## 0.0.10 - 2026-10-03
 
 - Groups of your own, under "Group by name". Select two or more videos and
   tap the folder in the bar at the top to put them into a new group, which
@@ -327,7 +374,7 @@
 - A video taken out of its group stays on its own; "Regroup automatically"
   in its menu lets it join videos with a similar name again.
 
-## 0.0.9 - 3 October 2026
+## 0.0.9 - 2026-10-03
 
 - Several videos at once: a long press on a video, folder or group selects
   it, and taps add more or take them out again. A bar at the top then plays
@@ -336,7 +383,7 @@
 - "Playback action" in the display settings: a tap on a video plays it, or
   plays everything shown from that video on.
 
-## 0.0.8 - 3 October 2026
+## 0.0.8 - 2026-10-03
 
 - A queue. "Play all" in a video's menu plays everything shown, from that
   video on; in a folder's or group's menu it plays what is inside. Each video
@@ -351,7 +398,7 @@
 - Keyboard: N and P, and the media keys, for next and previous.
 - **Fixed:** subtitles were drawn on top of the player's menus.
 
-## 0.0.7 - 3 October 2026
+## 0.0.7 - 2026-10-03
 
 - Videos can be grouped, from "Group videos" in the display settings: by
   name, by folder, or not at all.
@@ -362,7 +409,7 @@
 - A folder or group opens in place. The arrow in the header and the back key
   lead out again.
 
-## 0.0.6 - 3 October 2026
+## 0.0.6 - 2026-10-03
 
 - Display settings for the Video tab, behind the button at the top right:
   grid or list, "Show only favourites", and the order. Videos can be sorted
@@ -378,7 +425,7 @@
 - The grid and list switch moved from the top bar into the display settings,
   where VLC has it.
 
-## 0.0.5 - 3 October 2026
+## 0.0.5 - 2026-10-03
 
 - The Video tab shows the videos as a grid of cards, two across on a phone
   held upright. The button at the top right switches to a list and back, and
@@ -387,7 +434,7 @@
   720p, SD), a tick when it was watched to the end, and a bar for how far it
   was played.
 
-## 0.0.4 - 3 October 2026
+## 0.0.4 - 2026-10-03
 
 - A bar along the bottom with VLC's five tabs: Video, Audio, Browse,
   Playlists and More. Video holds the list of videos; Audio, Browse and
@@ -395,7 +442,7 @@
 - The More tab shows the version, and the diagnostics page is opened from
   there.
 
-## 0.0.3 - 3 October 2026
+## 0.0.3 - 2026-10-03
 
 The first build published for testers.
 
