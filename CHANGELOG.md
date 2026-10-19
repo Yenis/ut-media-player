@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.36 - unreleased
+## 0.0.36 - 19 October 2026
 
 - "Resume played videos" under More, Settings, with VLC's three choices:
   always, ask, never. It was a switch; what it was set to carries over.
