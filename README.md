@@ -279,7 +279,8 @@ The full plan, with the reasoning behind each decision, is in
 **Later**
 - [ ] The OpenStore, after the battle test, and the store's review of an
       unconfined app
-- [ ] Removable storage tried with a card and a stick
+- [x] Removable storage tried with a card (in a USB reader)
+- [ ] And with a USB stick formatted FAT32 or exFAT
 - [ ] To discuss: VLC's features this playback stack cannot reach, such as
       speed, audio tracks and embedded subtitles
 

@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is the clean install and subtitle files and encodings (version 0.0.37), asking before resuming (version 0.0.36), the skip lengths and seek buttons (version 0.0.35), landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is removable storage (version 0.0.38), the clean install and subtitle files and encodings (version 0.0.37), asking before resuming (version 0.0.36), the skip lengths and seek buttons (version 0.0.35), landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -32,6 +32,7 @@ table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [Removable storage, 0.0.38](#removable-storage-version-0038) | 1 | A USB stick formatted FAT32 or exFAT |
 | [Subtitle files and encodings, 0.0.37](#subtitle-files-and-encodings-version-0037) | 3 | |
 | [Ask before resuming, 0.0.36](#ask-before-resuming-version-0036) | 3 | |
 | [Skip lengths and seek buttons, 0.0.35](#skip-lengths-and-seek-buttons-version-0035) | 3 | Turning the phone for one |
@@ -44,7 +45,7 @@ table, marked "Still to do" or "Not reported".
 | [History and About, 0.0.28](#playback-history-and-about-version-0028) | 5 | |
 | [Streams, 0.0.27](#streams-version-0027) | 8 | Wi-Fi, and an address to open |
 | [Playlists, 0.0.26](#playlists-version-0026) | 8 | |
-| [Browse tab, 0.0.25](#browse-tab-version-0025) | 4 | An SD card or USB stick for one |
+| [Browse tab, 0.0.25](#browse-tab-version-0025) | 3 | |
 | [Queue page, 0.0.24](#queue-page-search-and-moving-version-0024) | 4 | A headset or Bluetooth buttons for one |
 | [Album cards, 0.0.23](#album-cards-and-an-artists-albums-version-0023) | 3 | |
 | [Multiple selection for music, 0.0.22](#multiple-selection-for-music-version-0022) | 3 | |
@@ -74,13 +75,43 @@ table, marked "Still to do" or "Not reported".
 | Check | Where it comes from | State |
 |---|---|---|
 | A video played as audio, 30 minutes in a pocket with the screen off | S6; run 5 reached 10 minutes | Open; part of the battle test |
-| Removable storage: `/media` lists, and its files play | S2, and the Browse tab | Open; no card has been in the phone |
+| Removable storage: `/media` lists, and its files play | S2, and the Browse tab | **Pass by hand**, 19 October 2026, with a card in a USB reader, after two fixes ([0.0.38](#removable-storage-version-0038)) |
 | Playback under other apps and behind the lock screen as one check of the audio side, with the sound indicator and headset buttons | [PLAN.md](PLAN.md), Phase 3, the one unticked box | Open; its parts are rows of 0.0.12, 0.0.13 and 0.0.24 |
 | The sleep timer and A-B repeat for music behind the lock screen | [PLAN.md](PLAN.md), Phase 1, platform limits | Known to fire late; not measured |
 | A confined build without the `networking` group still plays a stream | D13; read in media-hub's source on 9 October 2026 | **[source]** only. Needs a confined test build on the phone |
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Removable storage, version 0.0.38
+
+### By hand and over adb, 19 October 2026
+
+Yenis plugged a USB stick and an SD card in a USB card reader into the
+phone's one USB port, so `adb` was off while they were in. A recorder ran
+on the phone as a user service (`systemd-run --user`), which outlives the
+cable, and wrote what was under `/media` and GemPlayer's state, through the
+development remote, every two seconds. `adb tcpip` is refused on this
+phone; a script started from `adb shell` is ended when the cable comes out,
+even with `nohup` and `setsid`.
+
+| Check | Result |
+|---|---|
+| A USB stick formatted NTFS | Not mounted by the system; no app sees it, the file manager neither |
+| A card in a USB reader: where the system puts it | `/media/phablet/Memory card`, a `vfat` mount owned by the user, a few seconds after it is plugged in. `/media/phablet` stays behind, empty, after it is taken out |
+| On 0.0.37: the card under Storages in Browse, with GemPlayer open, and after GemPlayer is started with the card in | **Failed** both ways. The model listing `/media` was given the literal `"file:///media"`, which Qt turns into `file://media`, a host: it listed nothing, and Browse took that for no card. See DEVELOPING.md |
+| On 0.0.38: the card under Storages, with GemPlayer open, and after a restart with the card in | **Pass by hand** (Yenis), both ways |
+| A song from the card plays, its folder as the queue | **Pass by hand** (Yenis); 3 of 182 in the recording |
+| The card taken out with a folder of it open, on 0.0.37, and a file tapped | **Failed by hand**: the app quit. The folder's rows had stayed; the tap handed media-hub 182 files that were gone, and while the app waited on it, the folder's model emptied and destroyed the row whose tap was running. Qt aborts on that ("destroyed while one of its QML signal handlers is in progress") |
+| The same on 0.0.38, a song from the card playing | **Pass by hand** (Yenis): Browse went back to the overview at once, without the card; the song played on for about five seconds from what was read, then stopped and its queue closed. No crash |
+| A video, a track and a Browse file still start from a tap, now a moment after it | Pass over adb |
+| The library after the card is out | Unchanged: the card's music was a copy of the phone's own, and nothing of the card was left listed |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| A USB stick formatted FAT32 or exFAT: it shows under Storages, and plays | Still to do |
 
 ## Clean install, version 0.0.37
 
@@ -593,7 +624,7 @@ The six playlists made for this were deleted again from the phone.
 | Folders, files and the path bar by touch; the back gesture steps up | Still to do |
 | A folder's menu: Open, Play all, favourite | Still to do |
 | A long path: the bar scrolls and shows its end | Still to do |
-| An SD card or USB stick: it shows under Storages, and plays | Still to do |
+| An SD card or USB stick: it shows under Storages, and plays | **Failed by hand** on 0.0.37: it never showed. **Pass by hand** on 0.0.38, with a card in a USB reader (Yenis, 19 October 2026); see [Removable storage, 0.0.38](#removable-storage-version-0038) |
 
 ## Queue page, search and moving, version 0.0.24
 

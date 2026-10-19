@@ -126,13 +126,22 @@ FocusScope {
     // Plays a list from its item `index`. options: { fromStart, asAudio,
     // background }; `background` leaves the lists in front, with the
     // mini-player, when the list plays as audio.
+    //
+    // A moment later, not at once: a tap on a row calls this from inside
+    // the row's own handler, and handing the backend a list waits on it in
+    // a nested event loop, where a list that changes meanwhile (a card
+    // taken out, say) destroys that row. Qt aborts the app then [device].
     function playList(list, index, options) {
+        Qt.callLater(_playList, list, index, options);
+    }
+
+    function _playList(list, index, options) {
         if (list.length === 0)
             return;
         var first = list[Math.max(0, Math.min(index, list.length - 1))];
         // A stream, while streams are off: the question first (D14).
         if (core.blocks(list)) {
-            gate.ask(_firstStream(list), function() { shell.playList(list, index, options); });
+            gate.ask(_firstStream(list), function() { shell._playList(list, index, options); });
             return;
         }
         var asAudio = !!options.asAudio || !first.hasPicture;

@@ -261,6 +261,13 @@ Those tabs show what the system's media library has found, which is the
 copied in a moment ago can take a little while to appear. Anything else on
 the phone is reached through the **Browse** tab.
 
+### A USB stick or a card does not show in Browse
+
+It shows under **Storages** a few seconds after the system mounts it, as
+`/media/phablet/<its name>`. Ubuntu Touch does not mount drives formatted
+**NTFS** at all, so no app sees them; FAT32 or exFAT works. GemPlayer 0.0.37
+and earlier never showed one; update.
+
 ### A stream asks whether to allow streams
 
 That is the app being offline, as it arrives. **Allow streams** under

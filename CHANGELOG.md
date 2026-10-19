@@ -47,6 +47,20 @@ First release.
 - No playback speed, audio track choice or embedded subtitles: the
   system's playback service does not offer them.
 
+## 0.0.38 - unreleased
+
+### Fixed
+
+- **A memory card or USB stick now shows in the Browse tab**, under
+  Storages, and plays from there. Until now the tab never found one: the
+  address of the folder where they appear was read wrongly.
+- **A card taken out while its folder is open** takes Browse back to the
+  overview, where it is no longer listed. Before, its files stayed listed,
+  and tapping one made the app quit.
+- **The app could quit when a list changed under a tap** that started
+  playback, as a card taken out does. Playback now starts a moment after
+  the tap.
+
 ## 0.0.37 - 2026-10-19
 
 - "Subtitle file" in the player's subtitles menu: VLC's "Select subtitle

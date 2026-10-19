@@ -30,7 +30,7 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
 | **Not confirmed by hand** | 133 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 5, the release of 0.1.0. `clickable review` and a clean install were checked on 0.0.37 (19 October 2026). The README, `docs/INSTALL.md` and `CHANGELOG.md` are rewritten for it. Left: Yenis's check of the Browse tab with a USB stick and a card adapter; the development aids out, at the very end (Yenis, 19 October 2026), with the review and the clean install again after it; the battle test. Phase 4 is done. Hidden files, export and restore, and parental control are dropped (D17) |
+| **To pick up next** | Phase 5, the release of 0.1.0. `clickable review` and a clean install were checked on 0.0.37 (19 October 2026). The README, `docs/INSTALL.md` and `CHANGELOG.md` are rewritten for it. Browse with a card was checked by hand and fixed (0.0.38). Left: the development aids out, at the very end (Yenis, 19 October 2026), with the review and the clean install again after it; the battle test. Phase 4 is done. Hidden files, export and restore, and parental control are dropped (D17) |
 
 What the first day established, in the order it was found:
 
@@ -759,8 +759,19 @@ How it is built:
       (`qml/js/Format.js`), and what the library knows of one gives its
       title and length. Listing is `Qt.labs.folderlistmodel`, which given a
       folder that is not there lists the app's own instead **[device]**.
-- [ ] Browse, still to do: a check with a card or stick. Hidden files are
+- [x] Browse with a card (version 0.0.38), by hand with a card in a USB
+      reader, the phone having no card slot: it never showed before. The
+      system mounts it at `/media/phablet/<label>`; the model that looks
+      for `/media/phablet` was given the literal `"file:///media"`, which
+      Qt turned into `file://media` **[device]**. Taking the card out with
+      one of its folders open now goes back to the overview; it made the
+      app quit before, as below. An NTFS stick is not mounted by the
+      system at all. Still to try: a FAT32 or exFAT stick. Hidden files are
       dropped (D17).
+  - Found on the way **[device]**: handing media-hub a list waits on it in
+    a nested event loop, and a list view that changes meanwhile destroys
+    the delegate whose tap started it; Qt aborts the app. `AppShell.playList`
+    now starts playback with `Qt.callLater`, after the tap's handler.
 - [x] Playlists (version 0.0.26). `qml/Gem/PlaylistsPage.qml` is the tab:
       the playlists by name, each with its number of items and its length;
       the plus makes one; a playlist's menu plays it, inserts it next, adds

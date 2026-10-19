@@ -296,7 +296,10 @@ Item {
 
     FolderListModel {
         id: mounts
-        folder: "file:///media"
+        // Not the literal "file:///media": a url literal with one folder in
+        // it loses a slash and becomes "file://media", a host, and the model
+        // lists nothing [device]. Built by an expression, it stays whole.
+        folder: page.fileUrl("/media")
         showDirs: true
         showFiles: false
         showDotAndDotDot: false
@@ -310,6 +313,7 @@ Item {
             if (mounts.get(i, "filePath") === removableRoot)
                 there = true;
         removableThere = there;
+        leaveRemoved();
     }
 
     FolderListModel {
@@ -318,6 +322,23 @@ Item {
         showDirs: true
         showFiles: false
         showDotAndDotDot: false
+        onCountChanged: page.leaveRemoved()
+        onStatusChanged: page.leaveRemoved()
+    }
+
+    // A card or stick taken out while one of its folders is shown: back to
+    // the overview, where it is no longer listed. Left as it was, the page
+    // kept the card's files, and a tap on one played files that are gone.
+    function leaveRemoved() {
+        if (path === "" || removableRoot === "" || root.indexOf(removableRoot + "/") !== 0)
+            return;
+        if (removable.status !== FolderListModel.Ready)
+            return;
+        for (var i = 0; removableThere && i < removable.count; i++)
+            if (removable.get(i, "filePath") === root)
+                return;
+        path = "";
+        root = "";
     }
 
     // For "Play all" on a folder that is not the one shown.

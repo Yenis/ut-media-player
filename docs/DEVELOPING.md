@@ -197,6 +197,9 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | A `Playlist` is for audio only | Played from a list, a video's picture stays black or stale. Audio in a list is moved on by media-hub itself, also while the app is frozen |
 | Wait for the list before choosing its item; expect stray index changes | The list reports index -1 and 0 on the way to the item asked for, sometimes at once, inside `clear()` and `addItems()`, sometimes later. Whatever tells them from the hub moving on has to be set before the list is touched |
 | Add to a list with `addItems` at the end and `insertItem` before an existing item | `insertItems` is not implemented, and `insertItem` at the end is refused |
+| Never write a `file:///` address with a single folder as a QML literal | `folder: "file:///media"` becomes `file://media`, a host, and a FolderListModel lists nothing; `"file:///media/phablet"` survives, and so does any address built by an expression [device] |
+| Start playback a moment after a tap (`Qt.callLater`), never inside a delegate's handler | Handing media-hub a list waits in a nested event loop; a list view that changes meanwhile destroys the delegate whose handler is running, and Qt aborts the app [device] |
+| Test removable storage with a recorder run by `systemd-run --user` | The phone has one USB port, `adb tcpip` is refused, and what `adb shell` starts is ended when the cable comes out [device] |
 | Read a file's bytes with `responseType = "arraybuffer"` | `responseText` is always UTF-8; Qt 5.15 has no `overrideMimeType`, and a request header changes nothing [device] |
 | In a handler for a changed property, do not read a binding on that property | It still holds its old value: the subtitles were never looked for, because `canPick` still said "not a file" [device] |
 | Ignore "Failed to open uri  because it can't be found" | Giving the player its list empties its address for a moment |
