@@ -47,7 +47,7 @@ First release.
 - No playback speed, audio track choice or embedded subtitles: the
   system's playback service does not offer them.
 
-## 0.0.38 - unreleased
+## 0.0.38 - 2026-10-19
 
 ### Fixed
 

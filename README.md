@@ -18,7 +18,7 @@ It is built for **Ubuntu Touch** and installed by hand rather than through a
 store: see **[docs/INSTALL.md](docs/INSTALL.md)** for the guide.
 
 **Status:** heading for 0.1.0, the first release. Test builds, 0.0.1 to
-0.0.37, are on the
+0.0.38, are on the
 [Releases page](https://github.com/Yenis/ut-media-player/releases); what each
 one changed is in [CHANGELOG.md](CHANGELOG.md).
 
@@ -126,8 +126,8 @@ updating and removing it. The short version, with Developer Mode on and the
 phone connected:
 
 ```bash
-adb push gemplayer.yenis_0.0.37_all.click /home/phablet/
-adb shell "gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install /home/phablet/gemplayer.yenis_0.0.37_all.click"
+adb push gemplayer.yenis_0.0.38_all.click /home/phablet/
+adb shell "gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install /home/phablet/gemplayer.yenis_0.0.38_all.click"
 ```
 
 ## Building from source
