@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import Gem 1.0
+import "../js/Encodings.js" as Encodings
 
 /*
  * Settings, behind the More tab, in VLC's grouping as far as there is
@@ -51,6 +52,7 @@ Item {
     }
 
     function closeSheets() {
+        encodingSheet.close();
         clearSheet.close();
     }
 
@@ -60,6 +62,9 @@ Item {
         prefs.set("audioTipsShown", false);
         tipsReset();
     }
+
+    // For the development remote.
+    function openEncodings() { encodingSheet.show(); }
 
     // For the development remote: how far down the page is shown.
     function scrollTo(y) {
@@ -258,6 +263,17 @@ Item {
                     }
                 }
             }
+            SettingRow {
+                title: "Text encoding"
+                detail: (page.prefs && page.prefs.subtitleEncoding !== "" ? Encodings.name(page.prefs.subtitleEncoding)
+                                                                          : "Automatic: UTF-8, or else Windows-1252")
+                        + ". Used unless another is chosen for a video, in the player's subtitles menu."
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: encodingSheet.show()
+                }
+            }
 
             // ---- audio ------------------------------------------------------------------
 
@@ -344,6 +360,18 @@ Item {
                 }
             }
         }
+    }
+
+    OptionSheet {
+        id: encodingSheet
+        parent: page.overlay
+        anchors.fill: parent
+        title: "Subtitle text encoding"
+        options: Encodings.choices.map(function(c) {
+            return { key: c.key === "" ? "auto" : c.key, label: c.name,
+                     selected: page.prefs ? page.prefs.subtitleEncoding === c.key : c.key === "" };
+        })
+        onChosen: page.prefs.set("subtitleEncoding", key === "auto" ? "" : key)
     }
 
     OptionSheet {

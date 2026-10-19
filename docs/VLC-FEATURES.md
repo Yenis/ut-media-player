@@ -185,10 +185,10 @@ audio player with a different set of entries.
 
 | Feature | Behaviour in VLC | Source | Verdict |
 |---|---|---|---|
-| External subtitle file | Loaded automatically when it sits beside the video; can be picked by hand | `preferences_subtitles.xml` `subtitles_autoload`, `src/gui/browser/FilePickerFragment.kt` | Build **[device]** |
+| External subtitle file | Loaded automatically when it sits beside the video; can be picked by hand | `preferences_subtitles.xml` `subtitles_autoload`, `src/gui/browser/FilePickerFragment.kt` | Build **[device]**. `.srt` and `.vtt`; picked by hand since 0.0.37, and kept per video |
 | Embedded subtitle tracks | Listed and selectable | `src/gui/dialogs/VideoTracksDialog.kt` | Discuss. media-hub never draws them and does not list them **[device]** |
 | Styling | Size (seven steps), bold, colour, opacity, background, shadow, outline, and six presets | `res/xml/preferences_subtitles.xml` | Build, for subtitles we draw |
-| Text encoding, preferred language | Settings | same | Encoding: Build. Preferred language applies to embedded tracks: Discuss |
+| Text encoding, preferred language | Settings | same | Encoding: Build (0.0.37), in the settings and per video in the player; 36 of VLC's 41, without the ISO-2022 ones, EUC-TW and HKSCS. Preferred language applies to embedded tracks: Discuss |
 | Download subtitles | Searches an online service by file | `src/gui/dialogs/SubtitleDownloaderDialogFragment.kt` | Dropped (D13) |
 
 ---

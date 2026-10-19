@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import Qt.labs.settings 1.0
+import "../js/Encodings.js" as Encodings
 
 /*
  * The app's settings, as the Settings page shows them (docs/PLAN.md,
@@ -54,6 +55,10 @@ Item {
     readonly property var subtitleColours: ["white", "yellow"]
     readonly property var subtitleColourNames: ["White", "Yellow"]
     property bool subtitleBackground: false
+    // VLC's "Subtitles text encoding": what a subtitle file is read as when
+    // none was chosen for its video. "" is VLC's default: UTF-8 if the file
+    // is UTF-8, otherwise Windows-1252.
+    property string subtitleEncoding: ""
 
     // The gesture tips were seen, in the video player and in the audio
     // player. They come once, as in VLC, and again when asked for.
@@ -96,6 +101,15 @@ Item {
         subtitleScale = subtitleScales.indexOf(scale) >= 0 ? scale : 1.0;
         var colour = "" + settings.value("subtitleColour", subtitleColour);
         subtitleColour = subtitleColours.indexOf(colour) >= 0 ? colour : "white";
+        subtitleEncoding = _encoding("" + settings.value("subtitleEncoding", ""));
+    }
+
+    function _encoding(key) {
+        for (var i = 0; i < Encodings.choices.length; i++) {
+            if (Encodings.choices[i].key === key)
+                return key;
+        }
+        return "";
     }
 
     function set(name, value) {
@@ -117,12 +131,14 @@ Item {
             set(name, subtitleScales.indexOf(parseFloat(text)) >= 0 ? parseFloat(text) : 1.0);
         else if (name === "subtitleColour")
             set(name, subtitleColours.indexOf(text) >= 0 ? text : "white");
+        else if (name === "subtitleEncoding")
+            set(name, _encoding(text === "auto" ? "" : text));
         else if (name === "resumeMode")
             set(name, resumeModes.indexOf(text) >= 0 ? text : "always");
     }
 
     function summary() {
-        var all = { resumeMode: resumeMode, skipSeconds: skipSeconds, audioSkipSeconds: audioSkipSeconds, subtitleScale: subtitleScale, subtitleColour: subtitleColour };
+        var all = { resumeMode: resumeMode, skipSeconds: skipSeconds, audioSkipSeconds: audioSkipSeconds, subtitleScale: subtitleScale, subtitleColour: subtitleColour, subtitleEncoding: subtitleEncoding };
         for (var i = 0; i < _flags.length; i++)
             all[_flags[i]] = prefs[_flags[i]];
         return all;

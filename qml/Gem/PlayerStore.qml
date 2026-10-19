@@ -59,6 +59,10 @@ QtObject {
             // The addresses of streams that were opened, with the names given them.
             tx.executeSql("CREATE TABLE IF NOT EXISTS streams("
                           + "url TEXT PRIMARY KEY, title TEXT NOT NULL, opened_at INTEGER NOT NULL DEFAULT 0)");
+            // The subtitle file and encoding chosen for a video; no value for
+            // the file beside it and for the settings' encoding. (The database
+            // takes an empty text for no value at all.)
+            tx.executeSql("CREATE TABLE IF NOT EXISTS video_subtitles(url TEXT PRIMARY KEY, file TEXT, encoding TEXT)");
             tx.executeSql("CREATE TABLE IF NOT EXISTS playlist_items("
                           + "playlist_id INTEGER NOT NULL, place INTEGER NOT NULL, url TEXT NOT NULL, media TEXT NOT NULL)");
         });
@@ -235,6 +239,27 @@ QtObject {
                           [url, Math.round(position), title]);
         });
         bookmarkRevision++;
+    }
+
+    // { file, encoding } chosen for a video's subtitles; "" where nothing was.
+    function subtitleChoice(url) {
+        var choice = { file: "", encoding: "" };
+        db().readTransaction(function(tx) {
+            var rows = tx.executeSql("SELECT file, encoding FROM video_subtitles WHERE url = ?", [url]).rows;
+            if (rows.length > 0)
+                choice = { file: rows.item(0).file || "", encoding: rows.item(0).encoding || "" };
+        });
+        return choice;
+    }
+
+    function setSubtitleChoice(url, file, encoding) {
+        db().transaction(function(tx) {
+            if (file === "" && encoding === "")
+                tx.executeSql("DELETE FROM video_subtitles WHERE url = ?", [url]);
+            else
+                tx.executeSql("INSERT OR REPLACE INTO video_subtitles(url, file, encoding) VALUES(?, ?, ?)",
+                              [url, file, encoding]);
+        });
     }
 
     // A value kept under a name, as text; "" if there is none.

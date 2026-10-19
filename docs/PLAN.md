@@ -29,8 +29,8 @@ One day's work, from an empty folder to a player that runs on the phone.
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
 | **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **Not confirmed by hand** | 130 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 4, the last of the settings: a subtitle file and its encoding chosen by hand (0.0.37). Then Phase 5, the release of 0.1.0. Hidden files, export and restore, and parental control are dropped (D17) |
+| **Not confirmed by hand** | 133 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | Phase 5, the release of 0.1.0: the development aids out, `clickable review`, a clean install, the battle test. Phase 4 is done. Hidden files, export and restore, and parental control are dropped (D17) |
 
 What the first day established, in the order it was found:
 
@@ -436,7 +436,7 @@ How it is built:
 | Player screen | `qml/Gem/VideoPlayerPage.qml` | Picture, picture size, own rotation, overlays, lock |
 | Gestures | `qml/Gem/GestureLayer.qml`, `qml/js/Gestures.js` | Recognises taps, swipes and pinch with VLC's zones and thresholds |
 | Volume and brightness | `qml/platform/SystemVolume.qml`, `SystemBrightness.qml` | The system's own levels, through the sound and power indicators |
-| Subtitles | `qml/Gem/SubtitleTrack.qml`, `qml/js/Srt.js` | Finds and reads the `.srt` beside a video; the page draws the current line |
+| Subtitles | `qml/Gem/SubtitleTrack.qml`, `qml/Gem/SubtitlePicker.qml`, `qml/js/Srt.js`, `qml/js/Encodings.js` | Finds the `.srt` or `.vtt` beside a video, or the one chosen, and reads it in its encoding; the page draws the current line |
 | Menu features | `qml/Gem/TimePicker.qml`, `SleepTimer.qml`, `PlayerStore.qml` | Keypad for jump and sleep, the timer, bookmarks |
 | Controls | `qml/Gem/PlayerControls.qml`, `SeekBar.qml`, `OptionSheet.qml`, `Glyph.qml` | Title bar, timeline, buttons, menu, icons |
 | Audio mode | `qml/Gem/AudioPlayerPage.qml` (since 0.0.12; `AudioModePage.qml` before) | What shows while a video plays as audio |
@@ -475,8 +475,8 @@ hidden.
 - [x] Bookmarks: add, jump, remove, marks on the timeline. Renaming waits for
       a text field that works in a turned player.
 - [x] External `.srt` subtitles beside the video, with a delay control.
-      Styling, other encodings and picking a file by hand come with Settings
-      and the file browser.
+      Styling came with the settings in 0.0.29; other encodings, `.vtt`
+      and picking a file by hand in 0.0.37.
 - [x] Video information, as far as the library goes.
 - [x] Play as audio and back to video (D11), with a minimal audio page; Phase 3
       replaces it with the full one.
@@ -877,10 +877,10 @@ How it is built:
   - Found on the way **[device]**: with resume off, a video still loaded in
     media-hub played on from where it had been paused, as "Play from
     start" once did. It is sent to its start the same way.
-  - Not in it yet: picking a subtitle file and its encoding. Separate
-    skip lengths and the rewind and forward buttons came in 0.0.35, the
-    choice to be asked before resuming in 0.0.36. Export and restore, which needed a
-    way to write a file, are dropped (D17).
+  - Separate skip lengths and the rewind and forward buttons came in
+    0.0.35, the choice to be asked before resuming in 0.0.36, the
+    subtitle encoding in 0.0.37. Export and restore, which needed a way to
+    write a file, are dropped (D17).
 - [x] Library search (version 0.0.30), under More,
       `qml/Gem/SearchPage.qml`: one text across videos, artists, albums,
       tracks, genres and playlists, the results in sections with their
@@ -948,7 +948,35 @@ How it is built:
       setting does by default. Checked over adb **[device]**: each answer,
       each setting, a queue with and without the switch, turned, back,
       the tips after it, and an old "off" read as "never".
-- [ ] Settings, the rest: a subtitle file and its encoding (0.0.37).
+- [x] A subtitle file and its encoding (version 0.0.37), after VLC's
+      "Select subtitle file" and `subtitle_text_encoding`. Qt reads a
+      file as UTF-8 only, and has no other decoder a QML app can reach;
+      but its XMLHttpRequest hands over the bytes (`responseType =
+      "arraybuffer"`, Qt 5.15 on the phone) **[device]**, so
+      `qml/js/Encodings.js` decodes them. `tools/make-encodings.py` writes
+      VLC's list and the tables from Python's codecs: a line of 128
+      characters for each single-byte encoding, in the code, and a table
+      file per double-byte one in `qml/js/encodings/` (about 72 KB each,
+      five of them), read the first time it is needed. 36 of VLC's 41 are
+      read; ISO-2022-CN-EXT, ISO-2022-JP-2, ISO-2022-KR, EUC-TW and HKSCS
+      are not. "Automatic" is VLC's: a byte-order mark, else UTF-8 if the
+      bytes are valid UTF-8, else Windows-1252. Each encoding was checked
+      against Python's codecs on the phone, 41 cases **[device]**.
+      `qml/Gem/SubtitlePicker.qml` is the file picker, an option sheet over
+      a folder listing that starts in the video's folder and lists `.srt`
+      and `.vtt`; WebVTT needed nothing new of the parser. The file and the
+      encoding chosen are kept per video in a table of their own,
+      `video_subtitles`; a chosen file that is gone is forgotten and the
+      one beside the video is looked for. The subtitles button now shows
+      for every video on the phone, so that there is a way to the picker.
+      Found on the way **[device]**: the database takes an empty text for
+      no value, so a column for "nothing chosen" must allow none; and in a
+      handler for a changed property, a binding on that property still
+      holds its old value.
+  - Not done: VLC's other subtitle formats (`.ass`, `.ssa`, `.sub` and
+    more); choosing among several files beside a video other than through
+    the picker; a way back to "the file beside the video" other than
+    picking it.
 - [x] Landscape and wide layouts (version 0.0.34). The phone cannot be
       turned over adb, so the development remote got `landscape`, which
       lays the whole app out in a window of the phone's height by its

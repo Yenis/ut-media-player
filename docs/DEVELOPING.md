@@ -113,6 +113,7 @@ tools/dev.sh cmd state              # then: tools/dev.sh log 5
 | `angle <0\|90\|270>`, `follow` | Force the content's rotation, or follow the sensor again |
 | `sheet <menu\|aspects\|subtitles\|bookmarks\|info\|jump\|sleep\|queue>` | Opens a sheet |
 | `volume <delta>`, `brightness <delta>`, `subdelay <ms>` | What the swipes and keys do |
+| `subpick`, `subchoose <row>`, `subfile <path>`, `subenc <key\|auto\|default>` | The subtitle file picker: open it at the video's folder, and choose a row of it (a folder opens, a file is taken); take a file without it; set this video's encoding, by its key in `qml/js/Encodings.tables.js`. `state` shows `subs`: the file, whether it was chosen, the encoding chosen and the one used, and the first line. `sheet encodings` opens the player's list, `sencoding` the one in Settings |
 | `bookmark`, `ab`, `screenshot`, `sleep <ms>`, `tapseek <back\|forward>` | Menu actions |
 | `info <text>`, `level <volume\|brightness>` | Shows an overlay for five seconds |
 | `shot <name>` | The app saves a picture of its own window. A page with a photograph on it takes longer to save than `tools/dev.sh shot` waits: send `cmd shot`, wait, and `adb pull` it |
@@ -196,6 +197,8 @@ these were found on the device; the evidence is in [TESTING.md](TESTING.md).
 | A `Playlist` is for audio only | Played from a list, a video's picture stays black or stale. Audio in a list is moved on by media-hub itself, also while the app is frozen |
 | Wait for the list before choosing its item; expect stray index changes | The list reports index -1 and 0 on the way to the item asked for, sometimes at once, inside `clear()` and `addItems()`, sometimes later. Whatever tells them from the hub moving on has to be set before the list is touched |
 | Add to a list with `addItems` at the end and `insertItem` before an existing item | `insertItems` is not implemented, and `insertItem` at the end is refused |
+| Read a file's bytes with `responseType = "arraybuffer"` | `responseText` is always UTF-8; Qt 5.15 has no `overrideMimeType`, and a request header changes nothing [device] |
+| In a handler for a changed property, do not read a binding on that property | It still holds its old value: the subtitles were never looked for, because `canPick` still said "not a file" [device] |
 | Ignore "Failed to open uri  because it can't be found" | Giving the player its list empties its address for a moment |
 | Tell a skip's length by where it lands, not by its "+10 s" | The sign shows for 750 ms, less than the remote needs to photograph it. Use a file with close keyframes, or music, which lands where asked: `long-35min.mp4` has one every 10 s, `h264-1080p30.mp4` every 8.33 s |
 | Starting a list at the item it already stands at: step it to -1, wait for the list to say so, then ask for the item | Asked for directly, nothing reaches the backend and media-hub plays on what it had loaded, the video from before; asked for in the same breath as the -1, the second request is dropped |

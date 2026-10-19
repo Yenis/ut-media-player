@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.37 - unreleased
+
+- "Subtitle file" in the player's subtitles menu: VLC's "Select subtitle
+  file", a list of folders and subtitle files that starts in the video's
+  folder. The file chosen is kept for the video.
+- "Encoding" in the same menu, for this video's subtitles, and "Text
+  encoding" under More, Settings, for the others, with VLC's list. Until
+  now a subtitle file was read as UTF-8 only; a file in another encoding
+  came out garbled. "Automatic", the default, is VLC's: UTF-8 if the file
+  is UTF-8, otherwise Windows-1252.
+- WebVTT (`.vtt`) files are read too, beside the video or chosen.
+- The subtitles button is there for every video on the phone, dimmed when
+  there are none, so that a file can be chosen.
+
 ## 0.0.36 - 19 October 2026
 
 - "Resume played videos" under More, Settings, with VLC's three choices:

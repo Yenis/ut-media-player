@@ -3,6 +3,7 @@ import QtQuick.Window 2.12
 import QtMultimedia 5.12
 import Gem 1.0
 import "../js/Format.js" as Format
+import "../js/Encodings.js" as Encodings
 import "../js/Gestures.js" as Gestures
 
 /*
@@ -106,12 +107,15 @@ Item {
     property string tapSeekSide: ""
 
     readonly property bool sheetOpen: menu.open || aspectSheet.open || subtitleSheet.open || bookmarkSheet.open
+                                      || subtitlePicker.open || encodingSheet.open
                                       || infoSheet.open || jumpPicker.open || sleepPicker.open || queueSheet.open
 
     function closeSheets() {
         menu.close();
         aspectSheet.close();
         subtitleSheet.close();
+        subtitlePicker.close();
+        encodingSheet.close();
         bookmarkSheet.close();
         infoSheet.close();
         jumpPicker.close();
@@ -289,6 +293,28 @@ Item {
         id: subtitles
         mediaUrl: page.playback ? page.playback.url : ""
         position: page.playback ? page.playback.position : 0
+        store: page.store
+        defaultEncoding: page.prefs ? page.prefs.subtitleEncoding : ""
+    }
+
+    // What the encoding row says: the one chosen, or what the default made of it.
+    function subtitleEncodingText() {
+        if (subtitles.encoding !== "" && subtitles.encoding !== "auto")
+            return subtitles.encoding;
+        return (subtitles.encoding === "auto" || !prefs || prefs.subtitleEncoding === "" ? "Automatic" : "Default")
+               + (subtitles.usedEncoding !== "" ? ": " + subtitles.usedEncoding : "");
+    }
+
+    // For the development remote.
+    function openSubtitlePicker() { subtitlePicker.show(subtitles.folder); }
+    function chooseInSubtitlePicker(index) { subtitlePicker.choose(index); }
+    function pickSubtitleFile(url) { subtitles.pick(url); }
+    function setSubtitleEncoding(key) { subtitles.setEncoding(key); }
+    function subtitleState() {
+        return { source: decodeURIComponent(subtitles.source.substring(subtitles.source.lastIndexOf("/") + 1)),
+                 chosen: subtitles.chosenFile !== "", encoding: subtitles.encoding, used: subtitles.usedEncoding,
+                 cues: subtitles.cues.length, first: subtitles.cues.length > 0 ? subtitles.cues[0].text : "",
+                 picker: subtitlePicker.open ? subtitlePicker.title : "" };
     }
 
     function showInfo(text, ms) {
@@ -329,7 +355,7 @@ Item {
     // By name, for the development remote.
     function openSheet(name) {
         var sheets = { menu: menu, aspects: aspectSheet, subtitles: subtitleSheet, bookmarks: bookmarkSheet,
-                       info: infoSheet, jump: jumpPicker, sleep: sleepPicker, queue: queueSheet };
+                       info: infoSheet, jump: jumpPicker, sleep: sleepPicker, queue: queueSheet, encodings: encodingSheet };
         if (sheets[name])
             sheets[name].show();
     }
@@ -671,8 +697,8 @@ Item {
             orientationLocked: page.orientationLocked
             seekButtons: page.prefs ? page.prefs.seekButtons : false
             onSeekTapped: page.tapSeek(side)
-            subtitlesAvailable: subtitles.available
-            subtitlesOn: subtitles.enabled
+            subtitlesAvailable: subtitles.canPick
+            subtitlesOn: subtitles.enabled && subtitles.available
             markers: page.timelineMarkers
             chips: {
                 var list = [];
@@ -863,15 +889,27 @@ Item {
             id: subtitleSheet
             anchors.fill: parent
             title: "Subtitles"
-            options: [
-                { key: "toggle", label: subtitles.enabled ? "Showing" : "Hidden", glyph: "subtitles",
-                  selected: subtitles.enabled, stay: true },
-                { key: "earlier", label: "Show earlier", value: "\u2212 50 ms", stay: true },
-                { key: "later", label: "Show later", value: "+ 50 ms", stay: true },
-                { key: "reset", label: "Delay", value: (subtitles.delay > 0 ? "+" : "") + subtitles.delay + " ms", stay: true }
-            ]
+            options: {
+                var list = [{ key: "file", label: "Subtitle file", glyph: "folder",
+                              value: subtitles.available ? decodeURIComponent(subtitles.source.substring(subtitles.source.lastIndexOf("/") + 1))
+                                                         : "none found" }];
+                if (!subtitles.available)
+                    return list;
+                return list.concat([
+                    { key: "encoding", label: "Encoding", value: page.subtitleEncodingText() },
+                    { key: "toggle", label: subtitles.enabled ? "Showing" : "Hidden", glyph: "subtitles",
+                      selected: subtitles.enabled, stay: true },
+                    { key: "earlier", label: "Show earlier", value: "\u2212 50 ms", stay: true },
+                    { key: "later", label: "Show later", value: "+ 50 ms", stay: true },
+                    { key: "reset", label: "Delay", value: (subtitles.delay > 0 ? "+" : "") + subtitles.delay + " ms", stay: true }
+                ]);
+            }
             onChosen: {
-                if (key === "toggle")
+                if (key === "file")
+                    subtitlePicker.show(subtitles.folder);
+                else if (key === "encoding")
+                    encodingSheet.show();
+                else if (key === "toggle")
                     subtitles.enabled = !subtitles.enabled;
                 else if (key === "earlier")
                     subtitles.delay -= 50;
@@ -880,6 +918,34 @@ Item {
                 else if (key === "reset")
                     subtitles.delay = 0;
             }
+        }
+
+        // VLC's "Select subtitle file", starting in the video's folder.
+        SubtitlePicker {
+            id: subtitlePicker
+            anchors.fill: parent
+            current: subtitles.source
+            onPicked: subtitles.pick(url)
+        }
+
+        // The encoding for this video's subtitles: the settings' default, or
+        // one of VLC's list.
+        OptionSheet {
+            id: encodingSheet
+            anchors.fill: parent
+            title: "Subtitle encoding for this video"
+            options: {
+                var list = [{ key: "default", label: "As in the settings",
+                              value: page.prefs && page.prefs.subtitleEncoding !== "" ? page.prefs.subtitleEncoding : "Automatic",
+                              selected: subtitles.encoding === "" }];
+                for (var i = 0; i < Encodings.choices.length; i++) {
+                    var c = Encodings.choices[i];
+                    var key = c.key === "" ? "auto" : c.key;
+                    list.push({ key: key, label: c.name, selected: subtitles.encoding === key });
+                }
+                return list;
+            }
+            onChosen: subtitles.setEncoding(key === "default" ? "" : key)
         }
 
         // Tap a bookmark to go there; hold it to remove it.

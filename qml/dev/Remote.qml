@@ -189,6 +189,11 @@ Item {
         else if (v && name === "ab") v.markAB();
         else if (v && name === "screenshot") v.takeScreenshot();
         else if (v && name === "subdelay") v.changeSubtitleDelay(parseInt(argument));
+        else if (v && name === "subpick") v.openSubtitlePicker();
+        else if (v && name === "subchoose") v.chooseInSubtitlePicker(parseInt(argument));
+        else if (v && name === "subfile") v.pickSubtitleFile("file://" + argument);
+        else if (v && name === "subenc") v.setSubtitleEncoding(argument === "default" ? "" : argument);
+        else if (name === "sencoding") shell.settingsPage.openEncodings();
         else if (name === "sleep") shell.sleepTimer.start(parseInt(argument), false, false);
         else if (v && name === "tapseek") v.tapSeek(argument);
         else if (v && name === "follow") { v.orientationLocked = false; v.followSensor(); }
@@ -206,7 +211,7 @@ Item {
             hasPicture: p.hasPicture, seekable: p.seekable, status: p.player.status,
             error: p.error, starting: p.starting, ab: [p.abStart, p.abEnd], asking: p.asking ? p.askingFrom : null,
             sleep: shell.sleepTimer.remaining,
-            angle: v ? v.contentAngle : null, window: shell.width + "x" + shell.height,
+            angle: v ? v.contentAngle : null, subs: v ? v.subtitleState() : null, window: shell.width + "x" + shell.height,
             sensor: v ? v.Screen.orientation : null, app: Qt.application.state, wall: Date.now()
         }));
     }

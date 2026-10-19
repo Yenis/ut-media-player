@@ -38,6 +38,7 @@ SettingsPage 1.0 SettingsPage.qml
 SleepTimer 1.0 SleepTimer.qml
 StreamGate 1.0 StreamGate.qml
 StreamsPage 1.0 StreamsPage.qml
+SubtitlePicker 1.0 SubtitlePicker.qml
 SubtitleTrack 1.0 SubtitleTrack.qml
 TabBar 1.0 TabBar.qml
 TextButton 1.0 TextButton.qml
