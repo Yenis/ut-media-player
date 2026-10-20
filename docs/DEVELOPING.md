@@ -72,6 +72,10 @@ development build before is a release build again.
 A release click on the phone has no remote: `tools/dev.sh cmd` does nothing
 until `tools/dev.sh deploy` puts a development build back.
 
+A bare `clickable review` checks the click last built in the project folder,
+which after `tools/dev.sh deploy` is a development build. To check a release,
+name it: `clickable review build/release/gemplayer.yenis_<version>_all.click`.
+
 ## Driving the app from the computer
 
 `qml/dev/Remote.qml` lets the app be steered and photographed over adb, so a

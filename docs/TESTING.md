@@ -27,12 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-135 checks are open. The rows themselves are in each section's "By hand"
+134 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
-| [Release build, 0.1.0](#release-build-version-010) | 2 | The release click, which has no remote |
+| [Release build, 0.1.0](#release-build-version-010) | 1 | The release click, which has no remote |
 | [Removable storage, 0.0.38](#removable-storage-version-0038) | 1 | A USB stick formatted FAT32 or exFAT |
 | [Subtitle files and encodings, 0.0.37](#subtitle-files-and-encodings-version-0037) | 3 | |
 | [Ask before resuming, 0.0.36](#ask-before-resuming-version-0036) | 3 | |
@@ -106,7 +106,7 @@ tree and installed on the phone.
 
 | Check | Result |
 |---|---|
-| `click-review` on the release click: the one finding written down in STORE.md, nothing else | Still to do |
+| `click-review` on the release click: the one finding written down in STORE.md, nothing else | **Pass**, 20 October 2026: `clickable review build/release/gemplayer.yenis_0.1.0_all.click`, SHA-256 `6309044a…`, the click of the release notes. A bare `clickable review` (Yenis) checked the development build last made in the project folder, with the same result |
 | A clean install of the release click, as in INSTALL.md: the defaults, a first video and song, a restart | Still to do |
 
 ## Removable storage, version 0.0.38
