@@ -17,10 +17,11 @@ subtitles in any of VLC's encodings.
 It is built for **Ubuntu Touch** and installed by hand rather than through a
 store: see **[docs/INSTALL.md](docs/INSTALL.md)** for the guide.
 
-**Status:** heading for 0.1.0, the first release. Test builds, 0.0.1 to
-0.0.38, are on the
-[Releases page](https://github.com/Yenis/ut-media-player/releases); what each
-one changed is in [CHANGELOG.md](CHANGELOG.md).
+**Status:** 0.1.0, the first release, after 38 test builds. It is in its
+battle test now: a few weeks of daily use on a Pixel 3a, whose findings are
+fixed in 0.1.x. Every build is on the
+[Releases page](https://github.com/Yenis/ut-media-player/releases); what
+each one changed is in [CHANGELOG.md](CHANGELOG.md).
 
 GemPlayer is not VLC and is not affiliated with VideoLAN. It does not contain
 libVLC. See [Credits](#credits).
@@ -126,8 +127,8 @@ updating and removing it. The short version, with Developer Mode on and the
 phone connected:
 
 ```bash
-adb push gemplayer.yenis_0.0.38_all.click /home/phablet/
-adb shell "gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install /home/phablet/gemplayer.yenis_0.0.38_all.click"
+adb push gemplayer.yenis_0.1.0_all.click /home/phablet/
+adb shell "gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install /home/phablet/gemplayer.yenis_0.1.0_all.click"
 ```
 
 ## Building from source

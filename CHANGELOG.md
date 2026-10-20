@@ -5,7 +5,7 @@ All notable changes to GemPlayer. Versions follow
 builds, one for each step of [the plan](docs/PLAN.md); their notes are in
 [docs/releases/](docs/releases/).
 
-## 0.1.0 - unreleased
+## 0.1.0 - 2026-10-20
 
 First release.
 

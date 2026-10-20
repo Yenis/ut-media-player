@@ -45,7 +45,7 @@ name ends in `_all.click`, meaning it works on every device.
 **Step 2 - check the download (optional but quick).**
 
 ```bash
-sha256sum gemplayer.yenis_0.0.38_all.click
+sha256sum gemplayer.yenis_0.1.0_all.click
 ```
 
 The line printed should match the SHA-256 in that release's notes.
@@ -82,8 +82,8 @@ If you see `offline`, `unauthorized`, or nothing at all, see
 **Step 5 - copy the package to the phone and install it.**
 
 ```bash
-adb push gemplayer.yenis_0.0.38_all.click /home/phablet/
-adb shell "gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install /home/phablet/gemplayer.yenis_0.0.38_all.click"
+adb push gemplayer.yenis_0.1.0_all.click /home/phablet/
+adb shell "gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install /home/phablet/gemplayer.yenis_0.1.0_all.click"
 ```
 
 The second command asks the system's click service to install the file, as
@@ -92,7 +92,7 @@ install-local`, which Ubuntu Touch 20.04 and later no longer have (checked on
 the Pixel 3a, 7 October 2026). Then tidy up:
 
 ```bash
-adb shell "rm /home/phablet/gemplayer.yenis_0.0.38_all.click"
+adb shell "rm /home/phablet/gemplayer.yenis_0.1.0_all.click"
 ```
 
 **Step 6 - open it.**
@@ -110,7 +110,7 @@ The same command works on the phone itself. Not tried this way yet.
 3. In Terminal, with your file name:
 
 ```bash
-gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install ~/Downloads/gemplayer.yenis_0.0.38_all.click
+gdbus call --system --dest com.lomiri.click --object-path /com/lomiri/click --method com.lomiri.click.Install ~/Downloads/gemplayer.yenis_0.1.0_all.click
 ```
 
 4. Find GemPlayer in the app drawer.
@@ -181,7 +181,7 @@ tools/dev.sh deploy    # build with the development aids, install, restart
 Over `adb shell`, or in Terminal on the phone:
 
 ```bash
-click list | grep gemplayer        # shows: gemplayer.yenis  0.0.38
+click list | grep gemplayer        # shows: gemplayer.yenis  0.1.0
 ```
 
 The app keeps everything in four places:
