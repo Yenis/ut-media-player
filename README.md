@@ -171,11 +171,12 @@ Lomiri is used for grid units, Content Hub and thumbnails only, and
 everything that touches the system lives in `qml/platform/`, loaded so that
 the rest runs without it.
 
-Until 0.1.0 the package carries two development aids: a remote control that
-lets the app be driven and photographed over `adb`, off unless a marker file
-is created by hand, and a diagnostics page under More. Both are removed for
-the release. [docs/DEVELOPING.md](docs/DEVELOPING.md) has the build loop, the
-remote's commands and the platform's rules, each learned on the phone.
+Two development aids stay out of the release package: a remote control
+that lets the app be driven and photographed over `adb`, and a diagnostics
+page under More. `tools/dev.sh deploy` builds with them
+(`-DGEM_DEV_AIDS=ON`); a plain `clickable build` leaves them out.
+[docs/DEVELOPING.md](docs/DEVELOPING.md) has the build loop, the remote's
+commands and the platform's rules, each learned on the phone.
 
 The subtitle encodings are generated: `tools/make-encodings.py` writes VLC's
 list and the decoding tables from Python's codecs.
@@ -234,6 +235,8 @@ qml/js/
   encodings/               Tables for Chinese, Japanese and Korean, read on demand
   Format.js                Times, sizes, names
   AppInfo.js               The version shown in About
+  Build.js.in              Written into Build.js by CMake: whether the
+                           development aids are in this build
 qml/platform/
   MediaLibrary.qml         The system's media library, through MediaScanner
   ContentImport.qml        Files and links from other apps
@@ -243,8 +246,8 @@ qml/platform/
   SystemBrightness.qml     The screen's backlight
   Folders.qml              Where the user's folders are
   LomiriUnits.qml          The grid unit, where Lomiri exists
-qml/dev/Remote.qml         Development only, removed for 0.1.0
-qml/spike/                 The Phase 0 diagnostics page, removed for 0.1.0
+qml/dev/Remote.qml         The development remote; development builds only
+qml/spike/                 The Phase 0 diagnostics page; development builds only
 tools/dev.sh               Deploy, and drive the remote over adb
 tools/make-encodings.py    Writes the encoding tables
 assets/icon.png            The app's icon
@@ -271,8 +274,10 @@ The full plan, with the reasoning behind each decision, is in
 **0.1.0 - the first release, self-installed**
 - [x] The video player, the video library, the audio side, Browse,
       playlists, streams, history, search, settings
+- [x] Feature complete: everything planned is built, the rest decided
+      (D18 in [docs/PLAN.md](docs/PLAN.md))
 - [x] `click-review` and a clean install checked
-- [ ] The development aids removed
+- [x] The development aids left out of the release package
 - [ ] A few weeks of daily use on the Pixel 3a; what turns up is fixed in
       0.1.x
 
@@ -281,8 +286,9 @@ The full plan, with the reasoning behind each decision, is in
       unconfined app
 - [x] Removable storage tried with a card (in a USB reader)
 - [ ] And with a USB stick formatted FAT32 or exFAT
-- [ ] To discuss: VLC's features this playback stack cannot reach, such as
-      speed, audio tracks and embedded subtitles
+- VLC's features this playback stack cannot reach, such as speed, audio
+  tracks and embedded subtitles, are not planned: they would take a
+  playback engine of the app's own (D18)
 
 ## Credits
 

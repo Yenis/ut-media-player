@@ -1,0 +1,7 @@
+.pragma library
+
+// Written by CMake from Build.js.in at build time; not in the source tree.
+// Whether this package carries the development aids, the remote control in
+// qml/dev/ and the diagnostics page in qml/spike/: only builds made with
+// -DGEM_DEV_AIDS=ON do, as tools/dev.sh makes them. A release does not.
+var devAids = @GEM_DEV_AIDS_JS@;

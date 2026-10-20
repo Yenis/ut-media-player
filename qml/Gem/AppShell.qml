@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import Gem 1.0
 import "../js/Format.js" as Format
+import "../js/Build.js" as Build
 
 /*
  * The app: the one Playback object, the store of resume points, and the pages.
@@ -114,8 +115,10 @@ FocusScope {
         }
     }
     readonly property bool sharing: shareLoader.status === Loader.Ready && shareLoader.item.open
+    // The development remote, in development builds only (Build.js).
     Loader {
-        source: "../dev/Remote.qml"
+        active: Build.devAids
+        source: Build.devAids ? "../dev/Remote.qml" : ""
         onLoaded: item.shell = shell
     }
 
@@ -487,6 +490,7 @@ FocusScope {
                 onSettingsRequested: shell.moreView = "settings"
                 onHistoryRequested: shell.moreView = "history"
                 onAboutRequested: shell.moreView = "about"
+                diagnostics: Build.devAids
                 onDiagnosticsRequested: shell.page = "diagnostics"
             }
             SearchPage {
@@ -674,12 +678,13 @@ FocusScope {
         onAllowed: core.setStreamsAllowed(true)
     }
 
-    // The Phase 0 spike, kept for checking the platform. It has players of its
-    // own, so ours is paused while it is open.
+    // The Phase 0 spike, kept for checking the platform, in development
+    // builds only. It has players of its own, so ours is paused while it is
+    // open.
     Loader {
         id: diagnostics
         anchors.fill: parent
-        active: shell.page === "diagnostics"
+        active: Build.devAids && shell.page === "diagnostics"
         source: active ? "../spike/SpikeShell.qml" : ""
         onLoaded: {
             core.pause();

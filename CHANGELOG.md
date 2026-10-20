@@ -45,7 +45,10 @@ First release.
 - Offline until streams are allowed; no accounts, no tracking. What the app
   stores stays on the phone.
 - No playback speed, audio track choice or embedded subtitles: the
-  system's playback service does not offer them.
+  system's playback service does not offer them, and they are not planned
+  (D18 in [docs/PLAN.md](docs/PLAN.md)).
+- The test builds' development remote and diagnostics page are not in the
+  package.
 
 ## 0.0.38 - 2026-10-19
 

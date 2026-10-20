@@ -29,7 +29,7 @@ The goal is every VLC feature, where feasible. Each feature gets one verdict:
 |---|---|
 | **Build** | Own QML over the system backend. Nothing known stands in the way |
 | **Spike Sn** | Buildable if spike row Sn in [PLAN.md](PLAN.md) passes on the Pixel 3a |
-| **Discuss** | The system backend does not offer it. Not dropped: when the work reaches it, we decide together whether another route is worth trying |
+| **Not on this engine** | The system backend does not offer it, and a QML-only app cannot add it. Decided for 0.1.0 (D18): it comes back only if the app ever brings a playback engine of its own, which would reverse D7. Until 20 October 2026 these were "Discuss" |
 | **Dropped** | Decided against: by D13 in [PLAN.md](PLAN.md) (nothing over the network except playing streams), or as not needed |
 | **N/A** | Tied to Android itself; has no counterpart on Ubuntu Touch |
 
@@ -110,10 +110,10 @@ Source: `src/gui/video/VideoTouchDelegate.kt`. Settings and defaults:
 | Vertical swipe, right | Volume. VLC changes the system media volume | Build: the system volume, through the sound indicator **[device]**. The player's own volume is ignored by the backend |
 | Vertical swipe, left | Screen brightness | Build: the real backlight, through the power indicator **[device]**; restored when the player is left. Darkens the picture instead where that is not available |
 | Pinch | Out switches to "Fit screen", in returns to the previous mode | Build |
-| Tap and hold | Plays at 2x while held ("fast play"), off by default | Discuss (needs playback speed) |
+| Tap and hold | Plays at 2x while held ("fast play"), off by default | Not on this engine (D18), as it needs playback speed |
 | Three-finger swipe | Screenshot, off by default | Build |
 | Each gesture can be switched off | Seven toggles in the settings | Build |
-| Drag on a 360° video | Moves the viewpoint; pinch changes field of view | Discuss |
+| Drag on a 360° video | Moves the viewpoint; pinch changes field of view | Not on this engine (D18) |
 
 ### Controls on screen
 
@@ -129,7 +129,7 @@ Source: `res/layout/player_hud.xml`, `player_hud_right.xml`,
 | Lock | Hides the controls and ignores touches until unlocked by a swipe | Build |
 | Orientation button | Locks to the current orientation; a setting chooses automatic, portrait, landscape, reverse landscape or last locked | Build, by rotating the player's own content. The system's rotation follows the user's rotation lock **[device]**, which a video player has to override |
 | Aspect button | Tap cycles the main modes, long press lists all twelve | Build |
-| Tracks button | Audio track, subtitle track, video track, pick a subtitle file, download subtitles | External subtitles: Spike S10. Download: Dropped (D13). The rest: Discuss |
+| Tracks button | Audio track, subtitle track, video track, pick a subtitle file, download subtitles | External subtitles: Spike S10. Download: Dropped (D13). The rest: not on this engine (D18) |
 | Queue button | Shows the play queue over the video | Build |
 | Quick-action chips | Appear when sleep timer, speed, a delay or orientation lock is active; tap to change | Build for sleep and orientation |
 | Brightness, volume and info overlays | Vertical bar with a percentage; short text for seek and aspect changes | Build |
@@ -144,21 +144,21 @@ audio player with a different set of entries.
 | Entry | Behaviour in VLC | Verdict |
 |---|---|---|
 | Lock | As above | Build |
-| Sleep timer | Time picker, with "Wait for current media item to finish first" and "Reset on any interaction". A default duration can be set | Build. Works while the app is in front; behind the lock screen the app is frozen and the timer fires late. Fixing that is Discuss |
-| Playback speed | 0.25x to 8x in 0.01 steps, for this media or all media | Discuss |
+| Sleep timer | Time picker, with "Wait for current media item to finish first" and "Reset on any interaction". A default duration can be set | Build. Works while the app is in front; behind the lock screen the app is frozen and the timer fires late. "Keep running in the background" fixes that, since 0.0.29 (D16) |
+| Playback speed | 0.25x to 8x in 0.01 steps, for this media or all media | Not on this engine (D18) |
 | Jump to time | Hours, minutes, seconds | Build |
-| Equalizer | Presets and custom bands, saved per preset | Discuss |
+| Equalizer | Presets and custom bands, saved per preset | Not on this engine (D18) |
 | Play as audio | Video only. Leaves the video screen; playback continues in the audio player | Build. The same player carries on with its picture hidden **[device]**. With the screen off: still Spike S6 |
 | Play as video | Audio player only, shown when the file has a video track | Build **[device]** |
-| Pop-up player | Video in a floating window | Discuss |
+| Pop-up player | Video in a floating window | Not on this engine (D18) |
 | Repeat | None, one, all; "all" is skipped when the queue has one item | Build |
 | Shuffle | Offered when the queue has more than two items | Build |
-| Video information | Codec, resolution, bitrate graphs | Build for what the metadata gives; live statistics are Discuss |
-| Go to chapter | Shown when the file has chapters | Discuss |
+| Video information | Codec, resolution, bitrate graphs | Build for what the metadata gives; live statistics are not on this engine (D18) |
+| Go to chapter | Shown when the file has chapters | Not on this engine (D18) |
 | Bookmarks | Add at the current time, rename, delete, jump to previous or next; markers on the seek bar | Build. Renaming waits for Phase 4 |
 | A-B repeat | Mark A, mark B, loop; markers on the seek bar; reset | Build |
 | Save playlist | Saves the current queue as a playlist | Build |
-| Digital audio passthrough | For external receivers | Discuss |
+| Digital audio passthrough | For external receivers | Not on this engine (D18) |
 | Lock or unlock with PIN | Part of parental control | Dropped (D17) |
 | Control settings | Shortcut to the gesture and button settings | Build |
 | Share track info | Audio only | Spike S12 |
@@ -170,15 +170,15 @@ audio player with a different set of entries.
 |---|---|---|---|
 | Resume position | Saved per file. Setting: always, never, or ask. The prompt reads "Resume from last position?" with a "do this for all" box | `src/media/PlaylistManager.kt`, `VideoPlayerActivity.kt` | Build. All three choices since 0.0.36; the question names the time, "Resume from 12:34?", and asks in the video player only |
 | Seen marker | A file played to the end is marked seen, its play count goes up and its position resets | `PlaylistManager.kt` `saveMediaMeta` | Build |
-| When the app is left | Setting with three choices: stop (default), play as audio in background, picture-in-picture | `arrays.xml` `video_app_switch_action_titles` | Stop and play as audio: Spike S5, S6. PiP: Discuss |
+| When the app is left | Setting with three choices: stop (default), play as audio in background, picture-in-picture | `arrays.xml` `video_app_switch_action_titles` | Stop and play as audio: Spike S5, S6. PiP: not on this engine (D18) |
 | Restore video from background | Returning to the app reopens the video screen | `res/xml/preferences_video.xml` | Build |
 | Aspect modes | Best fit, Fit screen, Fill, Center, 16:9, 4:3, 16:10, 2:1, 2.21:1, 2.35:1, 2.39:1, 5:4. The last one used is remembered | `src/gui/video/VideoPlayerResizeDelegate.kt` | Build |
-| Audio delay, subtitle delay | 50 ms steps; audio delay can be saved per file or for Bluetooth | `src/gui/video/VideoDelayDelegate.kt` | Subtitle delay: Build (our own subtitle drawing). Audio delay: Discuss |
-| Audio boost | Volume up to 200% | `VideoTouchDelegate.kt` | Discuss |
+| Audio delay, subtitle delay | 50 ms steps; audio delay can be saved per file or for Bluetooth | `src/gui/video/VideoDelayDelegate.kt` | Subtitle delay: Build (our own subtitle drawing). Audio delay: not on this engine (D18) |
+| Audio boost | Volume up to 200% | `VideoTouchDelegate.kt` | Not on this engine (D18) |
 | Video queue | Play a folder as a queue; "Video playlist mode" plays all videos in order | `preferences_ui.xml` `playlist_mode_video` | Build |
 | Screenshot | Button or gesture; saves a frame | `src/gui/video/VideoPlayerScreenshotDelegate.kt` | Build. `grabToImage` returns the real picture **[device]** |
 | Keyboard | Space, arrows, media keys and letter shortcuts | `VideoPlayerActivity.kt` `onKeyDown` | Build |
-| Hardware acceleration, deblocking, frame skip, preferred resolution, fast seek | Decoder settings | `res/xml/preferences.xml`, `preferences_adv.xml` | Discuss (the backend decides these itself) |
+| Hardware acceleration, deblocking, frame skip, preferred resolution, fast seek | Decoder settings | `res/xml/preferences.xml`, `preferences_adv.xml` | Not on this engine (D18): the backend decides these itself |
 | Secondary display, cast to a renderer | Chromecast and presentation displays | `src/RendererDelegate.kt` | Dropped (D13) |
 
 ### Subtitles
@@ -186,9 +186,9 @@ audio player with a different set of entries.
 | Feature | Behaviour in VLC | Source | Verdict |
 |---|---|---|---|
 | External subtitle file | Loaded automatically when it sits beside the video; can be picked by hand | `preferences_subtitles.xml` `subtitles_autoload`, `src/gui/browser/FilePickerFragment.kt` | Build **[device]**. `.srt` and `.vtt`; picked by hand since 0.0.37, and kept per video |
-| Embedded subtitle tracks | Listed and selectable | `src/gui/dialogs/VideoTracksDialog.kt` | Discuss. media-hub never draws them and does not list them **[device]** |
+| Embedded subtitle tracks | Listed and selectable | `src/gui/dialogs/VideoTracksDialog.kt` | Not on this engine (D18). media-hub never draws them and does not list them **[device]** |
 | Styling | Size (seven steps), bold, colour, opacity, background, shadow, outline, and six presets | `res/xml/preferences_subtitles.xml` | Build, for subtitles we draw |
-| Text encoding, preferred language | Settings | same | Encoding: Build (0.0.37), in the settings and per video in the player; 36 of VLC's 41, without the ISO-2022 ones, EUC-TW and HKSCS. Preferred language applies to embedded tracks: Discuss |
+| Text encoding, preferred language | Settings | same | Encoding: Build (0.0.37), in the settings and per video in the player; 36 of VLC's 41, without the ISO-2022 ones, EUC-TW and HKSCS. Preferred language applies to embedded tracks: not on this engine (D18) |
 | Download subtitles | Searches an online service by file | `src/gui/dialogs/SubtitleDownloaderDialogFragment.kt` | Dropped (D13) |
 
 ---
@@ -209,14 +209,14 @@ Source: `src/gui/audio/AudioPlayer.kt`, `res/layout/audio_player.xml`,
 | Stop after this track | From a queue item's menu | Build |
 | Shuffle and repeat | As in the video player; "always shuffle" setting | Build. Shuffle mixes what follows the playing item only: the system's list cannot be changed before it **[device]** |
 | Sleep timer, jump to time, A-B repeat, bookmarks, save playlist | Shared with the video player | Build |
-| Playback speed, equalizer, chapters | Shared with the video player | Discuss |
+| Playback speed, equalizer, chapters | Shared with the video player | Not on this engine (D18) |
 | Resume last queue | Queue and position restored on launch; a card offers to resume | Build |
 | Background playback | Continues with the screen off and under other apps | Build **[device]**. media-hub runs the queue while the app is suspended, for audio only: a video's picture does not survive being played from a list |
-| System controls | Notification, lock screen with cover, headset and Bluetooth buttons | Build for what the system gives: play, previous and next in the sound indicator, under the name "Media Player" **[device]**. Our own name, icon and cover there: Discuss (compiled MPRIS service) |
+| System controls | Notification, lock screen with cover, headset and Bluetooth buttons | Build for what the system gives: play, previous and next in the sound indicator, under the name "Media Player" **[device]**. Our own name, icon and cover there: not on this engine (D18): it needs a compiled MPRIS service |
 | Headset | Pause when unplugged, optional resume when plugged in | Spike S11 |
 | Pause for calls, lower volume for notifications | Audio focus | Spike S5 (media-hub may do this for us) |
-| Replay gain | Track or album mode, pre-amp, peak protection | Discuss |
-| Audio output choice, time stretching | Decoder settings | Discuss |
+| Replay gain | Track or album mode, pre-amp, peak protection | Not on this engine (D18) |
+| Audio output choice, time stretching | Decoder settings | Not on this engine (D18) |
 
 ---
 
@@ -325,10 +325,12 @@ behind them:
 
 ---
 
-## Discuss list, grouped by what it would take
+## Not on this engine, grouped by what it would take
 
-The Discuss rows above, grouped by the one thing that would unlock each group.
-None is decided; each is raised when the work reaches it.
+The rows above marked "not on this engine", grouped by the one thing that
+would unlock each group. They were "Discuss" until D18 (Yenis, 20 October
+2026) settled them together for 0.1.0; the grouping is kept for if that
+decision is ever reopened.
 
 | What would unlock it | Features |
 |---|---|

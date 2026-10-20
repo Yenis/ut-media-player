@@ -1,7 +1,7 @@
 # Testing GemPlayer on a device
 
 This page records what has been checked on a device, and how. The first part
-is removable storage (version 0.0.38), the clean install and subtitle files and encodings (version 0.0.37), asking before resuming (version 0.0.36), the skip lengths and seek buttons (version 0.0.35), landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
+is the release build (version 0.1.0), removable storage (version 0.0.38), the clean install and subtitle files and encodings (version 0.0.37), asking before resuming (version 0.0.36), the skip lengths and seek buttons (version 0.0.35), landscape (version 0.0.34), the gesture tips (version 0.0.33), what happens when a file cannot be played (version 0.0.32), Content Hub (version 0.0.31), the library search (version 0.0.30), the settings (version 0.0.29), the playback history and About (version 0.0.28), the streams (version 0.0.27), the playlists (version 0.0.26), the Browse tab (version 0.0.25), the queue's page, search and moving (version 0.0.24), album cards and an artist's albums (version 0.0.23), multiple selection for music (version 0.0.22), a track's information and "go to" (version 0.0.21), sorting and favourites for music (version 0.0.20), the music filter and blurred cover (version 0.0.19), the kept queue (version 0.0.18), the audio player's volume and brightness swipes (version 0.0.17), its menu (version 0.0.16), shuffle and repeat (version 0.0.15), the music library (version 0.0.14), the queue in the background (version 0.0.13), the audio player and mini-player (version 0.0.12), the information page (version 0.0.11), groups made by hand (version 0.0.10), multiple selection (version 0.0.9), the queue and item menu (version 0.0.8), the video library (versions 0.0.5
 to 0.0.7), the app shell (version 0.0.4) and the player (versions 0.0.2 and 0.0.3);
 the rest is the Phase 0 spike from
 [PLAN.md](PLAN.md), a diagnostics page that found out what Ubuntu Touch offers
@@ -27,11 +27,12 @@ What counts as what:
 
 ### By hand, per layer
 
-133 checks are open. The rows themselves are in each section's "By hand"
+135 checks are open. The rows themselves are in each section's "By hand"
 table, marked "Still to do" or "Not reported".
 
 | Layer | Open | Needs more than the phone |
 |---|---|---|
+| [Release build, 0.1.0](#release-build-version-010) | 2 | The release click, which has no remote |
 | [Removable storage, 0.0.38](#removable-storage-version-0038) | 1 | A USB stick formatted FAT32 or exFAT |
 | [Subtitle files and encodings, 0.0.37](#subtitle-files-and-encodings-version-0037) | 3 | |
 | [Ask before resuming, 0.0.36](#ask-before-resuming-version-0036) | 3 | |
@@ -82,6 +83,31 @@ table, marked "Still to do" or "Not reported".
 | "Group by name" follows VLC's rule of six characters | [PLAN.md](PLAN.md), Phase 2: written down from memory | Not checked against VLC's native library, which is not in the clone |
 | The system's album-art lookup reaches a server | 0.0.24 | **Not to be tried**: trying it is making the connection (D13) |
 | Screenshot appears in the Gallery | 0.0.3 | Not reported |
+
+## Release build, version 0.1.0
+
+### Checked, 20 October 2026
+
+The development aids go only into builds made with `-DGEM_DEV_AIDS=ON`
+(D19 in [PLAN.md](PLAN.md)). Both kinds of build were made from the working
+tree and installed on the phone.
+
+| Check | Result |
+|---|---|
+| A development build (`tools/dev.sh deploy`): `qml/dev/` and `qml/spike/` in the package, `Build.js` saying `devAids = true` | Pass |
+| Its remote answers; More ends with "Development", Diagnostics; the diagnostics page opens; About says 0.1.0 | Pass over adb |
+| A plain `clickable build` straight after it, in the same folder: neither folder in the package, `devAids = false`, no `Build.js.in` | Pass: the switch is not kept between builds |
+| The release build installed and started: nothing in the log but the system's own lines | Pass |
+| Its More ends with About, "GemPlayer 0.1.0", no Development section | **Pass by hand** (Yenis) |
+| Music plays | **Pass by hand** (Yenis) |
+| The development build put back: the remote answers | Pass |
+
+### By hand
+
+| Check | Result |
+|---|---|
+| `click-review` on the release click: the one finding written down in STORE.md, nothing else | Still to do |
+| A clean install of the release click, as in INSTALL.md: the defaults, a first video and song, a restart | Still to do |
 
 ## Removable storage, version 0.0.38
 

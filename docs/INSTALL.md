@@ -169,7 +169,7 @@ clickable launch
 ```bash
 clickable logs         # watch the app's log output from the phone
 clickable review       # run the same package checks a store would
-tools/dev.sh deploy    # build, install and restart the app in one go
+tools/dev.sh deploy    # build with the development aids, install, restart
 ```
 
 [DEVELOPING.md](DEVELOPING.md) has the rest.

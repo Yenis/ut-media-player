@@ -28,9 +28,9 @@ One day's work, from an empty folder to a player that runs on the phone.
 |---|---|
 | **Works, checked by hand on the Pixel 3a** | Video list with thumbnails; playback of H.264, HEVC, VP9 and AV1; VLC's gestures (tap, double tap, swipe seek, system volume, real brightness, pinch); twelve picture sizes; lock; own rotation; resume; play as audio and back; background and screen-off playback; sleep timer; jump to time; A-B repeat; bookmarks; external subtitles; screenshot; opening files from other apps |
 | **Known and settled** | The app is unconfined (D12). No playback speed, track selection or embedded subtitles on this backend. Seeks land on the keyframe before their target. System media controls work but carry the name "Media Player" |
-| **Still open from Phase 1** | A check with a real film and real subtitles. Decisions on the Discuss items in the table at the end of [Phase 1](#phase-1---video-player) |
-| **Not confirmed by hand** | 133 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
-| **To pick up next** | Phase 5, the release of 0.1.0. `clickable review` and a clean install were checked on 0.0.37 (19 October 2026). The README, `docs/INSTALL.md` and `CHANGELOG.md` are rewritten for it. Browse with a card was checked by hand and fixed (0.0.38). Left: the development aids out, at the very end (Yenis, 19 October 2026), with the review and the clean install again after it; the battle test. Phase 4 is done. Hidden files, export and restore, and parental control are dropped (D17) |
+| **Still open from Phase 1** | A check with a real film and real subtitles. The Discuss items are settled: not on this engine (D18) |
+| **Not confirmed by hand** | 135 checks across the layers, and a few that belong to no layer. They are kept in one list, [TESTING.md, "Open checks"](TESTING.md#open-checks), until Yenis has time for them (9 October 2026). Work goes on meanwhile; a pass over adb is not a pass by hand |
+| **To pick up next** | The 0.1.0 release: feature complete (D18), the development aids left out of the release package (D19). Then Yenis's check of the release click by hand (`click-review`, a clean install) and the battle test; what turns up is fixed in 0.1.x |
 
 What the first day established, in the order it was found:
 
@@ -111,10 +111,12 @@ Facts are marked:
 | D15 | Incognito mode | **Dropped** (Yenis, 9 October 2026): not needed. With it go VLC's "Persistent incognito mode" and its header icon |
 | D16 | Running in the background | **The app may add itself to the system's list of apps that are not frozen, when the user switches that on** (decided by Yenis, 12 October 2026). Off by default. It is the setting `com.canonical.qtmir lifecycle-exempt-appids`, which holds the stock Music app; an unconfined app can write it. With it on, the sleep timer and A-B repeat work behind the lock screen and other apps. Switching off takes the app out of the list again. A confined build could not do this |
 | D17 | Left out of 0.1.0 | **Dropped** (Yenis, 19 October 2026): hidden files in the Browse tab, export and restore of the settings, and parental control with VLC's PIN. What is left of Phase 4 is built one layer at a time, then 0.1.0 |
+| D18 | Feature complete for 0.1.0 | **Decided** (Yenis, 20 October 2026). Every feature of Phases 1 to 4 is built; what is not built was dropped: network shares, casting, remote access, subtitle download and film metadata (D13), incognito mode (D15), hidden files, export and restore, and parental control (D17), choosing library folders, VLC's "hold play to stop" and its 20 s skip on a long press. The Discuss items are settled as **not on this engine**: playback speed and fast play, equalizer, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters, replay gain, passthrough, decoder settings, 360° video, live statistics, the pop-up player and picture-in-picture, the app's own name and cover in the system's controls, deleting and renaming files. Each needs a playback engine or compiled code of the app's own, or a platform feature, and so would reverse D7; they are not open for 0.1.x. Features built in a simpler form than VLC's are known limits, listed in the release notes |
+| D19 | Development aids | **Left out of release packages, kept in the source** (Yenis, 20 October 2026; it was "removed before 0.1.0"). The remote control (`qml/dev/`) and the diagnostics page (`qml/spike/`) go only into builds made with `-DGEM_DEV_AIDS=ON`, which `tools/dev.sh deploy` makes; a plain `clickable build` leaves them out, and More shows no Diagnostics entry. So the battle test's fixes can still be checked over adb |
 
 ### Still open
 
-None. Discuss items become decisions as the work reaches them.
+None. The Discuss items were settled together for 0.1.0 (D18).
 
 ### Network
 
@@ -250,7 +252,7 @@ test, the choice in Phase 6.
 | Reading media folders directly | `video_files_read` and `music_files_read` cover `~/Videos`, `~/Music` and the `Videos` and `Music` folders of an SD card, nothing else. Both are reserved: `click-review` flags them for manual review. They allow listing, thumbnails and reading a `.srt`, but **not playback** | **[device]** |
 | Who may play a file | media-hub decides by package name, not by policy group: only `music.ubports` and `gallery.ubports` may open files under `Music/`, `Videos/` and `/media`. Any confined app may open files in its own data and cache folders, and network streams. Unconfined apps may open anything | **[source]** media-hub, **[device]** |
 | Who may read the library | mediascanner answers a confined app only if it is `music.ubports`, and only for audio. Unconfined apps get everything | **[source]** mediascanner, **[device]** |
-| Deleting and renaming files | QML has no API for either, whatever the confinement allows. Needs compiled code plus the write groups `video_files`, `music_files` | **[source]**; a Discuss item |
+| Deleting and renaming files | QML has no API for either, whatever the confinement allows. Needs compiled code plus the write groups `video_files`, `music_files` | **[source]**; not on this engine (D18) |
 | Keeping the display on | `QtSystemInfo 5.0` `ScreenSaver`, policy group `keep-display-on` | **[source]** music app. media-hub also holds the display on by itself while a video source plays |
 | Calls and low battery | media-hub pauses multimedia sessions for a phone call and resumes them afterwards | **[source]** media-hub |
 | Own database | `QtQuick.LocalStorage 2.0` (SQLite) | **[source]** music app; used here for resume points, history, playlists, bookmarks, favourites, groups |
@@ -276,7 +278,7 @@ Touch, is in [VLC-FEATURES.md](VLC-FEATURES.md). In short:
 |---|---|
 | **Build** | Gestures, player controls and menu, lock, aspect modes, resume and seen marker, sleep timer, jump to time, A-B repeat, bookmarks, queue, repeat and shuffle, playlists, favourites, history, video grouping, sorting, multiple selection, stream history, subtitle styling, settings |
 | **Spike** | Everything that touches the system: playback itself, background audio, play as audio, library models and thumbnails, direct file access, external subtitles, system controls, orientation, keep-screen-on, opening from other apps, network streams |
-| **Discuss** | Playback speed, equalizer, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters, replay gain, decoder settings, 360° video, pop-up player |
+| **Not on this engine** (D18; "Discuss" until then) | Playback speed, equalizer, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters, replay gain, decoder settings, 360° video, pop-up player |
 | **Dropped** | By D13: network shares, casting, remote access, subtitle download, film metadata. Not needed: choosing library folders, incognito mode (D15), hidden files, export and restore of the settings, parental control (D17) |
 | **N/A** | Android widgets, Android Auto, Android TV, ringtone, launcher shortcuts, permission onboarding |
 
@@ -289,7 +291,8 @@ Touch, is in [VLC-FEATURES.md](VLC-FEATURES.md). In short:
   playback items share one answer, an engine that exposes more than
   QtMultimedia 5; see the grouping at the end of
   [VLC-FEATURES.md](VLC-FEATURES.md).
-- The outcome is recorded here as a decision.
+- The outcome is recorded here as a decision. For 0.1.0 they were settled
+  together, as not on this engine (D18).
 
 ### Play as audio
 
@@ -501,9 +504,9 @@ Discuss items this phase reached, for a decision (D2):
 
 | Item | What it would take | Suggestion |
 |---|---|---|
-| Playback speed and fast play, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters | A second playback engine, in compiled code | After 0.1.0, as one decision |
+| Playback speed and fast play, audio delay and boost, choosing audio and embedded-subtitle tracks, chapters | A second playback engine, in compiled code | Not on this engine (D18) |
 | Sleep timer and A-B repeat while the app is in the background | The app adding itself to the system's list of apps that are not frozen | Decided as D16 and built in 0.0.29: an opt-in switch under Settings, Advanced. The catching up after a freeze that 0.0.18 needs stays in, for when the switch is off |
-| Pop-up player | The platform has no floating windows | Drop |
+| Pop-up player | The platform has no floating windows | Not on this engine (D18) |
 | Subtitle download | An account with an online subtitle service, and a file hash | Dropped (D13) |
 | Renaming a bookmark | A text field in a turned player; the system keyboard appears on the window's edge, not the content's | With playlists in Phase 4, which need naming too. The name dialog exists since 0.0.10 (`NameDialog.qml`); what is left is using it in a turned player |
 
@@ -557,8 +560,8 @@ How it is built:
 - Carried over to later phases: "Insert next" and "Append", in the item
   menu, the selection bar and the playback action, for a player that keeps
   playing behind the library (the mini-player of Phase 3); "Add to playlist"
-  (Phase 4). Delete, rename and share are Discuss items (compiled code;
-  sharing was not tried in the spike).
+  (Phase 4). Delete and rename need compiled code: not on this engine
+  (D18). Share was built in 0.0.31, through Content Hub.
 - [x] Media information screen (version 0.0.11), from "Information" in a
       video's menu or in the selection bar with one video selected: picture,
       name, a Play or Resume button, length, file size, resolution class,
@@ -743,7 +746,7 @@ How it is built:
       a track with no cover of its own, and `qml/platform/MediaLibrary.qml`
       does not pass that on. Whether the lookup still reaches a server was
       not tried, on purpose: trying it is making the connection.
-- [ ] Discuss, when reached: equalizer, replay gain, passthrough.
+- [x] Equalizer, replay gain, passthrough: not on this engine (D18).
 
 ## Phase 4 - Browse, playlists, streams and settings
 
@@ -1049,11 +1052,13 @@ How it is built:
       line and install commands, and in INSTALL's commands, is set, and the
       README's status line and the development section lose what is said
       of the development aids.
-- [ ] Remove the development aids: `qml/dev/` (remote control) and `qml/spike/`
-      (diagnostics page), and the entry that opens it. The very last step
-      before 0.1.0 (Yenis, 19 October 2026): until then the app can still
-      be driven over adb. The review and the clean install below are done
-      again after it, by hand, as the remote is then gone.
+- [x] The development aids out of the release (D19, 20 October 2026):
+      `qml/dev/` (remote control), `qml/spike/` (diagnostics page) and the
+      Diagnostics entry under More are in development builds only. The
+      release click is built without them; `qml/js/Build.js`, written by
+      CMake, tells the app which kind of build it is. The review and a
+      clean install are done again on the release click, by hand, as it
+      has no remote.
 - [x] `clickable review` clean, or every exception written down in
       `docs/STORE.md`. On the 0.0.37 release click, 19 October 2026: one
       finding, the unconfined template, written down there; no warnings.

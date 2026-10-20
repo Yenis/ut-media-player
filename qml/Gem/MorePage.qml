@@ -13,6 +13,7 @@ Item {
 
     property bool streamsAllowed: false
     property bool keepingHistory: true
+    property bool diagnostics: false    // a development build: the entry for the diagnostics page
 
     signal streamsRequested()
     signal searchRequested()
@@ -124,9 +125,10 @@ Item {
                 }
             }
 
-            // Leaves with the spike, before 0.1.0.
-            SectionLabel { text: "Development" }
+            // Development builds only.
+            SectionLabel { text: "Development"; visible: page.diagnostics }
             SettingRow {
+                visible: page.diagnostics
                 title: "Diagnostics"
                 detail: "The checks that found out what the platform offers."
                 trailing: Glyph {

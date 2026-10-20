@@ -22,7 +22,7 @@ build next.
 | `qml/Gem/` | The app: shell, pages, components, the `Theme` singleton |
 | `qml/js/` | Plain logic with no QML in it: gesture arithmetic, subtitle parsing, formatting |
 | `qml/platform/` | Everything that exists only on Ubuntu Touch, each file loaded by URL through a `Loader` so the rest starts without it |
-| `qml/dev/`, `qml/spike/` | Development remote and the Phase 0 diagnostics page. Both leave before 0.1.0 |
+| `qml/dev/`, `qml/spike/` | Development remote and the Phase 0 diagnostics page. In development builds only (D19) |
 | `tools/` | Scripts for the phone: `dev.sh`, `make-test-media.sh` |
 | `docs/` | Plan, feature survey, test records, store notes |
 | `vlc-android/` | Reference clone of VLC for Android. Ignored by git, read only |
@@ -52,6 +52,25 @@ Two things `clickable` does not do for you, which `tools/dev.sh` does:
 
 The version number lives in three places that must agree: `manifest.json`,
 `CMakeLists.txt` and `qml/js/AppInfo.js`.
+
+## Development builds and releases
+
+The remote and the diagnostics page go only into builds made with the CMake
+switch `GEM_DEV_AIDS` (decision D19 in [PLAN.md](PLAN.md)):
+
+| Build | How | What is in it |
+|---|---|---|
+| Development | `tools/dev.sh deploy`, which sets `CLICKABLE_BUILD_ARGS="-DGEM_DEV_AIDS=ON"` | `qml/dev/`, `qml/spike/`, and Diagnostics under More |
+| Release, and anyone else's | A plain `clickable build`, from a clean `git archive` of the commit | Neither, and no Diagnostics entry |
+
+CMake writes `qml/js/Build.js` from `qml/js/Build.js.in`, with `devAids`
+true or false, and the shell loads the remote and the diagnostics page only
+when it is true; the source tree has no `Build.js`. The switch is not
+remembered between builds, so a plain build in a folder that made a
+development build before is a release build again.
+
+A release click on the phone has no remote: `tools/dev.sh cmd` does nothing
+until `tools/dev.sh deploy` puts a development build back.
 
 ## Driving the app from the computer
 

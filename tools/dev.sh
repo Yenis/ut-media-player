@@ -2,7 +2,7 @@
 # Drives GemPlayer on a phone connected over adb, through the development
 # remote in qml/dev/Remote.qml. See docs/DEVELOPING.md.
 #
-#   tools/dev.sh deploy            build, install, restart the app
+#   tools/dev.sh deploy            build with the development aids, install, restart the app
 #   tools/dev.sh restart           restart the app, with the remote switched on
 #   tools/dev.sh cmd <command...>  send one command, e.g. cmd open /home/phablet/Videos/x.mp4
 #   tools/dev.sh shot <name>       have the app photograph itself; saved as build/shots/<name>.png
@@ -42,7 +42,9 @@ restart() {
 
 case "$1" in
     deploy)
-        cd "$ROOT" && clickable build 2>&1 | grep -E 'Successfully|rror'
+        # The remote and the diagnostics page go only into builds made with
+        # this switch (CMakeLists.txt); a plain `clickable build` leaves them out.
+        cd "$ROOT" && CLICKABLE_BUILD_ARGS="-DGEM_DEV_AIDS=ON" clickable build 2>&1 | grep -E 'Successfully|rror'
         clickable install 2>&1 | grep -E 'rror'
         restart ;;
     restart)
